@@ -1,0 +1,158 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  height: 100vh;
+  width: 100%;
+  background-image: linear-gradient(to right, #67f6e5, #8981c4);
+  padding: 0.5em;
+}
+
+h1 {
+  font-family: 'Karla', sans-serif;
+}
+
+/*****Individual containers*****/
+.container {
+  width: 40%;
+  height: 100vh;
+  max-height: 800px;
+  padding: 0.5em;
+ /* outline: solid blue;*/
+}
+
+.container h1 {
+  text-align: center;
+  margin-bottom: 0.5em;
+}
+
+/*****InputBtnContainer*****/
+.inputBtnContainer {
+  width: 100%;
+  margin-bottom: 0.5em;
+  text-align: center;
+  /*outline: solid black;*/
+}
+
+/*****Input*****/
+.inputContainer {
+  display: inline-block;
+  width: 50%;
+  margin-right: 20px;
+  /*outline: solid 1px red;  */
+}
+
+.input {
+  width: 100%;
+  border: none;
+}
+
+/*****Buttons*****/
+.btnContainer {
+  display: inline-block;
+  margin: auto;
+  width: 10%;
+  /*outline: solid red;*/
+}
+
+button {
+  width: 100%;
+  height: 100%;
+  padding: 0.5em;
+  border: none;
+  border-radius: 10px;
+  transition: all 0.5s;
+  cursor: pointer;
+}
+
+button:hover {
+  transform: scale(1.1);
+  color: green;
+}
+
+/*****Submit(save) button*****/
+.submitContainer {
+  position: relative;
+  height: 30px;
+  margin-top: 2em;
+}
+
+.submitContainer button {
+  height: 100%;
+  width: 100%;
+  padding: 0.3em;
+}
+
+.submitContainer button:hover {
+  color: green;
+  box-shadow: 0px 0px 10px 0px green;  
+}
+
+/*.saveMe {   JS Add
+  color: green;
+  box-shadow: 0px 0px 5px 1px #00ff00;
+}*/
+
+/*****Lists*****/
+ul {
+  max-height: 90%;
+  padding: 1em;
+  /*outline: solid green;*/
+}
+
+/*****JS added classes*****/
+.itemClass {
+  position: relative;
+  height: 100%; 
+  list-style: none;
+  margin: 0 auto;
+  margin-bottom: 1em;
+  padding: 0.2em;
+  border-bottom: solid 1px black;
+  /*outline: dotted red;*/
+}
+
+.btnClass {
+  position: absolute;
+  right: 0.5em;
+  top: 0;   
+  width: 6%;
+  height: 90%;
+  background: white;
+  color: black;
+  border: none;
+  border-radius: 20px;
+  padding: 0;
+}
+
+.btnClass:hover {
+  color: red;
+  box-shadow: 0px 0px 5px 1px red;
+}
+
+.approvedHidden {
+  opacity: 0;
+  width: 90%;
+  height: 140%;
+  position: absolute;
+  bottom: 0;
+  font-size: 20px;
+  color: green;
+}
+
+.approvedVisible {
+  opacity: 1;
+  position: absolute;
+  left: 175px;
+  top: -10px;
+  font-size: 20px;
+  color: green;
+  transform: skew(0deg, 170deg);
+}
