@@ -152,7 +152,8 @@ function assignStamps(list, stamps) {
 	}
 }
 
-function triggerEvent( elem, event ) {	// Artificial 'click' event
+// Artificial 'click' event
+function triggerEvent( elem, event ) {	
   var clickEvent = new Event( event ); // Create the event.
   elem.dispatchEvent( clickEvent );    // Dispatch the event.
 }
