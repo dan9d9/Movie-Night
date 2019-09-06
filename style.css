@@ -14,7 +14,7 @@ body {
   flex-direction: column;
   height: 100vh;
   width: 100%;
-  /* background-image: linear-gradient(to right, #67f6e5, #8981c4); */
+  background-image: linear-gradient(to right, #67f6e5, #8981c4);
   padding: 0.5em;
 }
 
@@ -61,6 +61,7 @@ h1 {
   width: 100%;
   border: none;
   border-radius: 2px;
+  box-shadow: 0px 0px 3px 0px black;
 }
 
 /*****InputBtnContainer*****/
@@ -107,6 +108,8 @@ ul {
   overflow: scroll;
   padding: 1em;
   padding-bottom: 0;
+  /* background: white; */
+  border-radius: 2px;
   /* outline: solid green; */
 }
 
@@ -141,12 +144,10 @@ ul {
   margin: 0 auto;
   margin-bottom: 1em;
   padding: 0.2em;
-  border-bottom: solid 1px black;
+  box-shadow: 0px 1px 2px 1px black;
+  border-radius: 2px;
+  background-image: linear-gradient(to right, hsl(0, 0%, 100%), hsl(180, 3%, 92%), hsl(0, 0%, 92%));
   /*outline: dotted red;*/
-}
-
-.itemClass:last-child {
-  margin-bottom: 0;
 }
 
 .btnClass {
