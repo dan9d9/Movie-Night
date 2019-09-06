@@ -12,8 +12,9 @@ body {
   font-family: 'Karla', sans-serif;
   display: flex;
   flex-direction: column;
-  background-image: linear-gradient(to right, #67f6e5, #8981c4);
+  /* background-image: linear-gradient(to right, #67f6e5, #8981c4); */
   padding: 0.5em;
+  padding-bottom: 1em;
 }
 
 
@@ -184,6 +185,7 @@ ul {
   font-size: 20px;
   color: green;
   transform: skew(0deg, 170deg);
+  cursor: pointer;
   /* outline: solid gold; */
 }
 
