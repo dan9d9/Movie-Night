@@ -78,30 +78,30 @@ function addItem(user, value) {
 	if (user === "Danny" && !value) {
 		item.appendChild(document.createTextNode(inputDanny.value));
 		listDanny.appendChild(item);
-		item.appendChild(btn);
 		item.appendChild(stamp);
+		item.appendChild(btn);
 		inputDanny.value = "";		
 		dannyArray.push(item.childNodes[0].nodeValue);
 
 	}  	else if (user === "Danny" && value) {
 			item.appendChild(document.createTextNode(value));
 			listDanny.appendChild(item);
-			item.appendChild(btn);
 			item.appendChild(stamp);
+			item.appendChild(btn);
 				
 	}  	else if (user === "Lola" && !value) {
 			item.appendChild(document.createTextNode(inputLola.value));
 			listLola.appendChild(item);
-			item.appendChild(btn);
 			item.appendChild(stamp);
+			item.appendChild(btn);
 			inputLola.value = "";
 			lolaArray.push(item.childNodes[0].nodeValue);
 
 	}	else if (user === "Lola" && value) {
 			item.appendChild(document.createTextNode(value));
 			listLola.appendChild(item);
-			item.appendChild(btn);
 			item.appendChild(stamp);
+			item.appendChild(btn);
 		}
 
 	btn.addEventListener('click', deleteItem);
