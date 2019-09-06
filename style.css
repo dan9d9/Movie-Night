@@ -169,23 +169,22 @@ ul {
 .approvedHidden {
   opacity: 0;
   width: 90%;
-  height: 140%;
+  height: 100%;
   position: absolute;
   bottom: 0;
   font-size: 20px;
   color: green;
-  outline: solid gold;
 }
 
 .approvedVisible {
   opacity: 1;
   position: absolute;
-  left: 175px;
-  top: -10px;
+  left: 75px;
+  top: 0px;
   font-size: 20px;
   color: green;
   transform: skew(0deg, 170deg);
-  outline: solid gold;
+  /* outline: solid gold; */
 }
 
 /*****MEDIA QUERIES*****/
