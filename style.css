@@ -12,7 +12,7 @@ body {
   font-family: 'Karla', sans-serif;
   display: flex;
   flex-direction: column;
-  /* background-image: linear-gradient(to right, #67f6e5, #8981c4); */
+  background: rgb(245, 243, 243);
   padding: 0.5em;
   padding-bottom: 1em;
 }
@@ -79,7 +79,7 @@ button {
   border: none;
   border-radius: 10px;
   transition: all 0.5s;
-  cursor: pointer;
+  background: rgb(253, 253, 253);
   z-index: 1;
 }
 
@@ -164,7 +164,7 @@ ul {
   color: red;
   border: red;
   box-shadow: 0px 0px 2px 1px red;
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 
 .btnClass2 {
@@ -187,13 +187,12 @@ ul {
   color: green;
   border: green;
   box-shadow: 0px 0px 2px 1px green;
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 .btnClass-approve {
   color: green;
   border: green;
   box-shadow: 0px 0px 2px 1px green;
-  /* transform: scale(1.05); */
 }
 
 .approvedHidden {
@@ -204,18 +203,6 @@ ul {
   bottom: 0;
   font-size: 20px;
   color: green;
-}
-
-.approvedVisible {
-  opacity: 1;
-  position: absolute;
-  left: 75px;
-  top: 0px;
-  font-size: 20px;
-  color: green;
-  transform: skew(0deg, 170deg);
-  cursor: pointer;
-  /* outline: solid gold; */
 }
 
 /*****MEDIA QUERIES*****/
