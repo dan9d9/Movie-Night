@@ -36,7 +36,7 @@ h1 {
 }
 
 .cont-left {
-  background-image: url('../../../Desktop/freeimg_cool.jpg');
+  background-image: url('./bg_images/freeimg_cool.jpg');
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -46,7 +46,7 @@ h1 {
 }
 
 .cont-right {
-  background-image: url('../../../Desktop/freeimg_warm.jpg');
+  background-image: url('./bg_images/freeimg_warm.jpg');
   background-repeat: no-repeat;
   background-size: cover;
 }
