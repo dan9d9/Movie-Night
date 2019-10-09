@@ -13,20 +13,20 @@ let dannyArray = [];
 let lolaArray = [];
 
 
-function approveMovie() {	
+function approveMovie(e) {	
 	
-	if(this.parentElement.parentElement.id === "listDanny") {
-		this.innerText = "Lola approved!";
-		if(this.className ==='approvedHidden') {
-			this.className = 'approvedVisible';
-		} else {this.className = 'approvedHidden';}	
+	if(e.target.parentElement.parentElement.id === "listDanny") {
+		e.target.innerText = "Lola approved!";
+		if(e.target.className ==='approvedHidden') {
+			e.target.className = 'approvedVisible';
+		} else {e.target.className = 'approvedHidden';}	
 	}
 
-	if(this.parentElement.parentElement.id === "listLola") {
-		this.innerText = "Danny approved!";
-		if(this.className ==='approvedHidden') {
-			this.className = 'approvedVisible';
-		} else {this.className = 'approvedHidden';}
+	if(e.target.parentElement.parentElement.id === "listLola") {
+		e.target.innerText = "Danny approved!";
+		if(e.target.className ==='approvedHidden') {
+			e.target.className = 'approvedVisible';
+		} else {e.target.className = 'approvedHidden';}
 	}
 }
 
@@ -45,7 +45,7 @@ function removeMovie(list, arr) {
 
 // Delete item from list
 function deleteItem(e) {	
-	this.parentNode.remove();
+	e.target.parentNode.remove();
 	removeMovie(listDanny, dannyArray);
 	removeMovie(listLola, lolaArray);
 }
@@ -103,11 +103,19 @@ function addItem(user, value) {
 			listLola.appendChild(item);
 			item.appendChild(stamp);
 			item.appendChild(btn);
-		}
-
-	btn.addEventListener('click', deleteItem);
-	stamp.addEventListener('click', approveMovie);				
+		}				
 }
+
+listDanny.addEventListener('click', function(e){
+	switch (e.target.nodeName){
+		case 'BUTTON':
+			deleteItem(e);
+			break;
+		case 'DIV':
+			approveMovie(e);
+			break;
+	}
+});
 
 function hasContent(user) {
 
