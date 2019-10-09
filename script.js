@@ -85,21 +85,28 @@ function deleteItem(e) {
 	removeMovie(listLola, lolaArray);
 }
 
-function approveItem(e) {
-	e.target.classList.toggle('btnClass-approve');
-	e.target.parentNode.classList.toggle('btnClass-approve');
+function approveItem(e, btn) {
+	if(btn === null){	// From event listener
+		e.target.classList.toggle('btnClass-approve');
+		e.target.parentNode.classList.toggle('btnClass-approve');
+	}
+	
+	if(e === null){		// From assignStamps function
+		btn.classList.toggle('btnClass-approve');
+		btn.parentNode.classList.toggle('btnClass-approve');	
+	}	
 }
 
 listDanny.addEventListener('click', function(e){
 	switch (e.target.className){
 		case 'btnClass':
-			deleteItem(e);
+			deleteItem(e, null);
 			break;
 		case 'btnClass2':
-			approveItem(e);
+			approveItem(e, null);
 			break;
 		case 'btnClass2 btnClass-approve':
-			approveItem(e);
+			approveItem(e, null);
 			break;
 	}
 });
@@ -107,13 +114,13 @@ listDanny.addEventListener('click', function(e){
 listLola.addEventListener('click', function(e){
 	switch (e.target.className){
 		case 'btnClass':
-			deleteItem(e);
+			deleteItem(e, null);
 			break;
 		case 'btnClass2':
-			approveItem(e);
+			approveItem(e, null);
 			break;
 		case 'btnClass2 btnClass-approve':
-			approveItem(e);
+			approveItem(e, null);
 			break;
 	}
 });
@@ -152,33 +159,25 @@ function saveFunk(state1, state2) {
 		localStorage.setItem('lolaStates', JSON.stringify(state2));
 	}
 
-//Compare each list with saved stamp state - 'click' corresponding movie to activate stamp
+// Compare each list with saved stamp state - 'click' corresponding movie to activate stamp
 function assignStamps(list, stamps) {	
-	const divs = Array.from(list.getElementsByTagName("div"))
-	for(let i=0;i<divs.length;i++) {
+	const btns = Array.from(list.getElementsByClassName("btnClass2"));
+	console.log('btns', btns);
+	console.log('stamps ', stamps);
+	for(let i=0;i<btns.length;i++) {
 		if(stamps[i] === true) {
-			triggerEvent( divs[i], 'click' );
+			approveItem(null, btns[i]);
 		}
 	}
 }
 
-// Artificial 'click' event
-function triggerEvent( elem, event ) {	
-  var clickEvent = new Event( event ); // Create the event.
-  elem.dispatchEvent( clickEvent );    // Dispatch the event.
-}
-
 // Record states of stamps and pass to save function
 function isStampVisible() {
-	const dannyStampStates = Array.from(listDanny.getElementsByTagName("div"))
-						.map(node => node.classList)
-						.map(node => node.value)
-						.map(item => item.includes('approvedVisible'));
+	const dannyStampStates = Array.from(listDanny.getElementsByClassName("btnClass2"))
+								.map(btn => btn.className === 'btnClass2 btnClass-approve');
 
-	const lolaStampStates = Array.from(listLola.getElementsByTagName("div"))
-						.map(node => node.classList)
-						.map(node => node.value)
-						.map(item => item.includes('approvedVisible'));
+	const lolaStampStates = Array.from(listLola.getElementsByClassName("btnClass2"))
+								.map(btn => btn.className === 'btnClass2 btnClass-approve');
 
 	saveFunk(dannyStampStates, lolaStampStates);
 }
