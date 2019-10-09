@@ -12,22 +12,57 @@ const listMovies = listDanny.getElementsByTagName('div');
 let dannyArray = [];
 let lolaArray = [];
 
+function createBtnDelete() {
+	let btn = document.createElement('button');
+	btn.className = 'btnClass';
+	btn.appendChild(document.createTextNode('\u2717'));
+	return btn;
+}
+function createBtnApprove() {
+	let btn = document.createElement('button');
+	btn.className = 'btnClass2';
+	btn.appendChild(document.createTextNode('\u2713'));
+	return btn;
+}
+function createItem() {
+	let item = document.createElement('li');
+	item.className = 'itemClass';
+	return item;
+}
+function appendItemsBtns(list, item, btn, btn2) {
+	list.appendChild(item);
+	item.appendChild(btn);
+	item.appendChild(btn2);
+}
 
-function approveMovie(e) {	
+function addItem(user, value) {
 	
-	if(e.target.parentElement.parentElement.id === "listDanny") {
-		e.target.innerText = "Lola approved!";
-		if(e.target.className ==='approvedHidden') {
-			e.target.className = 'approvedVisible';
-		} else {e.target.className = 'approvedHidden';}	
-	}
+	let item = createItem();
+	
+	let btn = createBtnDelete();
+	
+	let btn2 = createBtnApprove();	
+	
+	if (user === "Danny" && !value) {
+		item.appendChild(document.createTextNode(inputDanny.value));
+		appendItemsBtns(listDanny, item, btn, btn2);
+		inputDanny.value = "";		
+		dannyArray.push(item.childNodes[0].nodeValue);
 
-	if(e.target.parentElement.parentElement.id === "listLola") {
-		e.target.innerText = "Danny approved!";
-		if(e.target.className ==='approvedHidden') {
-			e.target.className = 'approvedVisible';
-		} else {e.target.className = 'approvedHidden';}
-	}
+	}  	else if (user === "Danny" && value) {
+		item.appendChild(document.createTextNode(value));
+		appendItemsBtns(listDanny, item, btn, btn2);
+		
+	}  	else if (user === "Lola" && !value) {
+		item.appendChild(document.createTextNode(inputLola.value));
+		appendItemsBtns(listLola, item, btn, btn2);
+		inputLola.value = "";
+		lolaArray.push(item.childNodes[0].nodeValue);
+		
+	}	else if (user === "Lola" && value) {
+		item.appendChild(document.createTextNode(value));
+		appendItemsBtns(listLola, item, btn, btn2);
+	}				
 }
 
 // Remove deleted movie from corresponding array
@@ -50,80 +85,35 @@ function deleteItem(e) {
 	removeMovie(listLola, lolaArray);
 }
 
-function createStamp() {
-	let stamp = document.createElement('div');
-	stamp.className = 'approvedHidden';
-	return stamp;
-}
-
-function createBtn() {
-	let btn = document.createElement('button');
-	btn.className = 'btnClass';
-	btn.appendChild(document.createTextNode('X'));
-	return btn;
-}
-function createItem() {
-	let item = document.createElement('li');
- 	item.className = 'itemClass';
- 	return item;
-}
-
-function addItem(user, value) {
-
- 	let item = createItem();
-
- 	let btn = createBtn();	
-
- 	let stamp = createStamp();
-	
-	if (user === "Danny" && !value) {
-		item.appendChild(document.createTextNode(inputDanny.value));
-		listDanny.appendChild(item);
-		item.appendChild(stamp);
-		item.appendChild(btn);
-		inputDanny.value = "";		
-		dannyArray.push(item.childNodes[0].nodeValue);
-
-	}  	else if (user === "Danny" && value) {
-			item.appendChild(document.createTextNode(value));
-			listDanny.appendChild(item);
-			item.appendChild(stamp);
-			item.appendChild(btn);
-				
-	}  	else if (user === "Lola" && !value) {
-			item.appendChild(document.createTextNode(inputLola.value));
-			listLola.appendChild(item);
-			item.appendChild(stamp);
-			item.appendChild(btn);
-			inputLola.value = "";
-			lolaArray.push(item.childNodes[0].nodeValue);
-
-	}	else if (user === "Lola" && value) {
-			item.appendChild(document.createTextNode(value));
-			listLola.appendChild(item);
-			item.appendChild(stamp);
-			item.appendChild(btn);
-		}				
+function approveItem(e) {
+	e.target.classList.toggle('btnClass-approve');
+	e.target.parentNode.classList.toggle('btnClass-approve');
 }
 
 listDanny.addEventListener('click', function(e){
-	switch (e.target.nodeName){
-		case 'BUTTON':
+	switch (e.target.className){
+		case 'btnClass':
 			deleteItem(e);
 			break;
-		case 'DIV':
-			approveMovie(e);
+		case 'btnClass2':
+			approveItem(e);
+			break;
+		case 'btnClass2 btnClass-approve':
+			approveItem(e);
 			break;
 	}
 });
-
+			
 listLola.addEventListener('click', function(e){
-	switch (e.target.nodeName){
-		case 'BUTTON':
+	switch (e.target.className){
+		case 'btnClass':
 			deleteItem(e);
 			break;
-		case 'DIV':
-			approveMovie(e);
+		case 'btnClass2':
+			approveItem(e);
+			break;
+		case 'btnClass2 btnClass-approve':
+			approveItem(e);
 			break;
 	}
 });
