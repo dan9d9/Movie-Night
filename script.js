@@ -117,6 +117,17 @@ listDanny.addEventListener('click', function(e){
 	}
 });
 
+listLola.addEventListener('click', function(e){
+	switch (e.target.nodeName){
+		case 'BUTTON':
+			deleteItem(e);
+			break;
+		case 'DIV':
+			approveMovie(e);
+			break;
+	}
+});
+
 function hasContent(user) {
 
 	if(user === "Danny" && inputDanny.value === "") {
