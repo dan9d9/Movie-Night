@@ -6,9 +6,11 @@ const buttons = document.querySelectorAll('button');
 const inputs = Array.from(document.getElementsByClassName('input'));
 const submit = document.getElementById('submitBtn');
 
-//Arrays to store movies
-let dannyArray = [];
-let lolaArray = [];
+//Arrays to store movies and stamps
+const dannyArray = JSON.parse(localStorage.getItem('dannyMovies')) || [];
+const lolaArray = JSON.parse(localStorage.getItem('lolaMovies')) || [];
+const dannyStampStates = Array.from(JSON.parse(localStorage.getItem('dannyStamps'))) || [];
+const lolaStampStates = Array.from(JSON.parse(localStorage.getItem('lolaStamps'))) || [];
 
 function createBtnDelete() {
 	let btn = document.createElement('button');
@@ -179,17 +181,12 @@ function isStampVisible() {
 	saveFunk(dannyStampStates, lolaStampStates);
 }
 
-window.onload = function() {
-	dannyArray = Array.from(JSON.parse(localStorage.getItem('dannyMovies')));
-	lolaArray = Array.from(JSON.parse(localStorage.getItem('lolaMovies')));
+function populateList() {
 	
 	// Add saved movie titles to lists
 	dannyArray.forEach(movie => addItem("Danny", movie));
 	lolaArray.forEach(movie => addItem("Lola", movie));
 
-	const dannyStampStates = Array.from(JSON.parse(localStorage.getItem('dannyStamps')));
-	const lolaStampStates = Array.from(JSON.parse(localStorage.getItem('lolaStamps')));
-	
 	// Add saved stamps to items
 	assignStamps(listDanny, dannyStampStates);	
 	assignStamps(listLola, lolaStampStates);
@@ -198,3 +195,4 @@ window.onload = function() {
 buttons.forEach(btn => btn.addEventListener('click', clickFunk));
 inputs.forEach(input => input.addEventListener('keypress', enterFunk));
 submit.addEventListener('click', isStampVisible);	// Save button
+populateList();
