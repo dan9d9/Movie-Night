@@ -5,7 +5,6 @@ const listLola = document.getElementById('listLola');
 const buttons = document.querySelectorAll('button');
 const inputs = Array.from(document.getElementsByClassName('input'));
 const submit = document.getElementById('submitBtn');
-const listMovies = listDanny.getElementsByTagName('div');
 
 //Arrays to store movies
 let dannyArray = [];
@@ -188,8 +187,8 @@ window.onload = function() {
 	dannyArray.forEach(movie => addItem("Danny", movie));
 	lolaArray.forEach(movie => addItem("Lola", movie));
 
-	dannyStampStates = Array.from(JSON.parse(localStorage.getItem('dannyStamps')));
-	lolaStampStates = Array.from(JSON.parse(localStorage.getItem('lolaStamps')));
+	const dannyStampStates = Array.from(JSON.parse(localStorage.getItem('dannyStamps')));
+	const lolaStampStates = Array.from(JSON.parse(localStorage.getItem('lolaStamps')));
 	
 	// Add saved stamps to items
 	assignStamps(listDanny, dannyStampStates);	
