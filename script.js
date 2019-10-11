@@ -80,9 +80,13 @@ function removeMovie(list, arr) {
 
 // Delete item from list
 function deleteItem(e) {	
-	e.target.parentNode.remove();
-	removeMovie(listDanny, dannyArray);
-	removeMovie(listLola, lolaArray);
+	if(e.target.parentNode.parentNode.id === 'listDanny') {
+		e.target.parentNode.remove();
+		removeMovie(listDanny, dannyArray);
+	} else if(e.target.parentNode.parentNode.id === 'listLola') {
+		e.target.parentNode.remove();
+		removeMovie(listLola, lolaArray);
+	}		
 }
 
 function approveItem(e, btn) {
