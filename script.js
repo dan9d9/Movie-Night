@@ -5,11 +5,12 @@ const listLola = document.getElementById('listLola');
 const buttons = document.querySelectorAll('button');
 const inputs = Array.from(document.getElementsByClassName('input'));
 const submit = document.getElementById('submitBtn');
-const listMovies = listDanny.getElementsByTagName('div');
 
-//Arrays to store movies
-let dannyArray = [];
-let lolaArray = [];
+//Arrays to store movies and stamps
+const dannyArray = JSON.parse(localStorage.getItem('dannyMovies')) || [];
+const lolaArray = JSON.parse(localStorage.getItem('lolaMovies')) || [];
+const dannyStampStates = Array.from(JSON.parse(localStorage.getItem('dannyStamps'))) || [];
+const lolaStampStates = Array.from(JSON.parse(localStorage.getItem('lolaStamps'))) || [];
 
 function createBtnDelete() {
 	let btn = document.createElement('button');
@@ -79,9 +80,13 @@ function removeMovie(list, arr) {
 
 // Delete item from list
 function deleteItem(e) {	
-	e.target.parentNode.remove();
-	removeMovie(listDanny, dannyArray);
-	removeMovie(listLola, lolaArray);
+	if(e.target.parentNode.parentNode.id === 'listDanny') {
+		e.target.parentNode.remove();
+		removeMovie(listDanny, dannyArray);
+	} else if(e.target.parentNode.parentNode.id === 'listLola') {
+		e.target.parentNode.remove();
+		removeMovie(listLola, lolaArray);
+	}		
 }
 
 function approveItem(e, btn) {
@@ -180,17 +185,12 @@ function isStampVisible() {
 	saveFunk(dannyStampStates, lolaStampStates);
 }
 
-window.onload = function() {
-	dannyArray = Array.from(JSON.parse(localStorage.getItem('dannyMovies')));
-	lolaArray = Array.from(JSON.parse(localStorage.getItem('lolaMovies')));
+function populateList() {
 	
 	// Add saved movie titles to lists
 	dannyArray.forEach(movie => addItem("Danny", movie));
 	lolaArray.forEach(movie => addItem("Lola", movie));
 
-	dannyStampStates = Array.from(JSON.parse(localStorage.getItem('dannyStamps')));
-	lolaStampStates = Array.from(JSON.parse(localStorage.getItem('lolaStamps')));
-	
 	// Add saved stamps to items
 	assignStamps(listDanny, dannyStampStates);	
 	assignStamps(listLola, lolaStampStates);
@@ -199,3 +199,4 @@ window.onload = function() {
 buttons.forEach(btn => btn.addEventListener('click', clickFunk));
 inputs.forEach(input => input.addEventListener('keypress', enterFunk));
 submit.addEventListener('click', isStampVisible);	// Save button
+populateList();

@@ -140,8 +140,14 @@ ul {
 }
 
 .submitContainer button:hover {
+  transform: scale(1);
   color: hsl(277, 45%, 33%);
   box-shadow: 0px 0px 10px 0px hsl(277, 45%, 33%);  
+}
+
+.submitContainer button:active {
+  transform: scale(0.9);
+  box-shadow: 0px 0px 0px 0px hsl(277, 45%, 33%);
 }
 
 
