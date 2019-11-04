@@ -27,6 +27,7 @@ function createBtnApprove() {
 function createItem() {
 	let item = document.createElement('li');
 	item.className = 'itemClass';
+	item.setAttribute('contenteditable', 'true');
 	return item;
 }
 function appendItemsBtns(list, item, btn, btn2) {
