@@ -145,15 +145,22 @@ function hasContent(user) {
 }
 
 function clickFunk(e) {
+	console.log(this);
 	e.target.id === "btnDanny" ? hasContent("Danny") 
 	: e.target.id === "btnLola" ? hasContent("Lola")
 	: "";
 }
 
 function enterFunk(e) {
-	e.keyCode === 13 && e.target.id === "inputDanny" ? hasContent("Danny") 
-	: e.keyCode === 13 && e.target.id === "inputLola" ? hasContent("Lola")
-	: ""; 
+	if(e.keyCode != 13) {
+		return;
+	}
+	else {
+		this.id === "inputDanny" ? hasContent("Danny") 
+		: this.id === "inputLola" ? hasContent("Lola")
+		: ""; 	
+	}
+
 }
 
 // Compare each list with saved stamp states and add stamp class
