@@ -67,7 +67,7 @@ const lolaStampStates = Array.from(JSON.parse(localStorage.getItem('lolaStamps')
 // }
 
 // Remove deleted movie from corresponding array
-// To fix - Movies of the same name are only deleted if deleted togther 
+// To fix - Multiple movies of the same name are only deleted if deleted togther 
 function removeMovie(list, arr) {
 	let textContentArray = Array.from(list.children).map(node => node.firstChild.textContent);
 
@@ -153,12 +153,14 @@ function newItem(movieTitle, input) {
 		dannyArray.push(item)
 		const list = listDanny;
 		const array = dannyArray;
+		localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
 		createList(array, list);
 	} 
 	else {
 		lolaArray.push(item);
 		const list = listLola;
 		const array = lolaArray;
+		localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
 		createList(array, list);
 	} 
 }
@@ -211,8 +213,6 @@ function enterFunk(e) {
 
 // Save current states of movie arrays and stamps
 function saveFunk(state1, state2) {
-		localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
-		localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
 		localStorage.setItem('dannyStamps', JSON.stringify(state1));
 		localStorage.setItem('lolaStamps', JSON.stringify(state2));
 	}
