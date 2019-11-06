@@ -70,24 +70,29 @@ const lolaStampStates = Array.from(JSON.parse(localStorage.getItem('lolaStamps')
 // To fix - Multiple movies of the same name are only deleted if deleted togther 
 function removeMovie(list, arr) {
 	let textContentArray = Array.from(list.children).map(node => node.firstChild.textContent);
-
 	for(let i=0; i < arr.length; i++) {
-		if(textContentArray.indexOf(arr[i]) === -1) { 
+		if(textContentArray.indexOf(arr[i].title) === -1) { 
 			arr.splice(i, 1);
-			removeMovie(list, arr);
+			i = -1;
 		}
-	} return arr;
+	} 
+	localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
+	localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
 }
 
 // Delete item from list
-function deleteItem(e) {	
-	if(e.target.parentNode.parentNode.id === 'listDanny') {
-		e.target.parentNode.remove();
-		removeMovie(listDanny, dannyArray);
-	} else if(e.target.parentNode.parentNode.id === 'listLola') {
-		e.target.parentNode.remove();
-		removeMovie(listLola, lolaArray);
-	}		
+function deleteItem(target) {	
+	const list = target.dataset.list;
+	const index = target.dataset.index;
+
+	if(list === 'listDanny') {
+		listDanny.querySelector(`[data-index='${index}']`).remove();	
+	}
+	else {
+		listLola.querySelector(`[data-index='${index}']`).remove();
+	}
+
+			
 }
 
 function approveItem(e, btn) {
@@ -105,7 +110,7 @@ function approveItem(e, btn) {
 listDanny.addEventListener('click', function(e){
 	switch (e.target.className){
 		case 'btnClass':
-			deleteItem(e, null);
+			deleteItem(e.target);
 			break;
 		case 'btnClass2':
 			approveItem(e, null);
@@ -119,7 +124,7 @@ listDanny.addEventListener('click', function(e){
 listLola.addEventListener('click', function(e){
 	switch (e.target.className){
 		case 'btnClass':
-			deleteItem(e, null);
+			deleteItem(e.target);
 			break;
 		case 'btnClass2':
 			approveItem(e, null);
@@ -131,12 +136,14 @@ listLola.addEventListener('click', function(e){
 });
 
 function createList(array = [], list) {
-	list.innerHTML = array.map((movie) => {
+	if(array === []) {return}
+
+	list.innerHTML = array.map((movie, i) => {
 		return `
-			<li class='itemClass'>
+			<li class='itemClass' data-list=${list.id} data-index=${i}>
 				${movie.title}
-				<button class='btnClass2'>\u2713</button>
-				<button class='btnClass'>\u2717</button>
+				<button class='btnClass2' data-list=${list.id} data-index=${i}>\u2713</button>
+				<button class='btnClass' data-list=${list.id} data-index=${i}>\u2717</button>
 			</li>
 		`;
 	}).join('');
