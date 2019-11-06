@@ -196,6 +196,7 @@ function enterFunk(e) {
 		const movieTitle = this.value;
 		movieTitle === "" ? this.placeholder = "Please enter a movie" :
 		newItem(movieTitle, input);
+		this.value = '';
 	}
 
 }
