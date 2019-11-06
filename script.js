@@ -12,59 +12,59 @@ const lolaArray = JSON.parse(localStorage.getItem('lolaMovies')) || [];
 const dannyStampStates = Array.from(JSON.parse(localStorage.getItem('dannyStamps'))) || [];
 const lolaStampStates = Array.from(JSON.parse(localStorage.getItem('lolaStamps'))) || [];
 
-function createBtnDelete() {
-	let btn = document.createElement('button');
-	btn.className = 'btnClass';
-	btn.appendChild(document.createTextNode('\u2717'));
-	return btn;
-}
-function createBtnApprove() {
-	let btn = document.createElement('button');
-	btn.className = 'btnClass2';
-	btn.appendChild(document.createTextNode('\u2713'));
-	return btn;
-}
-function createItem() {
-	let item = document.createElement('li');
-	item.className = 'itemClass';
-	item.setAttribute('contenteditable', 'true');
-	return item;
-}
-function appendItemsBtns(list, item, btn, btn2) {
-	list.appendChild(item);
-	item.appendChild(btn);
-	item.appendChild(btn2);
-}
+// function createBtnDelete() {
+// 	let btn = document.createElement('button');
+// 	btn.className = 'btnClass';
+// 	btn.appendChild(document.createTextNode('\u2717'));
+// 	return btn;
+// }
+// function createBtnApprove() {
+// 	let btn = document.createElement('button');
+// 	btn.className = 'btnClass2';
+// 	btn.appendChild(document.createTextNode('\u2713'));
+// 	return btn;
+// }
+// function createItem() {
+// 	let item = document.createElement('li');
+// 	item.className = 'itemClass';
+// 	item.setAttribute('contenteditable', 'true');
+// 	return item;
+// }
+// function appendItemsBtns(list, item, btn, btn2) {
+// 	list.appendChild(item);
+// 	item.appendChild(btn);
+// 	item.appendChild(btn2);
+// }
 
-function addItem(user, value) {
+// function addItem(user, value) {
 	
-	let item = createItem();
+// 	let item = createItem();
 	
-	let btn = createBtnDelete();
+// 	let btn = createBtnDelete();
 	
-	let btn2 = createBtnApprove();	
+// 	let btn2 = createBtnApprove();	
 	
-	if (user === "Danny" && !value) {
-		item.appendChild(document.createTextNode(inputDanny.value));
-		appendItemsBtns(listDanny, item, btn, btn2);
-		inputDanny.value = "";		
-		dannyArray.push(item.childNodes[0].nodeValue);	// Push movie title to movie array
+// 	if (user === "Danny" && !value) {
+// 		item.appendChild(document.createTextNode(inputDanny.value));
+// 		appendItemsBtns(listDanny, item, btn, btn2);
+// 		inputDanny.value = "";		
+// 		dannyArray.push(item.childNodes[0].nodeValue);	// Push movie title to movie array
 
-	}  	else if (user === "Danny" && value) {
-		item.appendChild(document.createTextNode(value));
-		appendItemsBtns(listDanny, item, btn, btn2);
+// 	}  	else if (user === "Danny" && value) {
+// 		item.appendChild(document.createTextNode(value));
+// 		appendItemsBtns(listDanny, item, btn, btn2);
 		
-	}  	else if (user === "Lola" && !value) {
-		item.appendChild(document.createTextNode(inputLola.value));
-		appendItemsBtns(listLola, item, btn, btn2);
-		inputLola.value = "";
-		lolaArray.push(item.childNodes[0].nodeValue);	// Push movie title to movie array
+// 	}  	else if (user === "Lola" && !value) {
+// 		item.appendChild(document.createTextNode(inputLola.value));
+// 		appendItemsBtns(listLola, item, btn, btn2);
+// 		inputLola.value = "";
+// 		lolaArray.push(item.childNodes[0].nodeValue);	// Push movie title to movie array
 		
-	}	else if (user === "Lola" && value) {
-		item.appendChild(document.createTextNode(value));
-		appendItemsBtns(listLola, item, btn, btn2);
-	}				
-}
+// 	}	else if (user === "Lola" && value) {
+// 		item.appendChild(document.createTextNode(value));
+// 		appendItemsBtns(listLola, item, btn, btn2);
+// 	}				
+// }
 
 // Remove deleted movie from corresponding array
 // To fix - Movies of the same name are only deleted if deleted togther 
@@ -130,49 +130,84 @@ listLola.addEventListener('click', function(e){
 	}
 });
 
-function hasContent(user) {
-
-	if(user === "Danny" && inputDanny.value === "") {
-		return inputDanny.placeholder = "Please enter a movie";
-	
-	} else if(user === "Danny" && inputDanny.value !== "") {
-		addItem("Danny", null);
-	
-	} else if(user === "Lola" && inputLola.value === "") {
-		return inputLola.placeholder = "Please enter a movie";
-	
-	} else {addItem("Lola", null);}
+function createList(array = [], list) {
+	list.innerHTML = array.map((movie) => {
+		return `
+			<li class='itemClass'>
+				${movie.title}
+				<button class='btnClass2'>\u2713</button>
+				<button class='btnClass'>\u2717</button>
+			</li>
+		`;
+	}).join('');
 }
 
-function clickFunk(e) {
-	console.log(this);
-	e.target.id === "btnDanny" ? hasContent("Danny") 
-	: e.target.id === "btnLola" ? hasContent("Lola")
-	: "";
+function newItem(movieTitle, input) {
+	const title = movieTitle;
+	const item = {
+		title,
+		approve: false
+	};
+
+	if(input === 'inputDanny') {
+		dannyArray.push(item)
+		const list = listDanny;
+		const array = dannyArray;
+		createList(array, list);
+	} 
+	else {
+		lolaArray.push(item);
+		const list = listLola;
+		const array = lolaArray;
+		createList(array, list);
+	} 
 }
+
+// function hasContent(user) {
+
+// 	if(user === "Danny" && inputDanny.value === "") {
+// 		return inputDanny.placeholder = "Please enter a movie";
+	
+// 	} else if(user === "Danny" && inputDanny.value !== "") {
+// 		addItem("Danny", null);
+	
+// 	} else if(user === "Lola" && inputLola.value === "") {
+// 		return inputLola.placeholder = "Please enter a movie";
+	
+// 	} else {addItem("Lola", null);}
+// }
+
+// function clickFunk(e) {
+// 	console.log(this);
+// 	e.target.id === "btnDanny" ? hasContent("Danny") 
+// 	: e.target.id === "btnLola" ? hasContent("Lola")
+// 	: "";
+// }
 
 function enterFunk(e) {
+
 	if(e.keyCode != 13) {
 		return;
 	}
 	else {
-		this.id === "inputDanny" ? hasContent("Danny") 
-		: this.id === "inputLola" ? hasContent("Lola")
-		: ""; 	
+		const input = this.id
+		const movieTitle = this.value;
+		movieTitle === "" ? this.placeholder = "Please enter a movie" :
+		newItem(movieTitle, input);
 	}
 
 }
 
 // Compare each list with saved stamp states and add stamp class
-function assignStamps(list, stamps) {	
-	const btns = Array.from(list.getElementsByClassName("btnClass2"));
+// function assignStamps(list, stamps) {	
+// 	const btns = Array.from(list.getElementsByClassName("btnClass2"));
 
-	for(let i=0;i<btns.length;i++) {
-		if(stamps[i] === true) {
-			approveItem(null, btns[i]);
-		}
-	}
-}
+// 	for(let i=0;i<btns.length;i++) {
+// 		if(stamps[i] === true) {
+// 			approveItem(null, btns[i]);
+// 		}
+// 	}
+// }
 
 // Save current states of movie arrays and stamps
 function saveFunk(state1, state2) {
@@ -193,18 +228,19 @@ function isStampVisible() {
 	saveFunk(dannyStampStates, lolaStampStates);
 }
 
-function populateList() {
+// function populateList() {
 	
-	// Add saved movie titles to lists
-	dannyArray.forEach(movie => addItem("Danny", movie));
-	lolaArray.forEach(movie => addItem("Lola", movie));
+// 	// Add saved movie titles to lists
+// 	dannyArray.forEach(movie => newItem(movie, 'inputDanny'));
+// 	lolaArray.forEach(movie => newItem(movie, 'inputLola'));
 
-	// Add saved stamps to items
-	assignStamps(listDanny, dannyStampStates);	
-	assignStamps(listLola, lolaStampStates);
-}
+// 	// Add saved stamps to items
+// 	// assignStamps(listDanny, dannyStampStates);	
+// 	// assignStamps(listLola, lolaStampStates);
+// }
 
-buttons.forEach(btn => btn.addEventListener('click', clickFunk));
+// buttons.forEach(btn => btn.addEventListener('click', clickFunk));
 inputs.forEach(input => input.addEventListener('keypress', enterFunk));
 submit.addEventListener('click', isStampVisible);	// Save button
-populateList();
+createList(dannyArray, listDanny);
+createList(lolaArray, listLola);
