@@ -1,61 +1,59 @@
-const inputDanny = document.getElementById('inputDanny');
-const inputLola =  document.getElementById('inputLola');
 const listDanny = document.getElementById('listDanny');
 const listLola = document.getElementById('listLola');
 const buttons = document.querySelectorAll('button');
 const inputs = Array.from(document.getElementsByClassName('input'));
-const submit = document.getElementById('submitBtn');
+
 
 //Arrays to store movies and stamps
 const dannyArray = JSON.parse(localStorage.getItem('dannyMovies')) || [];
 const lolaArray = JSON.parse(localStorage.getItem('lolaMovies')) || [];
-const dannyStampStates = Array.from(JSON.parse(localStorage.getItem('dannyStamps'))) || [];
-const lolaStampStates = Array.from(JSON.parse(localStorage.getItem('lolaStamps'))) || [];
 
 // Delete item from list
 function deleteItem(list, target) {	
-	const movieToDelete = target.dataset.movie;
+	const movieToDelete = Number(target.dataset.index);
 
 	if(list === 'listDanny') {
 		dannyArray.forEach((obj, i) => {
-			obj.title === movieToDelete ? dannyArray.splice(i, 1) : "";
+			obj.index === movieToDelete ? dannyArray.splice(i, 1) : "";
 			localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
 			target.parentElement.remove();
-		})		
+		});		
 	}
 	else {
 		lolaArray.forEach((obj, i) => {
-			obj.title === movieToDelete ? lolaArray.splice(i, 1) : "";
+			obj.index === movieToDelete ? lolaArray.splice(i, 1) : "";
 			localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
 			target.parentElement.remove();
-		})	
+		});	
 	}			
 }
 
 function approveItem(list, target) {
-	const movieToApprove = target.dataset.movie;
-
+	console.log(target);
+	const movieToApproveIndex = Number(target.dataset.index);
+	
 	if(list === 'listDanny') {
 		dannyArray.forEach((obj) => {
-			obj.title === movieToApprove ? obj.approved = !obj.approved : "";
-			localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
-			target.classList.toggle('btnClass-approve');
-			target.parentNode.classList.toggle('btnClass-approve');
-		})		
+			obj.index === movieToApproveIndex ? obj.approved = !obj.approved : "";
+		});	
+		target.classList.toggle('btnClass-approve');
+		target.parentElement.classList.toggle('btnClass-approve');		
+		localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
 	}
 	else {
 		lolaArray.forEach((obj) => {
-			obj.title === movieToApprove ? obj.approved = !obj.approved : "";
-			localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
-			target.classList.toggle('btnClass-approve');
-			target.parentNode.classList.toggle('btnClass-approve');
-		})		
+			obj.index === movieToApproveIndex ? obj.approved = !obj.approved : "";
+		});		
+		target.classList.toggle('btnClass-approve');
+		target.parentNode.classList.toggle('btnClass-approve');
+		localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
 	}	
 }
 
 listDanny.addEventListener('click', function(e){
 	const list = this.id;
 	const target = e.target;
+	console.log(list, target);
 	switch (e.target.className){
 		case 'btnClass':
 			deleteItem(list, target);
@@ -88,34 +86,30 @@ listLola.addEventListener('click', function(e){
 function createList(array = [], list) {	
 	if(array === []) {return}
 
-	list.innerHTML = array.map((movie, i) => {
+	list.innerHTML = array.map((movie) => {
 		return `
-			<li class='itemClass' data-list=${list.id} data-index=${i}>
+			<li class='itemClass' data-list=${list.id} data-index=${movie.index}>
 				${movie.title}
-				<button class='btnClass2' data-movie='${movie.title}'>\u2713</button>
-				<button class='btnClass' data-movie='${movie.title}' data-index=${i}>\u2717</button>
+				<button class='btnClass2' data-index=${movie.index}>\u2713</button>
+				<button class='btnClass' data-index=${movie.index}>\u2717</button>
 			</li>
 		`;
 	}).join('');
-
-	const approvedState = array.map(obj => obj.approved);
-	for(let i=0;i<approvedState.length;i++) {
-		if(approvedState[i] === 'true') {
-
-		}
-	}
-
 }
 
 function newItem(movieTitle, input) {
 	const title = movieTitle;
 	const item = {
+		index: '',
 		title,
 		approved: false
 	};
 
 	if(input === 'inputDanny') {
 		dannyArray.push(item)
+		for(let i=0;i<dannyArray.length;i++){
+			dannyArray[i].index = i;
+		}
 		const list = listDanny;
 		const array = dannyArray;
 		localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
@@ -123,6 +117,9 @@ function newItem(movieTitle, input) {
 	} 
 	else {
 		lolaArray.push(item);
+		for(let i=0;i<lolaArray.length;i++){
+			lolaArray[i].index = i;
+		}
 		const list = listLola;
 		const array = lolaArray;
 		localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
