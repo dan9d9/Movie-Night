@@ -29,21 +29,21 @@ function deleteItem(list, target) {
 }
 
 function approveItem(list, target) {
-	console.log(target);
+	console.log(list, target);
 	const movieToApproveIndex = Number(target.dataset.index);
 	
 	if(list === 'listDanny') {
-		dannyArray.forEach((obj) => {
-			obj.index === movieToApproveIndex ? obj.approved = !obj.approved : "";
-		});	
+		for(let i=0;i<dannyArray.length;i++) {
+			dannyArray[i].index === movieToApproveIndex ? dannyArray[i].approved = !dannyArray[i].approved : "";
+		}	
 		target.classList.toggle('btnClass-approve');
 		target.parentElement.classList.toggle('btnClass-approve');		
 		localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
 	}
 	else {
-		lolaArray.forEach((obj) => {
-			obj.index === movieToApproveIndex ? obj.approved = !obj.approved : "";
-		});		
+		for(let i=0;i<dannyArray.length;i++) {
+			lolaArray[i].index === movieToApproveIndex ? lolaArray[i].approved = !lolaArray[i].approved : "";
+		}		
 		target.classList.toggle('btnClass-approve');
 		target.parentNode.classList.toggle('btnClass-approve');
 		localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
@@ -53,7 +53,6 @@ function approveItem(list, target) {
 listDanny.addEventListener('click', function(e){
 	const list = this.id;
 	const target = e.target;
-	console.log(list, target);
 	switch (e.target.className){
 		case 'btnClass':
 			deleteItem(list, target);
@@ -96,6 +95,16 @@ function createList(array = [], list) {
 		`;
 	}).join('');
 }
+
+// function approve(array, list) {
+// 	const approvedStates = array.filter(obj => obj.approved === true);
+// 	approvedStates.forEach(obj => {
+// 		obj.approved = false;
+// 		const index = obj.index;
+// 		const target = list.querySelector(`.btnClass2, [data-index='${index}]`);
+// 		approveItem(list, target);	
+// 	})
+// }
 
 function newItem(movieTitle, input) {
 	const title = movieTitle;
@@ -153,3 +162,4 @@ function enterFunk(e) {
 inputs.forEach(input => input.addEventListener('keypress', enterFunk));
 createList(dannyArray, listDanny);
 createList(lolaArray, listLola);
+// approve(dannyArray, listDanny);
