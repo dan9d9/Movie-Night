@@ -81,15 +81,27 @@ function removeMovie(list, arr) {
 }
 
 // Delete item from list
-function deleteItem(target) {	
-	const list = target.dataset.list;
-	const index = target.dataset.index;
+function deleteItem(list, target) {	
+	const movieToDelete = target.dataset.movie;
+	console.log(movieToDelete);
 
 	if(list === 'listDanny') {
-		listDanny.querySelector(`[data-index='${index}']`).remove();	
+		dannyArray.forEach((obj, i) => {
+			console.log(obj, i);
+			obj.title === movieToDelete ? dannyArray.splice(i, 1) : "";
+			localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
+			target.parentElement.remove();
+		})
+			
 	}
 	else {
-		listLola.querySelector(`[data-index='${index}']`).remove();
+		lolaArray.forEach((obj, i) => {
+			console.log(obj, i);
+			obj.title === movieToDelete ? lolaArray.splice(i, 1) : "";
+			localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
+			target.parentElement.remove();
+		})
+	
 	}
 
 			
@@ -108,9 +120,11 @@ function approveItem(e, btn) {
 }
 
 listDanny.addEventListener('click', function(e){
+	const list = this.id;
+	const target = e.target;
 	switch (e.target.className){
 		case 'btnClass':
-			deleteItem(e.target);
+			deleteItem(list, target);
 			break;
 		case 'btnClass2':
 			approveItem(e, null);
@@ -122,9 +136,11 @@ listDanny.addEventListener('click', function(e){
 });
 			
 listLola.addEventListener('click', function(e){
+	const list = this.id;
+	const target = e.target;
 	switch (e.target.className){
 		case 'btnClass':
-			deleteItem(e.target);
+			deleteItem(list, target);
 			break;
 		case 'btnClass2':
 			approveItem(e, null);
@@ -142,8 +158,8 @@ function createList(array = [], list) {
 		return `
 			<li class='itemClass' data-list=${list.id} data-index=${i}>
 				${movie.title}
-				<button class='btnClass2' data-list=${list.id} data-index=${i}>\u2713</button>
-				<button class='btnClass' data-list=${list.id} data-index=${i}>\u2717</button>
+				<button class='btnClass2' data-movie='${movie.title}'>\u2713</button>
+				<button class='btnClass' data-movie='${movie.title}'>\u2717</button>
 			</li>
 		`;
 	}).join('');
