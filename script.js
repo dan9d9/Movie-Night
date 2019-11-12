@@ -5,12 +5,11 @@ const inputs = Array.from(document.getElementsByClassName('input'));
 const inputDanny = document.getElementById('inputDanny');
 const inputLola = document.getElementById('inputLola');
 
-
-//Arrays to store movies and stamps
+//Arrays to store movies
 const dannyArray = JSON.parse(localStorage.getItem('dannyMovies')) || [];
 const lolaArray = JSON.parse(localStorage.getItem('lolaMovies')) || [];
 
-// Delete item from list
+// Delete item from list and save array
 function deleteItem(list, target) {	
 	const movieToDelete = Number(target.dataset.index);
 
@@ -27,9 +26,10 @@ function deleteItem(list, target) {
 			localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
 			target.parentElement.remove();
 		});	
-	}			
+	}
 };
 
+// Toggle approved on btnApprove click
 function approveItem(list, target) {
 	const movieToApproveIndex = Number(target.dataset.index);
 	
@@ -83,6 +83,7 @@ listLola.addEventListener('click', function(e){
 	}
 });
 
+// Toggle approved after list is re-created
 function markApproved(array, list) {
 	array.forEach(obj => {
 		let index = obj.index;
@@ -96,6 +97,7 @@ function markApproved(array, list) {
 	});
 };
 
+// Create list on page load and when new item is added
 function createList(array = [], list) {	
 	if(array === []) {return}
 
@@ -127,6 +129,7 @@ function newItem(movieTitle, input) {
 		}
 		const list = listDanny;
 		const array = dannyArray;
+
 		localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
 		createList(array, list);
 	} 
@@ -137,6 +140,7 @@ function newItem(movieTitle, input) {
 		}
 		const list = listLola;
 		const array = lolaArray;
+
 		localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
 		createList(array, list);
 	}
@@ -145,20 +149,20 @@ function newItem(movieTitle, input) {
 function clickFunk(e) {
 	if(e.target.id === "btnDanny") {
 		const movieTitle = inputDanny.value;
+
 		newItem(movieTitle, 'inputDanny');
 		inputDanny.value = '';
 	}
 	else {
 		const movieTitle = inputLola.value;
+
 		newItem(movieTitle, 'inputLola');
 		inputLola.value = '';
 	} 	
 };
 
 function enterFunk(e) {
-	if(e.keyCode != 13) {
-		return;
-	}
+	if(e.keyCode != 13) {return;}
 	else {
 		const input = this.id
 		const movieTitle = this.value;
@@ -171,5 +175,18 @@ function enterFunk(e) {
 
 buttons.forEach(btn => btn.addEventListener('click', clickFunk));
 inputs.forEach(input => input.addEventListener('keypress', enterFunk));
+
+function convertOldArray(array, input) {
+	array.forEach(movieTitle => {
+		if(typeof movieTitle === 'object') {return;}
+		else {
+			newItem(movieTitle, input);
+		}
+	});
+}
+
+convertOldArray(dannyArray, listDanny);
+convertOldArray(lolaArray, listLola);
+
 createList(dannyArray, listDanny);
 createList(lolaArray, listLola);
