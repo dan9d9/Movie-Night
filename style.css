@@ -121,36 +121,6 @@ ul {
   /* outline: solid green; */
 }
 
-/*****Submit(save) button*****/
-.submitContainer {
-  position: absolute;
-  margin: auto;
-  min-width: 50px;
-  width: 50px;
-  height: 50px;
-  top: 0px; right: 0px; bottom: 60px; left: 0px;
-}
-
-.submitContainer button {
-  height: 100%;
-  width: 100%;
-  border-radius: 50%;
-  color: hsl(277, 45%, 63%);
-  box-shadow: 0px 0px 10px 0px hsl(277, 45%, 63%);
-}
-
-.submitContainer button:hover {
-  transform: scale(1);
-  color: hsl(277, 45%, 33%);
-  box-shadow: 0px 0px 10px 0px hsl(277, 45%, 33%);  
-}
-
-.submitContainer button:active {
-  transform: scale(0.9);
-  box-shadow: 0px 0px 0px 0px hsl(277, 45%, 33%);
-}
-
-
 /*****JS added classes*****/
 .itemClass {
   position: relative;
@@ -166,7 +136,7 @@ ul {
   /*outline: dotted red;*/
 }
 
-.btnClass {
+.btnDelete {
   position: absolute;
   right: 0.5em;
   top: 0; 
@@ -182,14 +152,14 @@ ul {
   padding: 0;
 }
 
-.btnClass:hover {
+.btnDelete:hover {
   color: red;
   border: red;
   box-shadow: 0px 0px 2px 1px red;
   transform: scale(1.03);
 }
 
-.btnClass2 {
+.btnApprove {
   position: absolute;
   right: 2.5em;
   top: 0; 
@@ -205,26 +175,16 @@ ul {
   padding: 0;
 }
 
-.btnClass2:hover {
+.btnApprove:hover {
   color: green;
   border: green;
   box-shadow: 0px 0px 2px 1px green;
   transform: scale(1.03);
 }
-.btnClass-approve {
+.js-approve {
   color: green;
   border: green;
   box-shadow: 0px 0px 2px 1px green;
-}
-
-.approvedHidden {
-  opacity: 0;
-  width: 90%;
-  height: 100%;
-  position: absolute;
-  bottom: 0;
-  font-size: 20px;
-  color: green;
 }
 
 /*****MEDIA QUERIES*****/
@@ -242,12 +202,4 @@ ul {
     overflow: hidden;
   }
 
-  .submitContainer {
-    position: absolute;
-    margin: auto;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-  }
 }

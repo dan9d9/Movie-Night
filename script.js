@@ -29,23 +29,22 @@ function deleteItem(list, target) {
 }
 
 function approveItem(list, target) {
-	console.log(list, target);
 	const movieToApproveIndex = Number(target.dataset.index);
 	
 	if(list === 'listDanny') {
 		for(let i=0;i<dannyArray.length;i++) {
 			dannyArray[i].index === movieToApproveIndex ? dannyArray[i].approved = !dannyArray[i].approved : "";
 		}	
-		target.classList.toggle('btnClass-approve');
-		target.parentElement.classList.toggle('btnClass-approve');		
+		target.classList.toggle('js-approve');
+		target.parentElement.classList.toggle('js-approve');		
 		localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
 	}
 	else {
-		for(let i=0;i<dannyArray.length;i++) {
+		for(let i=0;i<lolaArray.length;i++) {
 			lolaArray[i].index === movieToApproveIndex ? lolaArray[i].approved = !lolaArray[i].approved : "";
 		}		
-		target.classList.toggle('btnClass-approve');
-		target.parentNode.classList.toggle('btnClass-approve');
+		target.classList.toggle('js-approve');
+		target.parentNode.classList.toggle('js-approve');
 		localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
 	}	
 }
@@ -53,14 +52,14 @@ function approveItem(list, target) {
 listDanny.addEventListener('click', function(e){
 	const list = this.id;
 	const target = e.target;
-	switch (e.target.className){
-		case 'btnClass':
+	switch (target.className){
+		case 'btnDelete':
 			deleteItem(list, target);
 			break;
-		case 'btnClass2':
+		case 'btnApprove':
 			approveItem(list, target);
 			break;
-		case 'btnClass2 btnClass-approve':
+		case 'btnApprove js-approve':
 			approveItem(list, target);
 			break;
 	}
@@ -69,14 +68,14 @@ listDanny.addEventListener('click', function(e){
 listLola.addEventListener('click', function(e){
 	const list = this.id;
 	const target = e.target;
-	switch (e.target.className){
-		case 'btnClass':
+	switch (target.className){
+		case 'btnDelete':
 			deleteItem(list, target);
 			break;
-		case 'btnClass2':
+		case 'btnApprove':
 			approveItem(list, target);
 			break;
-		case 'btnClass2 btnClass-approve':
+		case 'btnApprove js-approve':
 			approveItem(list, target);
 			break;
 	}
@@ -85,11 +84,11 @@ listLola.addEventListener('click', function(e){
 function markApproved(array, list) {
 	array.forEach(obj => {
 		let index = obj.index;
-		let target = list.querySelector(`.btnClass2[data-index='${index}']`);
+		let target = list.querySelector(`.btnApprove[data-index='${index}']`);
 
 		if(obj.approved === true) {
-			target.classList.toggle('btnClass-approve');
-			target.parentElement.classList.toggle('btnClass-approve');
+			target.classList.toggle('js-approve');
+			target.parentElement.classList.toggle('js-approve');
 		}
 
 	});
@@ -102,8 +101,8 @@ function createList(array = [], list) {
 		return `
 			<li class='itemClass' data-list=${list.id} data-index=${movie.index}>
 				${movie.title}
-				<button class='btnClass2' data-index=${movie.index}>\u2713</button>
-				<button class='btnClass' data-index=${movie.index}>\u2717</button>
+				<button class='btnApprove' data-index=${movie.index}>\u2713</button>
+				<button class='btnDelete' data-index=${movie.index}>\u2717</button>
 			</li>
 		`;
 	}).join('');
