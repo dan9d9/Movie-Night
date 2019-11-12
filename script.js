@@ -2,6 +2,8 @@ const listDanny = document.getElementById('listDanny');
 const listLola = document.getElementById('listLola');
 const buttons = document.querySelectorAll('button');
 const inputs = Array.from(document.getElementsByClassName('input'));
+const inputDanny = document.getElementById('inputDanny');
+const inputLola = document.getElementById('inputLola');
 
 
 //Arrays to store movies and stamps
@@ -26,7 +28,7 @@ function deleteItem(list, target) {
 			target.parentElement.remove();
 		});	
 	}			
-}
+};
 
 function approveItem(list, target) {
 	const movieToApproveIndex = Number(target.dataset.index);
@@ -47,7 +49,7 @@ function approveItem(list, target) {
 		target.parentNode.classList.toggle('js-approve');
 		localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
 	}	
-}
+};
 
 listDanny.addEventListener('click', function(e){
 	const list = this.id;
@@ -92,7 +94,7 @@ function markApproved(array, list) {
 		}
 
 	});
-}
+};
 
 function createList(array = [], list) {	
 	if(array === []) {return}
@@ -108,7 +110,7 @@ function createList(array = [], list) {
 	}).join('');
 
 	markApproved(array, list);
-}
+};
 
 function newItem(movieTitle, input) {
 	const title = movieTitle;
@@ -137,32 +139,37 @@ function newItem(movieTitle, input) {
 		const array = lolaArray;
 		localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
 		createList(array, list);
-	} 
-}
+	}
+};
 
-// function clickFunk(e) {
-// 	console.log(this);
-// 	e.target.id === "btnDanny" ? hasContent("Danny") 
-// 	: e.target.id === "btnLola" ? hasContent("Lola")
-// 	: "";
-// }
+function clickFunk(e) {
+	if(e.target.id === "btnDanny") {
+		const movieTitle = inputDanny.value;
+		newItem(movieTitle, 'inputDanny');
+		inputDanny.value = '';
+	}
+	else {
+		const movieTitle = inputLola.value;
+		newItem(movieTitle, 'inputLola');
+		inputLola.value = '';
+	} 	
+};
 
 function enterFunk(e) {
-
 	if(e.keyCode != 13) {
 		return;
 	}
 	else {
 		const input = this.id
 		const movieTitle = this.value;
+
 		movieTitle === "" ? this.placeholder = "Please enter a movie" :
 		newItem(movieTitle, input);
 		this.value = '';
 	}
+};
 
-}
-
-// buttons.forEach(btn => btn.addEventListener('click', clickFunk));
+buttons.forEach(btn => btn.addEventListener('click', clickFunk));
 inputs.forEach(input => input.addEventListener('keypress', enterFunk));
 createList(dannyArray, listDanny);
 createList(lolaArray, listLola);
