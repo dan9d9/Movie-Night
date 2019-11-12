@@ -82,6 +82,19 @@ listLola.addEventListener('click', function(e){
 	}
 });
 
+function markApproved(array, list) {
+	array.forEach(obj => {
+		let index = obj.index;
+		let target = list.querySelector(`.btnClass2[data-index='${index}']`);
+
+		if(obj.approved === true) {
+			target.classList.toggle('btnClass-approve');
+			target.parentElement.classList.toggle('btnClass-approve');
+		}
+
+	});
+}
+
 function createList(array = [], list) {	
 	if(array === []) {return}
 
@@ -94,17 +107,9 @@ function createList(array = [], list) {
 			</li>
 		`;
 	}).join('');
-}
 
-// function approve(array, list) {
-// 	const approvedStates = array.filter(obj => obj.approved === true);
-// 	approvedStates.forEach(obj => {
-// 		obj.approved = false;
-// 		const index = obj.index;
-// 		const target = list.querySelector(`.btnClass2, [data-index='${index}]`);
-// 		approveItem(list, target);	
-// 	})
-// }
+	markApproved(array, list);
+}
 
 function newItem(movieTitle, input) {
 	const title = movieTitle;
@@ -162,4 +167,3 @@ function enterFunk(e) {
 inputs.forEach(input => input.addEventListener('keypress', enterFunk));
 createList(dannyArray, listDanny);
 createList(lolaArray, listLola);
-// approve(dannyArray, listDanny);
