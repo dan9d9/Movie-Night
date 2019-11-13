@@ -27,7 +27,7 @@ function deleteItem(list, target) {
 			target.parentElement.remove();
 		});	
 	}
-};
+}
 
 // Toggle approved on btnApprove click
 function approveItem(list, target) {
@@ -49,11 +49,13 @@ function approveItem(list, target) {
 		target.parentNode.classList.toggle('js-approve');
 		localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
 	}	
-};
+}
 
+// Listeners for approve and delete buttons
 listDanny.addEventListener('click', function(e){
 	const list = this.id;
 	const target = e.target;
+
 	switch (target.className){
 		case 'btnDelete':
 			deleteItem(list, target);
@@ -70,6 +72,7 @@ listDanny.addEventListener('click', function(e){
 listLola.addEventListener('click', function(e){
 	const list = this.id;
 	const target = e.target;
+
 	switch (target.className){
 		case 'btnDelete':
 			deleteItem(list, target);
@@ -95,7 +98,7 @@ function markApproved(array, list) {
 		}
 
 	});
-};
+}
 
 // Create list on page load and when new item is added
 function createList(array = [], list) {	
@@ -112,7 +115,7 @@ function createList(array = [], list) {
 	}).join('');
 
 	markApproved(array, list);
-};
+}
 
 function newItem(movieTitle, input) {
 	const title = movieTitle;
@@ -144,7 +147,7 @@ function newItem(movieTitle, input) {
 		localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
 		createList(array, list);
 	}
-};
+}
 
 function clickFunk(e) {
 	if(e.target.id === "btnDanny") {
@@ -159,7 +162,7 @@ function clickFunk(e) {
 		newItem(movieTitle, 'inputLola');
 		inputLola.value = '';
 	} 	
-};
+}
 
 function enterFunk(e) {
 	if(e.keyCode != 13) {return;}
@@ -171,7 +174,7 @@ function enterFunk(e) {
 		newItem(movieTitle, input);
 		this.value = '';
 	}
-};
+}
 
 buttons.forEach(btn => btn.addEventListener('click', clickFunk));
 inputs.forEach(input => input.addEventListener('keypress', enterFunk));
