@@ -180,6 +180,7 @@ buttons.forEach(btn => btn.addEventListener('click', clickFunk));
 inputs.forEach(input => input.addEventListener('keypress', enterFunk));
 
 function convertOldArray(array, input) {
+	if(array === []) {return;}
 	array.forEach(movieTitle => {
 		if(typeof movieTitle === 'object') {return;}
 		else {
@@ -188,8 +189,8 @@ function convertOldArray(array, input) {
 	});
 }
 
-convertOldArray(dannyArray, listDanny);
-convertOldArray(lolaArray, listLola);
+convertOldArray(dannyArray, 'inputDanny');
+convertOldArray(lolaArray, 'inputLola');
 
-createList(dannyArray, listDanny);
-createList(lolaArray, listLola);
+// createList(dannyArray, listDanny);
+// createList(lolaArray, listLola);
