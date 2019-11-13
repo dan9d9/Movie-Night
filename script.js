@@ -182,13 +182,13 @@ inputs.forEach(input => input.addEventListener('keypress', enterFunk));
 
 function convertOldArray(array, input) {
 	if(array === []) {return;}
-	array.forEach((movieTitle, i) => {
-		if(typeof movieTitle === 'object') {return;}
+	array.forEach((movie, i) => {
+		if(typeof movie === 'object') {return;}
 		else {
-			// console.log(input);
-			// newItem(movieTitle, input);
+			const movieTitle = movie;
 			array.splice(i, 1);
 			localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
+			newItem(movieTitle, input);
 		}
 	});
 }
