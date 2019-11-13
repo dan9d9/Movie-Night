@@ -197,5 +197,5 @@ function convertOldArray(array, input) {
 convertOldArray(dannyArray, 'inputDanny');
 convertOldArray(lolaArray, 'inputLola');
 
-// createList(dannyArray, listDanny);
-// createList(lolaArray, listLola);
+createList(dannyArray, listDanny);
+createList(lolaArray, listLola);
