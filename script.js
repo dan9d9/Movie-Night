@@ -187,15 +187,13 @@ function convertOldArray(array, input) {
 		else {
 			const movieTitle = movie;
 			array.splice(i, 1);
-			localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
 			localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
 			newItem(movieTitle, input);
 		}
 	});
 }
 
-convertOldArray(dannyArray, 'inputDanny');
 convertOldArray(lolaArray, 'inputLola');
 
-createList(dannyArray, listDanny);
-createList(lolaArray, listLola);
+// createList(dannyArray, listDanny);
+// createList(lolaArray, listLola);
