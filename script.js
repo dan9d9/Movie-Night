@@ -118,6 +118,7 @@ function createList(array = [], list) {
 }
 
 function newItem(movieTitle, input) {
+	console.log(input);
 	const title = movieTitle;
 	const item = {
 		index: '',
@@ -184,6 +185,7 @@ function convertOldArray(array, input) {
 	array.forEach(movieTitle => {
 		if(typeof movieTitle === 'object') {return;}
 		else {
+			console.log(input);
 			newItem(movieTitle, input);
 		}
 	});
