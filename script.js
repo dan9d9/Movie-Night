@@ -180,20 +180,5 @@ function enterFunk(e) {
 buttons.forEach(btn => btn.addEventListener('click', clickFunk));
 inputs.forEach(input => input.addEventListener('keypress', enterFunk));
 
-// function convertOldArray(array, input) {
-// 	if(array === []) {return;}
-// 	array.forEach((movie, i) => {
-// 		if(typeof movie === 'object') {return;}
-// 		else {
-// 			const movieTitle = movie;
-// 			array.splice(i, 1);
-// 			localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
-// 			newItem(movieTitle, input);
-// 		}
-// 	});
-// }
-
-// convertOldArray(lolaArray, 'inputLola');
-
 createList(dannyArray, listDanny);
 createList(lolaArray, listLola);
