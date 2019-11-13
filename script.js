@@ -188,6 +188,7 @@ function convertOldArray(array, input) {
 			// console.log(input);
 			// newItem(movieTitle, input);
 			array.splice(i, 1);
+			localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
 		}
 	});
 }
