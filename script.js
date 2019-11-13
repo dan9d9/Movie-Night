@@ -188,6 +188,7 @@ function convertOldArray(array, input) {
 			const movieTitle = movie;
 			array.splice(i, 1);
 			localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
+			localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
 			newItem(movieTitle, input);
 		}
 	});
