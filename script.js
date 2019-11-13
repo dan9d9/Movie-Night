@@ -182,11 +182,12 @@ inputs.forEach(input => input.addEventListener('keypress', enterFunk));
 
 function convertOldArray(array, input) {
 	if(array === []) {return;}
-	array.forEach(movieTitle => {
+	array.forEach((movieTitle, i) => {
 		if(typeof movieTitle === 'object') {return;}
 		else {
-			console.log(input);
-			newItem(movieTitle, input);
+			// console.log(input);
+			// newItem(movieTitle, input);
+			array.splice(i, 1);
 		}
 	});
 }
