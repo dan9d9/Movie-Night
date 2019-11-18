@@ -110,7 +110,7 @@ function createList(array = [], list) {
 
 	list.innerHTML = array.map((movie) => {
 		return `
-			<li class='itemClass' contenteditable="true" data-list=${list.id} data-index=${movie.index}>
+			<li class='itemClass' data-list=${list.id} data-index=${movie.index}>
 				${movie.title}
 				<button class='btnApprove' data-index=${movie.index}>\u2713</button>
 				<button class='btnDelete' data-index=${movie.index}>\u2717</button>
@@ -122,7 +122,7 @@ function createList(array = [], list) {
 }
 
 function assignIndex(array) {
-		for(let i=0;i<array.length;i++){
+	for(let i=0;i<array.length;i++){
 			array[i].index = i;
 	} 
 }
