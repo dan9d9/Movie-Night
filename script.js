@@ -9,6 +9,11 @@ const inputLola = document.getElementById('inputLola');
 const dannyArray = JSON.parse(localStorage.getItem('dannyMovies')) || [];
 const lolaArray = JSON.parse(localStorage.getItem('lolaMovies')) || [];
 
+function setStorage() {
+	localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
+	localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
+}
+
 // Delete item from list and save array
 function deleteItem(list, target) {	
 	const movieToDelete = Number(target.dataset.index);
@@ -16,14 +21,14 @@ function deleteItem(list, target) {
 	if(list === 'listDanny') {
 		dannyArray.forEach((obj, i) => {
 			obj.index === movieToDelete ? dannyArray.splice(i, 1) : "";
-			storeItem()
+			setStorage()
 			target.parentElement.remove();
 		});		
 	}
 	else {
 		lolaArray.forEach((obj, i) => {
 			obj.index === movieToDelete ? lolaArray.splice(i, 1) : "";
-			storeItem()
+			setStorage()
 			target.parentElement.remove();
 		});	
 	}
@@ -39,7 +44,7 @@ function approveItem(list, target) {
 		}	
 		target.classList.toggle('js-approve');
 		target.parentElement.classList.toggle('js-approve');		
-		storeItem()
+		setStorage()
 	}
 	else {
 		for(let i=0;i<lolaArray.length;i++) {
@@ -47,7 +52,7 @@ function approveItem(list, target) {
 		}		
 		target.classList.toggle('js-approve');
 		target.parentNode.classList.toggle('js-approve');
-		storeItem()
+		setStorage()
 	}	
 }
 
@@ -56,7 +61,7 @@ listDanny.addEventListener('click', function(e){
 	const list = this.id;
 	const target = e.target;
 
-	switch (target.className){
+	switch (target.className) {
 		case 'btnDelete':
 			deleteItem(list, target);
 			break;
@@ -73,7 +78,7 @@ listLola.addEventListener('click', function(e){
 	const list = this.id;
 	const target = e.target;
 
-	switch (target.className){
+	switch (target.className) {
 		case 'btnDelete':
 			deleteItem(list, target);
 			break;
@@ -96,7 +101,6 @@ function markApproved(array, list) {
 			target.classList.toggle('js-approve');
 			target.parentElement.classList.toggle('js-approve');
 		}
-
 	});
 }
 
@@ -117,57 +121,55 @@ function createList(array = [], list) {
 	markApproved(array, list);
 }
 
-function createNewItem(movieTitle, input) {
+function createItemObject(movieTitle, array) {
 	const title = movieTitle;
 	const item = {
 		index: '',
 		title,
 		approved: false
 	};
-	assignIndex(item, input);
+
+	array.push(item);
+	return item;
 }
 
-function assignIndex(item, input) {
-	if(input === 'inputDanny') {
-		dannyArray.push(item)
-		for(let i=0;i<dannyArray.length;i++){
-			dannyArray[i].index = i;
-		}
-		const list = listDanny;
-		const array = dannyArray;
-
-		storeItem()
-		createList(array, list);
+function assignIndex(array) {
+		for(let i=0;i<array.length;i++){
+			array[i].index = i;
 	} 
-	else {
-		lolaArray.push(item);
-		for(let i=0;i<lolaArray.length;i++){
-			lolaArray[i].index = i;
-		}
-		const list = listLola;
-		const array = lolaArray;
-
-		storeItem()
-		createList(array, list);
-	}
 }
 
-function storeItem() {
-	localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
-	localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
+function createListItem(movieTitle, input) {
+	let list;
+	let array;
+	if(input === 'inputDanny') {
+		list = listDanny;
+		array = dannyArray;	
+	}	else {
+			list = listLola;
+			array = lolaArray;
+		}
+
+	createItemObject(movieTitle, array);
+
+	assignIndex(array);
+
+	setStorage();
+
+	createList(array, list);
 }
 
 function clickFunk(e) {
 	if(e.target.id === "btnDanny") {
 		const movieTitle = inputDanny.value;
 
-		createNewItem(movieTitle, 'inputDanny');
+		createListItem(movieTitle, 'inputDanny');
 		inputDanny.value = '';
 	}
 	else {
 		const movieTitle = inputLola.value;
 
-		createNewItem(movieTitle, 'inputLola');
+		createListItem(movieTitle, 'inputLola');
 		inputLola.value = '';
 	} 	
 }
@@ -179,7 +181,7 @@ function enterFunk(e) {
 		const movieTitle = this.value;
 
 		movieTitle === "" ? this.placeholder = "Please enter a movie" :
-		createNewItem(movieTitle, input);
+		createListItem(movieTitle, input);
 		this.value = '';
 	}
 }
