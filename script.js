@@ -121,6 +121,12 @@ function createList(array = [], list) {
 	markApproved(array, list);
 }
 
+function assignIndex(array) {
+		for(let i=0;i<array.length;i++){
+			array[i].index = i;
+	} 
+}
+
 function createItemObject(movieTitle, array) {
 	const title = movieTitle;
 	const item = {
@@ -130,12 +136,6 @@ function createItemObject(movieTitle, array) {
 	};
 
 	array.push(item);
-}
-
-function assignIndex(array) {
-		for(let i=0;i<array.length;i++){
-			array[i].index = i;
-	} 
 }
 
 function createListItem(movieTitle, input) {
