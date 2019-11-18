@@ -16,14 +16,14 @@ function deleteItem(list, target) {
 	if(list === 'listDanny') {
 		dannyArray.forEach((obj, i) => {
 			obj.index === movieToDelete ? dannyArray.splice(i, 1) : "";
-			localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
+			storeItem()
 			target.parentElement.remove();
 		});		
 	}
 	else {
 		lolaArray.forEach((obj, i) => {
 			obj.index === movieToDelete ? lolaArray.splice(i, 1) : "";
-			localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
+			storeItem()
 			target.parentElement.remove();
 		});	
 	}
@@ -39,7 +39,7 @@ function approveItem(list, target) {
 		}	
 		target.classList.toggle('js-approve');
 		target.parentElement.classList.toggle('js-approve');		
-		localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
+		storeItem()
 	}
 	else {
 		for(let i=0;i<lolaArray.length;i++) {
@@ -47,7 +47,7 @@ function approveItem(list, target) {
 		}		
 		target.classList.toggle('js-approve');
 		target.parentNode.classList.toggle('js-approve');
-		localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
+		storeItem()
 	}	
 }
 
@@ -117,15 +117,17 @@ function createList(array = [], list) {
 	markApproved(array, list);
 }
 
-function newItem(movieTitle, input) {
-	console.log(input);
+function createNewItem(movieTitle, input) {
 	const title = movieTitle;
 	const item = {
 		index: '',
 		title,
 		approved: false
 	};
+	assignIndex(item, input);
+}
 
+function assignIndex(item, input) {
 	if(input === 'inputDanny') {
 		dannyArray.push(item)
 		for(let i=0;i<dannyArray.length;i++){
@@ -134,7 +136,7 @@ function newItem(movieTitle, input) {
 		const list = listDanny;
 		const array = dannyArray;
 
-		localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
+		storeItem()
 		createList(array, list);
 	} 
 	else {
@@ -145,22 +147,27 @@ function newItem(movieTitle, input) {
 		const list = listLola;
 		const array = lolaArray;
 
-		localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
+		storeItem()
 		createList(array, list);
 	}
+}
+
+function storeItem() {
+	localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
+	localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
 }
 
 function clickFunk(e) {
 	if(e.target.id === "btnDanny") {
 		const movieTitle = inputDanny.value;
 
-		newItem(movieTitle, 'inputDanny');
+		createNewItem(movieTitle, 'inputDanny');
 		inputDanny.value = '';
 	}
 	else {
 		const movieTitle = inputLola.value;
 
-		newItem(movieTitle, 'inputLola');
+		createNewItem(movieTitle, 'inputLola');
 		inputLola.value = '';
 	} 	
 }
@@ -172,7 +179,7 @@ function enterFunk(e) {
 		const movieTitle = this.value;
 
 		movieTitle === "" ? this.placeholder = "Please enter a movie" :
-		newItem(movieTitle, input);
+		createNewItem(movieTitle, input);
 		this.value = '';
 	}
 }
