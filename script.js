@@ -130,7 +130,6 @@ function createItemObject(movieTitle, array) {
 	};
 
 	array.push(item);
-	return item;
 }
 
 function assignIndex(array) {
