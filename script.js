@@ -127,15 +127,14 @@ function assignIndex(array) {
 	} 
 }
 
-function createItemObject(movieTitle, array) {
+function createItemObject(movieTitle) {
 	const title = movieTitle;
 	const item = {
 		index: '',
 		title,
 		approved: false
 	};
-
-	array.push(item);
+	return item;
 }
 
 function createListItem(movieTitle, input) {
@@ -149,7 +148,9 @@ function createListItem(movieTitle, input) {
 			array = lolaArray;
 		}
 
-	createItemObject(movieTitle, array);
+	const item = createItemObject(movieTitle);
+
+	array.push(item);
 
 	assignIndex(array);
 
