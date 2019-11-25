@@ -137,17 +137,7 @@ function createItemObject(movieTitle) {
 	return item;
 }
 
-function createListItem(movieTitle, input) {
-	let list;
-	let array;
-	if(input === 'inputDanny') {
-		list = listDanny;
-		array = dannyArray;	
-	}	else {
-			list = listLola;
-			array = lolaArray;
-		}
-
+function createListItem(movieTitle, array) {
 	const item = createItemObject(movieTitle);
 
 	array.push(item);
@@ -155,23 +145,27 @@ function createListItem(movieTitle, input) {
 	assignIndex(array);
 
 	setStorage();
-
-	createList(array, list);
 }
 
 function clickFunk(e) {
-	if(e.target.id === "btnDanny") {
-		const movieTitle = inputDanny.value;
+	let movieTitle;
+	let array;
+	let list;
 
-		createListItem(movieTitle, 'inputDanny');
-		inputDanny.value = '';
+	if(e.target.id === "btnDanny") {
+		movieTitle = inputDanny.value;
+		array = dannyArray;
+		list = listDanny;
 	}
 	else {
-		const movieTitle = inputLola.value;
-
-		createListItem(movieTitle, 'inputLola');
-		inputLola.value = '';
-	} 	
+		movieTitle = inputLola.value;
+		array = lolaArray;
+		list = listLola;
+	}
+	
+	createListItem(movieTitle, array);
+	createList(array, list);
+	movieTitle = '';
 }
 
 function enterFunk(e) {
@@ -179,9 +173,23 @@ function enterFunk(e) {
 	else {
 		const input = this.id
 		const movieTitle = this.value;
+		let array;
+		let list;
 
-		movieTitle === "" ? this.placeholder = "Please enter a movie" :
-		createListItem(movieTitle, input);
+		if(input === 'inputDanny') {
+			array = dannyArray;
+			list = listDanny;
+		} else {
+			array = lolaArray;
+			list = listLola;
+		}
+
+		if(movieTitle == "") {
+			this.placeholder = "Please enter a movie";
+		} 
+		
+		createListItem(movieTitle, array);
+		createList(array, list);
 		this.value = '';
 	}
 }
