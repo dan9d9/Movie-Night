@@ -1,193 +1,208 @@
-
-
-const inputDanny = document.getElementById('inputDanny');
-const inputLola =  document.getElementById('inputLola');
 const listDanny = document.getElementById('listDanny');
 const listLola = document.getElementById('listLola');
 const buttons = document.querySelectorAll('button');
 const inputs = Array.from(document.getElementsByClassName('input'));
-const submit = document.getElementById('submitBtn');
-const listMovies = listDanny.getElementsByTagName('div');
+const inputDanny = document.getElementById('inputDanny');
+const inputLola = document.getElementById('inputLola');
 
 //Arrays to store movies
-let dannyArray = [];
-let lolaArray = [];
+const dannyArray = JSON.parse(localStorage.getItem('dannyMovies')) || [];
+const lolaArray = JSON.parse(localStorage.getItem('lolaMovies')) || [];
 
+function setStorage() {
+	localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
+	localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
+}
 
-function approveMovie() {	
-	
-	if(this.parentElement.parentElement.id === "listDanny") {
-		this.innerText = "Lola approved!";
-		if(this.className ==='approvedHidden') {
-			this.className = 'approvedVisible';
-		} else {this.className = 'approvedHidden';}	
+// Delete item from list and save array
+function deleteItem(list, target) {	
+	const movieToDelete = Number(target.dataset.index);
+
+	if(list === 'listDanny') {
+		dannyArray.forEach((obj, i) => {
+			obj.index === movieToDelete ? dannyArray.splice(i, 1) : "";
+			setStorage()
+			target.parentElement.remove();
+		});		
 	}
-
-	if(this.parentElement.parentElement.id === "listLola") {
-		this.innerText = "Danny approved!";
-		if(this.className ==='approvedHidden') {
-			this.className = 'approvedVisible';
-		} else {this.className = 'approvedHidden';}
+	else {
+		lolaArray.forEach((obj, i) => {
+			obj.index === movieToDelete ? lolaArray.splice(i, 1) : "";
+			setStorage()
+			target.parentElement.remove();
+		});	
 	}
 }
 
-// Remove deleted movie from corresponding array
-// To fix - Movies of the same name are only deleted if deleted togther 
-function removeMovie(list, arr) {
-	let textContentArray = Array.from(list.children).map(node => node.firstChild.textContent);
+// Toggle approved on btnApprove click
+function approveItem(list, target) {
+	const movieToApproveIndex = Number(target.dataset.index);
+	
+	if(list === 'listDanny') {
+		for(let i=0;i<dannyArray.length;i++) {
+			dannyArray[i].index === movieToApproveIndex ? dannyArray[i].approved = !dannyArray[i].approved : "";
+		}	
+		target.classList.toggle('js-approve');
+		target.parentElement.classList.toggle('js-approve');		
+		setStorage()
+	}
+	else {
+		for(let i=0;i<lolaArray.length;i++) {
+			lolaArray[i].index === movieToApproveIndex ? lolaArray[i].approved = !lolaArray[i].approved : "";
+		}		
+		target.classList.toggle('js-approve');
+		target.parentNode.classList.toggle('js-approve');
+		setStorage()
+	}	
+}
 
-	for(let i=0; i < arr.length; i++) {
-		if(textContentArray.indexOf(arr[i]) === -1) { 
-			arr.splice(i, 1);
-			removeMovie(list, arr);
+// Listeners for approve and delete buttons
+listDanny.addEventListener('click', function(e){
+	const list = this.id;
+	const target = e.target;
+
+	switch (target.className) {
+		case 'btnDelete':
+			deleteItem(list, target);
+			break;
+		case 'btnApprove':
+			approveItem(list, target);
+			break;
+		case 'btnApprove js-approve':
+			approveItem(list, target);
+			break;
+	}
+});
+			
+listLola.addEventListener('click', function(e){
+	const list = this.id;
+	const target = e.target;
+
+	switch (target.className) {
+		case 'btnDelete':
+			deleteItem(list, target);
+			break;
+		case 'btnApprove':
+			approveItem(list, target);
+			break;
+		case 'btnApprove js-approve':
+			approveItem(list, target);
+			break;
+	}
+});
+
+// Toggle approved after list is re-created
+function markApproved(array, list) {
+	array.forEach(obj => {
+		let index = obj.index;
+		let target = list.querySelector(`.btnApprove[data-index='${index}']`);
+
+		if(obj.approved === true) {
+			target.classList.toggle('js-approve');
+			target.parentElement.classList.toggle('js-approve');
 		}
-	} return arr;
+	});
 }
 
-// Delete item from list
-function deleteItem(e) {	
-	this.parentNode.remove();
-	removeMovie(listDanny, dannyArray);
-	removeMovie(listLola, lolaArray);
+// Create list on page load and when new item is added
+function createList(array = [], list) {	
+	if(array === []) {return}
+
+	list.innerHTML = array.map((movie) => {
+		return `
+			<li class='itemClass' data-list=${list.id} data-index=${movie.index}>
+				${movie.title}
+				<button class='btnApprove' data-index=${movie.index}>\u2713</button>
+				<button class='btnDelete' data-index=${movie.index}>\u2717</button>
+			</li>
+		`;
+	}).join('');
+
+	markApproved(array, list);
 }
 
-function createStamp() {
-	let stamp = document.createElement('div');
-	stamp.className = 'approvedHidden';
-	return stamp;
+function assignIndex(array) {
+	for(let i=0;i<array.length;i++){
+			array[i].index = i;
+	} 
 }
 
-function createBtn() {
-	let btn = document.createElement('button');
-	btn.className = 'btnClass';
-	btn.appendChild(document.createTextNode('X'));
-	return btn;
-}
-function createItem() {
-	let item = document.createElement('li');
- 	item.className = 'itemClass';
- 	return item;
-}
-
-function addItem(user, value) {
-
- 	let item = createItem();
-
- 	let btn = createBtn();	
-
- 	let stamp = createStamp();
-	
-	if (user === "Danny" && !value) {
-		item.appendChild(document.createTextNode(inputDanny.value));
-		listDanny.appendChild(item);
-		item.appendChild(stamp);
-		item.appendChild(btn);
-		inputDanny.value = "";		
-		dannyArray.push(item.childNodes[0].nodeValue);
-
-	}  	else if (user === "Danny" && value) {
-			item.appendChild(document.createTextNode(value));
-			listDanny.appendChild(item);
-			item.appendChild(stamp);
-			item.appendChild(btn);
-				
-	}  	else if (user === "Lola" && !value) {
-			item.appendChild(document.createTextNode(inputLola.value));
-			listLola.appendChild(item);
-			item.appendChild(stamp);
-			item.appendChild(btn);
-			inputLola.value = "";
-			lolaArray.push(item.childNodes[0].nodeValue);
-
-	}	else if (user === "Lola" && value) {
-			item.appendChild(document.createTextNode(value));
-			listLola.appendChild(item);
-			item.appendChild(stamp);
-			item.appendChild(btn);
-		}
-
-	btn.addEventListener('click', deleteItem);
-	stamp.addEventListener('click', approveMovie);				
-}
-
-function hasContent(user) {
-
-	if(user === "Danny" && inputDanny.value === "") {
-		return inputDanny.placeholder = "Please enter a movie";
-	
-	} else if(user === "Danny" && inputDanny.value !== "") {
-		addItem("Danny", null);
-	
-	} else if(user === "Lola" && inputLola.value === "") {
-		return inputLola.placeholder = "Please enter a movie";
-	
-	} else {addItem("Lola", null);}
+function createItemObject(movieTitle) {
+	const title = movieTitle;
+	const item = {
+		index: '',
+		title,
+		approved: false
+	};
+	return item;
 }
 
 function clickFunk(e) {
-	e.target.id === "btnDanny" ? hasContent("Danny") 
-	: e.target.id === "btnLola" ? hasContent("Lola")
-	: "";
+	let movieTitle;
+	let array;
+	let list;
+
+	if(e.target.id === "btnDanny") {
+		movieTitle = inputDanny.value;
+		array = dannyArray;
+		list = listDanny;
+
+		if(movieTitle == "") {
+			inputDanny.placeholder = "Please enter a movie";
+			return;
+		}
+	}
+	else {
+		movieTitle = inputLola.value;
+		array = lolaArray;
+		list = listLola;
+
+		if(movieTitle == "") {
+			inputLola.placeholder = "Please enter a movie";
+			return;
+		}
+	}
+	
+	const item = createItemObject(movieTitle);
+	array.push(item);
+	assignIndex(array);
+	setStorage();
+	createList(array, list);
+	movieTitle = '';
 }
 
 function enterFunk(e) {
-	e.keyCode === 13 && e.target.id === "inputDanny" ? hasContent("Danny") 
-	: e.keyCode === 13 && e.target.id === "inputLola" ? hasContent("Lola")
-	: ""; 
-}
+	if(e.keyCode != 13) {return;}
+	else {	
+		const input = this.id
+		const movieTitle = this.value;
+		let array;
+		let list;
+		
+		if(movieTitle == "") {
+			this.placeholder = "Please enter a movie";
+			return;
+		} 
 
-// Save current states of movie arrays and stamps
-function saveFunk(state1, state2) {
-		localStorage.setItem('dannyMovies', JSON.stringify(dannyArray));
-		localStorage.setItem('lolaMovies', JSON.stringify(lolaArray));
-		localStorage.setItem('dannyStates', JSON.stringify(state1));
-		localStorage.setItem('lolaStates', JSON.stringify(state2));
-	}
-
-//Compare each list with saved stamp state - 'click' corresponding movie to activate stamp
-function assignStamps(list, stamps) {	
-	const divs = Array.from(list.getElementsByTagName("div"))
-	for(let i=0;i<divs.length;i++) {
-		if(stamps[i] === true) {
-			triggerEvent( divs[i], 'click' );
+		if(input === 'inputDanny') {
+			array = dannyArray;
+			list = listDanny;
+		} else {
+			array = lolaArray;
+			list = listLola;
 		}
-	}
-}
-
-// Artificial 'click' event
-function triggerEvent( elem, event ) {	
-  var clickEvent = new Event( event ); // Create the event.
-  elem.dispatchEvent( clickEvent );    // Dispatch the event.
-}
-
-// Record states of stamps and pass to save function
-function isStampVisible() {
-	const dannyStampStates = Array.from(listDanny.getElementsByTagName("div"))
-						.map(node => node.classList)
-						.map(node => node.value)
-						.map(item => item.includes('approvedVisible'));
-
-	const lolaStampStates = Array.from(listLola.getElementsByTagName("div"))
-						.map(node => node.classList)
-						.map(node => node.value)
-						.map(item => item.includes('approvedVisible'));
-
-	saveFunk(dannyStampStates, lolaStampStates);
-}
-
-window.onload = function() {
-	dannyArray = Array.from(JSON.parse(localStorage.getItem('dannyMovies')));
-	lolaArray = Array.from(JSON.parse(localStorage.getItem('lolaMovies')));
-	dannyArray.forEach(movie => addItem("Danny", movie));
-	lolaArray.forEach(movie => addItem("Lola", movie));
-
-	dannyStampStates = Array.from(JSON.parse(localStorage.getItem('dannyStates')));
-	lolaStampStates = Array.from(JSON.parse(localStorage.getItem('lolaStates')));
 	
-	assignStamps(listDanny, dannyStampStates);	
-	assignStamps(listLola, lolaStampStates);
+		const item = createItemObject(movieTitle);
+		array.push(item);
+		assignIndex(array);
+		setStorage();
+		createList(array, list);
+		this.value = '';
+	}
 }
 
 buttons.forEach(btn => btn.addEventListener('click', clickFunk));
 inputs.forEach(input => input.addEventListener('keypress', enterFunk));
-submit.addEventListener('click', isStampVisible);
+
+createList(dannyArray, listDanny);
+createList(lolaArray, listLola);

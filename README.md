@@ -1,4 +1,4 @@
 # Movies-to-watch-list
-A fancier to-do list for saving movies to watch later.
+Basically a to-do list repurposed for saving movies to watch later.
 
-In progress :)
+I use this as a testing ground for new concepts I've learned.
