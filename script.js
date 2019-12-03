@@ -137,51 +137,66 @@ function createItemObject(movieTitle) {
 	return item;
 }
 
-function createListItem(movieTitle, input) {
-	let list;
-	let array;
-	if(input === 'inputDanny') {
-		list = listDanny;
-		array = dannyArray;	
-	}	else {
-			list = listLola;
-			array = lolaArray;
-		}
-
-	const item = createItemObject(movieTitle);
-
-	array.push(item);
-
-	assignIndex(array);
-
-	setStorage();
-
-	createList(array, list);
-}
-
 function clickFunk(e) {
-	if(e.target.id === "btnDanny") {
-		const movieTitle = inputDanny.value;
+	let movieTitle;
+	let array;
+	let list;
 
-		createListItem(movieTitle, 'inputDanny');
-		inputDanny.value = '';
+	if(e.target.id === "btnDanny") {
+		movieTitle = inputDanny.value;
+		array = dannyArray;
+		list = listDanny;
+
+		if(movieTitle == "") {
+			inputDanny.placeholder = "Please enter a movie";
+			return;
+		}
 	}
 	else {
-		const movieTitle = inputLola.value;
+		movieTitle = inputLola.value;
+		array = lolaArray;
+		list = listLola;
 
-		createListItem(movieTitle, 'inputLola');
-		inputLola.value = '';
-	} 	
+		if(movieTitle == "") {
+			inputLola.placeholder = "Please enter a movie";
+			return;
+		}
+	}
+	
+	const item = createItemObject(movieTitle);
+	array.push(item);
+	assignIndex(array);
+	setStorage();
+	createList(array, list);
+	movieTitle = '';
 }
 
 function enterFunk(e) {
 	if(e.keyCode != 13) {return;}
-	else {
+	else {	
 		const input = this.id
 		const movieTitle = this.value;
+		let array;
+		let list;
+		
+		if(movieTitle == "") {
+			this.placeholder = "Please enter a movie";
+			return;
+		} 
 
-		movieTitle === "" ? this.placeholder = "Please enter a movie" :
-		createListItem(movieTitle, input);
+		if(input === 'inputDanny') {
+			array = dannyArray;
+			list = listDanny;
+		} else {
+			array = lolaArray;
+			list = listLola;
+		}
+	
+		const item = createItemObject(movieTitle);
+		array.push(item);
+		assignIndex(array);
+		setStorage();
+		createList(array, list);
 		this.value = '';
 	}
 }
