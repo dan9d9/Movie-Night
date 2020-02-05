@@ -119,9 +119,20 @@ const view = {
 		}
 
 		userUL.innerHTML = movieArrays[array].map(movie => {
+			// In older code object had 'title' property instead of 'movieTitle'. This 'if' 
+			// statement makes sure either old or new objects will display correctly. I don't
+			// think it's necessary to modify the old object property names, as they will 	       // eventually be deleted from storage anyway.  
+			let movieTitle;
+
+			if(movie.title) {
+				movieTitle = movie.title;
+			} else {
+				movieTitle = movie.movieTitle;
+			}
+
 			return `
 		<li class='itemClass' data-index=${movie.index}>
-			${movie.movieTitle}
+			${movieTitle}
 			<button class='btnApprove'>\u2713</button>
 			<button class='btnDelete'>\u2717</button>
 		</li>
