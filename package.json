@@ -1,0 +1,19 @@
+{
+  "name": "ld_film_list",
+  "version": "1.0.0",
+  "description": "Basically a to-do list repurposed for saving movies to watch later.",
+  "main": ".eslintrc.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dan9d9/Movies-to-watch-list.git"
+  },
+  "author": "Daniel Dick",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dan9d9/Movies-to-watch-list/issues"
+  },
+  "homepage": "https://github.com/dan9d9/Movies-to-watch-list#readme"
+}
