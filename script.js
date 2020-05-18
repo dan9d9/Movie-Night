@@ -4,21 +4,39 @@ const movieArrays = {
 }
 
 const movieList = {
-	addMovie: function(movieTitle, array) {
-		movieArrays[array].push({
-			index: '',
-			movieTitle,
-			approved: false
-		});
-		this.assignIndex(array);
-		handlers.setStorage();
+	addMovie: async function(movieTitle, array) {
+
+		try {
+			const response = await axios.post('http://localhost:3000/movies/new', {
+				title: movieTitle,
+				summary: '',
+				url: ''
+			});
+			console.log('response: ', response);
+			if(response.statusText === 'OK') {
+				movieArrays[array].push({
+					id: response.data.id,
+					index: '',
+					movieTitle,
+					approved: false
+				});
+				this.assignIndex(array);
+				handlers.setStorage();
+			}
+		}
+		catch(err) {
+			if(err.response) {
+				console.log(err.response);
+			}else {
+				console.log(err.toJSON());	
+			}	
+		}	
 	},
 
 	deleteMovie: function(array, index) {
 		movieArrays[array].splice(index, 1);
 		this.assignIndex(array);
 		handlers.setStorage();
-
 	},
 
 	approveMovie: function(array, index) {
@@ -61,8 +79,9 @@ const handlers = {
 			inputLola.value = '';
 		}
 
-		movieList.addMovie(movieTitle, array);
-		view.displayMovies(userUL);
+		movieList.addMovie(movieTitle, array).then(() => {
+			view.displayMovies(userUL)
+		});
 	},
 
 	inputPressEnter: function(e) {
@@ -81,8 +100,10 @@ const handlers = {
 		}
 
 		this.value = '';
-		movieList.addMovie(movieTitle, array);
-		view.displayMovies(userUL);
+
+		movieList.addMovie(movieTitle, array).then(() => {
+			view.displayMovies(userUL);
+		});
 	},
 
 	listButtonsHandler: function(e) {
@@ -119,9 +140,6 @@ const view = {
 		}
 
 		userUL.innerHTML = movieArrays[array].map(movie => {
-			// In older code object had 'title' property instead of 'movieTitle'. This 'if' 
-			// statement makes sure either old or new objects will display correctly. I don't
-			// think it's necessary to modify the old object property names, as they will 	       // eventually be deleted from storage anyway.  
 			let movieTitle;
 
 			if(movie.title) {

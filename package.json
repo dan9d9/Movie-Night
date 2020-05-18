@@ -4,7 +4,7 @@
   "description": "Basically a to-do list repurposed for saving movies to watch later.",
   "main": ".eslintrc.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon server.js"
   },
   "repository": {
     "type": "git",
@@ -15,5 +15,13 @@
   "bugs": {
     "url": "https://github.com/dan9d9/Movies-to-watch-list/issues"
   },
-  "homepage": "https://github.com/dan9d9/Movies-to-watch-list#readme"
+  "homepage": "https://github.com/dan9d9/Movies-to-watch-list#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.9.14",
+    "nodemon": "^2.0.4"
+  }
 }
