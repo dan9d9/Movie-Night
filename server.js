@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 require('dotenv').config();
 const app = express();
+const PORT = process.env.PORT || 3000;
 const MONGOATLAS = process.env.MONGOATLAS;
 
 // Middlewares
@@ -38,4 +39,4 @@ async function connecting() {
 connecting();
 
 
-app.listen(3000, () => console.log('listening on port 3000'));
+app.listen(PORT, () => console.log(`listening on port ${PORT}`));
