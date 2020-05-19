@@ -1,10 +1,14 @@
+const APIKEY = 'ad4a44a2296a174ca3a693f429400547';
+
+
 //////////////
 /// ARRAYS ///
 //////////////
 const movieArrays = {
 	dannyArr: [],
 	lolaArr: [],
-	allMovies: []
+	allMovies: [],
+	searchedMovies: []
 }
 
 
@@ -75,6 +79,28 @@ const httpRequests = {
 				console.log('error response: ', err.response);
 			}else {
 				console.log('error: ', err);	
+			}
+		}
+	}
+}
+
+
+//////////////////////////
+/// TMDB API REQUESTS ///
+//////////////////////////
+const tmdbRequests = {
+	getMovie: async function(query) {
+		try {
+			const response = await axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${APIKEY}&language=en-US&query=${query}&page=1&include_adult=false`);
+			console.log('tmdb response: ', response);
+			if(response.statusText === 'OK') {
+				return movieArrays.searchedMovies = [...response.data.results];
+			}
+		}catch(err) {
+			if(err.response) {
+				console.log(err.response);
+			}else {
+				console.log(err);	
 			}
 		}
 	}
@@ -176,11 +202,37 @@ const handlers = {
 				view.displayMovies(userUL);
 			});
 			
-		}else {
+		}else if(e.target.className === 'btnApprove') {
 			httpRequests.approveMovie(array, id).then(() => {
 				view.displayMovies(userUL);	
 			});	
 		}
+	},
+
+	openMovieModal: function(e) {
+		if(e.target.tagName !== 'LI') {return}
+		const movieModal = document.getElementById('movie_modal');
+		const array = this.parentNode.id;
+
+
+		movieModal.style.display = 'block';
+
+		tmdbRequests.getMovie(this.dataset.title).then(() => {
+			view.displayMovieResults(e.target, movieArrays.searchedMovies);
+			
+		});
+	},
+
+	closeMovieModal: function() {
+		const movieModal = document.getElementById('movie_modal');
+
+		movieArrays.searchedMovies = [];
+		movieModal.style.display = 'none';
+	},
+
+	chooseMovie: function(e) {
+		console.log(e);
+		console.log(this);
 	}
 }
 
@@ -200,7 +252,7 @@ const view = {
 
 		userUL.innerHTML = movieArrays[array].map(movie => {
 		return `
-			<li class='itemClass' data-id=${movie._id}>
+			<li class='itemClass' data-title=${movie.title} data-movie_info='false' data-id=${movie._id}>
 				${movie.title}
 				<button class='btnApprove'>\u2713</button>
 				<button class='btnDelete'>\u2717</button>
@@ -229,6 +281,39 @@ const view = {
 				movieButtonToApprove.classList.toggle('js-approve');
 			}	
 		});
+	},
+
+	displayMovieResults: function(target, movieArray) {
+		console.log('target', target);
+		const movieList = document.getElementById('movie_modal-list');
+		if(movieArray.length === 0) {
+			return movieList.innerHTML = `<li>No results for that search</li>`;
+		}
+
+		movieList.innerHTML = movieArray.map(movie => {
+			const imagePath = 'https://image.tmdb.org/t/p/w185/';
+			let posterPath;
+
+			if(movie.poster_path) {
+				posterPath = imagePath + movie.poster_path;
+			}else {
+				posterPath = '';
+			}
+
+			return `
+				<li class='movie_modal-movie'>
+					<img src='${posterPath}' alt='missing movie poster'/>
+					<div>
+						<p>${movie.title}</p>
+						<p>${movie.overview}</p>
+					</div>
+					<button onclick=${handlers.chooseMovie(target)}>Choose</button>
+				</li>
+			`
+		}).join('');
+
+		// const movieBtns = document.querySelectorAll('.movie_modal-movie button');
+		// movieBtns.forEach(btn => addEventListener('click', handlers.chooseMovie.bind(null, evt, target)));
 	}
 }
 
@@ -241,7 +326,9 @@ const events = {
 		const inputButtons = document.querySelectorAll('.btnContainer button');
 		const inputs = Array.from(document.getElementsByClassName('input'));
 		const usersUL = document.querySelectorAll('ul');
+		const listItems = document.querySelectorAll('li');
 
+		listItems.forEach(li => li.addEventListener('click', handlers.openMovieModal));
 		inputButtons.forEach(btn => btn.addEventListener('click', handlers.inputButtonClick));
 		inputs.forEach(input => input.addEventListener('keypress', handlers.inputPressEnter));
 		usersUL.forEach(ul => ul.addEventListener('click', handlers.listButtonsHandler));
@@ -259,8 +346,7 @@ window.onload = function() {
 			movieArrays.lolaArr = movieArrays.allMovies.filter(movie => movie.array === 'lolaArr');
 			view.displayMovies(document.getElementById('listDanny'));
 			view.displayMovies(document.getElementById('listLola'));
+			events.listeners();
 		});
-	
-	events.listeners();
 }
 	
