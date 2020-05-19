@@ -5,9 +5,16 @@ const MovieSchema = mongoose.Schema({
 		type: String,
 		required: true
 	},
+	array: {
+		type: String,
+		required: true
+	},
+	approved: {
+		type: Boolean,
+		required: true
+	},
 	summary: String,
 	url: String,
-	approved: Boolean
 });
 
 module.exports = mongoose.model('Movies', MovieSchema);
