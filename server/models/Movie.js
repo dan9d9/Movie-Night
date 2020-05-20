@@ -13,8 +13,10 @@ const MovieSchema = mongoose.Schema({
 		type: Boolean,
 		required: true
 	},
+	hasInfo: Boolean,
 	summary: String,
-	url: String,
+	posterPath: String,
+	videoPaths: Array
 });
 
 module.exports = mongoose.model('Movies', MovieSchema);

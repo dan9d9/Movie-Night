@@ -15,9 +15,6 @@ const cors = require('cors');
 app.use(cors());
 
 // ROUTES
-app.get('/', (req, res) => {
-	res.send('We are home!');
-})
 app.use('/movies', require('./routes/movies_routes.js'));
 app.use('/users', require('./routes/users_routes.js'));
 

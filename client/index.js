@@ -1,4 +1,6 @@
 const APIKEY = 'ad4a44a2296a174ca3a693f429400547';
+const imagePath = 'https://image.tmdb.org/t/p/w185/';
+const videoPath = 'https://www.youtube.com/watch?v=';
 
 
 //////////////
@@ -11,10 +13,9 @@ const movieArrays = {
 	searchedMovies: []
 }
 
-
-/////////////////////
-/// HTTP REQUESTS ///
-/////////////////////
+// /////////////////////
+// /// HTTP REQUESTS ///
+// /////////////////////
 const httpRequests = {
 	addMovie: async function(movieTitle, array) {
 		try {
@@ -81,7 +82,22 @@ const httpRequests = {
 				console.log('error: ', err);	
 			}
 		}
-	}
+	},
+
+	// updateMovie: async function(id) {
+	// 	try {
+	// 		const response = await axios.put(`http://localhost:3000/movies/update`, {_id: id});
+	// 		if(response.statusText === 'OK') {	
+	// 			movieList.approveMovie(array, id);
+	// 		}
+	// 	}catch(err) {
+	// 		if(err.response) {
+	// 			console.log('error response: ', err.response);
+	// 		}else {
+	// 			console.log('error: ', err);	
+	// 		}
+	// 	}
+	// }
 }
 
 
@@ -89,12 +105,44 @@ const httpRequests = {
 /// TMDB API REQUESTS ///
 //////////////////////////
 const tmdbRequests = {
-	getMovie: async function(query) {
+	getMovies: async function(query) {
 		try {
 			const response = await axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${APIKEY}&language=en-US&query=${query}&page=1&include_adult=false`);
 			console.log('tmdb response: ', response);
 			if(response.statusText === 'OK') {
 				return movieArrays.searchedMovies = [...response.data.results];
+			}
+		}catch(err) {
+			if(err.response) {
+				console.log(err.response);
+			}else {
+				console.log(err);	
+			}
+		}
+	},
+
+	getMovieDetails: async function(id) {
+		try {
+			const response = await axios.get(`https://api.themoviedb.org/3/movie/${id}?api_key=${APIKEY}&language=en-US`);
+			console.log('tmdb response: ', response);
+			if(response.statusText === 'OK') {
+				return response.data;
+			}
+		}catch(err) {
+			if(err.response) {
+				console.log(err.response);
+			}else {
+				console.log(err);	
+			}
+		}
+	},
+
+	getMovieVideos: async function(id) {
+		try {
+			const response = await axios.get(`https://api.themoviedb.org/3/movie/${id}/videos?api_key=${APIKEY}&language=en-US`);
+			console.log('tmdb movie response: ', response);
+			if(response.statusText === 'OK') {
+				return response.data;
 			}
 		}catch(err) {
 			if(err.response) {
@@ -128,9 +176,16 @@ const movieList = {
 
 		movie.approved = !movie.approved;
 	},
-	// assignIndex: function(array) {
-	// 	movieArrays[array].forEach((movie, index) => movie.index = index);
-	// } 
+	
+	updateMovie: function(movieToUpdate, movieDetails, videos) {
+		let tempVids = videos.map(video => `${videoPath}${video.key}`);
+
+		movieToUpdate = {...movieToUpdate, 
+			summary: movieDetails.overview,
+			posterPath: `${imagePath}${movieDetails.poster_path}`,
+			videoPaths: tempVids
+		}
+	}
 }
 
 
@@ -185,7 +240,12 @@ const handlers = {
 	},
 
 	listButtonsHandler: function(e) {
-		if(e.target.tagName != 'BUTTON') {return}
+		if(e.target.tagName !== 'BUTTON' && e.target.tagName !== 'LI') {return}
+		if(e.target.tagName === 'LI') {
+			if(e.target.dataset.movie_info === 'false') {
+				handlers.openMovieModal(e.target)
+			}
+		}
 	
 		const id = e.target.parentNode.dataset.id;
 		const userUL = this;
@@ -202,37 +262,64 @@ const handlers = {
 				view.displayMovies(userUL);
 			});
 			
-		}else if(e.target.className === 'btnApprove') {
+		}else if(e.target.className === 'btnApprove' || e.target.className === 'btnApprove js-approve') {
 			httpRequests.approveMovie(array, id).then(() => {
 				view.displayMovies(userUL);	
 			});	
 		}
 	},
 
-	openMovieModal: function(e) {
-		if(e.target.tagName !== 'LI') {return}
+	openMovieModal: function(target) {
 		const movieModal = document.getElementById('movie_modal');
-		const array = this.parentNode.id;
+		const movieId = target.dataset.id;
 
+		let array;
+		if(target.parentNode.id === 'listDanny') {
+			array = 'dannyArr';
+		}else if(target.parentNode.id === 'listLola') {
+			array = 'lolaArr';
+		}
+		
+		const movieTitle = movieArrays[array].find(ele => ele._id === movieId).title;
 
 		movieModal.style.display = 'block';
 
-		tmdbRequests.getMovie(this.dataset.title).then(() => {
-			view.displayMovieResults(e.target, movieArrays.searchedMovies);
+		tmdbRequests.getMovies(movieTitle).then(() => {
+			view.displayMovieResults(target, movieArrays.searchedMovies);
 			
 		});
 	},
 
 	closeMovieModal: function() {
 		const movieModal = document.getElementById('movie_modal');
+		const movieList = document.getElementById('movie_modal-list');
 
 		movieArrays.searchedMovies = [];
 		movieModal.style.display = 'none';
+		movieList.removeEventListener('click', handlers.chooseMovie);
 	},
 
 	chooseMovie: function(e) {
-		console.log(e);
-		console.log(this);
+		if(e.target.tagName !== 'BUTTON') {return}
+		
+		const button = e.target;
+		const targetListItem = this;
+		let array;
+		if(targetListItem.parentNode.id === 'listDanny') {
+			array = 'dannyArr';
+		}else if(targetListItem.parentNode.id === 'listLola') {
+			array = 'lolaArr';
+		}
+
+		const movieToUpdate = movieArrays[array].find(movie => movie._id === targetListItem.dataset.id);
+
+		tmdbRequests.getMovieDetails(button.dataset.movie_id).then(details => {
+			console.log('details: ', details);
+			tmdbRequests.getMovieVideos(details.id).then(videos => {
+				targetListItem.dataset.movie_info = 'true';
+				movieList.updateMovie(movieToUpdate, details, videos.results);
+			});
+		});
 	}
 }
 
@@ -251,13 +338,16 @@ const view = {
 		}
 
 		userUL.innerHTML = movieArrays[array].map(movie => {
-		return `
-			<li class='itemClass' data-title=${movie.title} data-movie_info='false' data-id=${movie._id}>
-				${movie.title}
-				<button class='btnApprove'>\u2713</button>
-				<button class='btnDelete'>\u2717</button>
-			</li>
-		`;
+			let hasInfo;
+			movie.hasInfo ? hasInfo = 'true' : hasInfo = 'false';
+
+			return `
+				<li class='itemClass' data-movie_info=${hasInfo} data-id=${movie._id}>
+					${movie.title}
+					<button class='btnApprove'>\u2713</button>
+					<button class='btnDelete'>\u2717</button>
+				</li>
+			`;
 		}).join('');
 
 		view.displayApproved(userUL);
@@ -284,36 +374,31 @@ const view = {
 	},
 
 	displayMovieResults: function(target, movieArray) {
-		console.log('target', target);
 		const movieList = document.getElementById('movie_modal-list');
 		if(movieArray.length === 0) {
 			return movieList.innerHTML = `<li>No results for that search</li>`;
 		}
 
-		movieList.innerHTML = movieArray.map(movie => {
-			const imagePath = 'https://image.tmdb.org/t/p/w185/';
-			let posterPath;
+		movieList.addEventListener('click', handlers.chooseMovie.bind(target));
 
-			if(movie.poster_path) {
-				posterPath = imagePath + movie.poster_path;
-			}else {
-				posterPath = '';
-			}
+		movieList.innerHTML = movieArray.map(movie => {
+			let posterPath;
+			movie.poster_path ? posterPath = imagePath + movie.poster_path : posterPath = '';
+
+			let date;
+			movie.release_date ? date = movie.release_date.split('-')[0] : date = '';
 
 			return `
 				<li class='movie_modal-movie'>
 					<img src='${posterPath}' alt='missing movie poster'/>
 					<div>
-						<p>${movie.title}</p>
+						<p>${movie.title} - ${date}</p>
 						<p>${movie.overview}</p>
 					</div>
-					<button onclick=${handlers.chooseMovie(target)}>Choose</button>
+					<button data-movie_id=${movie.id}>Choose</button>
 				</li>
 			`
 		}).join('');
-
-		// const movieBtns = document.querySelectorAll('.movie_modal-movie button');
-		// movieBtns.forEach(btn => addEventListener('click', handlers.chooseMovie.bind(null, evt, target)));
 	}
 }
 
@@ -326,9 +411,7 @@ const events = {
 		const inputButtons = document.querySelectorAll('.btnContainer button');
 		const inputs = Array.from(document.getElementsByClassName('input'));
 		const usersUL = document.querySelectorAll('ul');
-		const listItems = document.querySelectorAll('li');
 
-		listItems.forEach(li => li.addEventListener('click', handlers.openMovieModal));
 		inputButtons.forEach(btn => btn.addEventListener('click', handlers.inputButtonClick));
 		inputs.forEach(input => input.addEventListener('keypress', handlers.inputPressEnter));
 		usersUL.forEach(ul => ul.addEventListener('click', handlers.listButtonsHandler));
