@@ -40,13 +40,24 @@
  	</div>
 
  	<div id='movie_modal' class='movie_modal'>
- 		<button id='close_modal' type="button" class="close_modal" aria-label="Close" onclick="handlers.closeMovieModal()">
-	      <span>&times;</span>
+ 		<button id='close_modal' type="button" class="close_modal" aria-label="Close">
+	      <span class="close_modal-span">CLOSE</span>
 	    </button>
 	    <div id='movie_modal-inner' class='movie_modal-inner'>
 	    	<ul id='movie_modal-list'>
 	    		<!--JS elements-->	
 	    	</ul>
+	    </div>
+ 	</div>
+
+ 	<div id='trailer_modal' class='movie_modal trailer_modal'>
+ 		<button id='close_trailer_modal' type="button" class="close_modal" aria-label="Close">
+	      <span class="close_modal-span">CLOSE</span>
+	    </button>
+	    <div id='movie_trailer-inner' class='movie_modal-inner movie_trailer-inner'>
+	    	<div>
+		    	<div id='player'></div>
+	    	</div>
 	    </div>
  	</div>
 

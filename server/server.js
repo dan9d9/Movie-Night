@@ -1,12 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const helmet = require('helmet');
 require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGOATLAS = process.env.MONGOATLAS;
 
 // Middlewares
+app.use(helmet());
+app.use(helmet.frameguard({ action: 'sameorigin' }));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 

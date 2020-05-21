@@ -1,6 +1,53 @@
 const APIKEY = 'ad4a44a2296a174ca3a693f429400547';
-const imagePath = 'https://image.tmdb.org/t/p/w185/';
-const videoPath = 'https://www.youtube.com/watch?v=';
+const imagePath = 'https://image.tmdb.org/t/p/w185';
+const videoPath = 'https://www.youtube.com/embed';
+const serverURL = 'http://localhost:3000';
+const TMDBURL = 'https://api.themoviedb.org/3';
+
+/////////////////////////////////
+/// CREATE YOUTUBE PLAYER API
+/// https://developers.google.com/youtube/iframe_api_reference
+/////////////////////////////////
+// 2. This code loads the IFrame Player API code asynchronously.
+  var tag = document.createElement('script');
+
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+  // 3. This function creates an <iframe> (and YouTube player)
+  //    after the API code downloads.
+  var player;
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+      // height: '390',
+      // width: '320',
+      videoId: '',
+      events: {
+        'onReady': onPlayerReady
+        // 'onStateChange': onPlayerStateChange
+      }
+    });
+  }
+
+  // 4. The API will call this function when the video player is ready.
+  function onPlayerReady(event) {
+    event.target.playVideo();
+  }
+
+  // 5. The API calls this function when the player's state changes.
+  //    The function indicates that when playing a video (state=1),
+  //    the player should play for six seconds and then stop.
+  // var done = false;
+  // function onPlayerStateChange(event) {
+  //   if (event.data == YT.PlayerState.PLAYING && !done) {
+  //     setTimeout(stopVideo, 6000);
+  //     done = true;
+  //   }
+  // }
+  // function stopVideo() {
+  //   player.stopVideo();
+  // }
 
 
 //////////////
@@ -13,13 +60,27 @@ const movieArrays = {
 	searchedMovies: []
 }
 
-// /////////////////////
-// /// HTTP REQUESTS ///
-// /////////////////////
+
+///////////////
+/// HELPERS ///
+///////////////
+const helpers = {
+	getArray: function(userUL) {
+		if(userUL === 'listDanny') {
+			return 'dannyArr';
+		}else if(userUL === 'listLola') {
+			return'lolaArr';
+		}
+	}
+}
+
+/////////////////////
+/// HTTP REQUESTS ///
+/////////////////////
 const httpRequests = {
 	addMovie: async function(movieTitle, array) {
 		try {
-			const response = await axios.post('http://localhost:3000/movies/new', {
+			const response = await axios.post(`${serverURL}/movies/new`, {
 				title: movieTitle,
 				array,
 				approved: false
@@ -40,7 +101,7 @@ const httpRequests = {
 
 	deleteMovie: async function(array, id) {
 		try {
-			const response = await axios.delete(`http://localhost:3000/movies/${id}`);
+			const response = await axios.delete(`${serverURL}/movies/${id}`);
 			if(response.statusText === 'OK') {	
 				movieList.deleteMovie(array, id);
 			}
@@ -55,7 +116,7 @@ const httpRequests = {
 
 	getMovies: async function() {
 		try {
-			const response = await axios.get('http://localhost:3000/movies');
+			const response = await axios.get(`${serverURL}/movies`);
 			console.log('get response: ', response);
 			if(response.statusText === 'OK') {
 				movieArrays.allMovies = [...response.data];
@@ -69,12 +130,9 @@ const httpRequests = {
 		}
 	},
 
-	approveMovie: async function(array, id) {
+	approveMovie: async function(movie) {
 		try {
-			const response = await axios.patch(`http://localhost:3000/movies/${id}`);
-			if(response.statusText === 'OK') {	
-				movieList.approveMovie(array, id);
-			}
+			await axios.patch(`${serverURL}/movies/${movie._id}`);
 		}catch(err) {
 			if(err.response) {
 				console.log('error response: ', err.response);
@@ -84,20 +142,29 @@ const httpRequests = {
 		}
 	},
 
-	// updateMovie: async function(id) {
-	// 	try {
-	// 		const response = await axios.put(`http://localhost:3000/movies/update`, {_id: id});
-	// 		if(response.statusText === 'OK') {	
-	// 			movieList.approveMovie(array, id);
-	// 		}
-	// 	}catch(err) {
-	// 		if(err.response) {
-	// 			console.log('error response: ', err.response);
-	// 		}else {
-	// 			console.log('error: ', err);	
-	// 		}
-	// 	}
-	// }
+	updateMovie: async function(movie, userUL) {
+		try {
+			const response = await axios.put(`${serverURL}/movies/update`, {
+				_id: movie._id,
+				title: movie.title, 
+				hasInfo: movie.hasInfo,
+				summary: movie.summary,
+				posterPath: movie.posterPath,
+				videoPaths: movie.videoPaths
+			});
+
+			if(response.statusText === 'OK') {	
+				handlers.closeModals();
+				view.displayMovies(userUL);
+			}
+		}catch(err) {
+			if(err.response) {
+				console.log('error response: ', err.response);
+			}else {
+				console.log('error: ', err);	
+			}
+		}
+	}
 }
 
 
@@ -107,7 +174,7 @@ const httpRequests = {
 const tmdbRequests = {
 	getMovies: async function(query) {
 		try {
-			const response = await axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${APIKEY}&language=en-US&query=${query}&page=1&include_adult=false`);
+			const response = await axios.get(`${TMDBURL}/search/movie?api_key=${APIKEY}&language=en-US&query=${query}&page=1&include_adult=false`);
 			console.log('tmdb response: ', response);
 			if(response.statusText === 'OK') {
 				return movieArrays.searchedMovies = [...response.data.results];
@@ -123,7 +190,7 @@ const tmdbRequests = {
 
 	getMovieDetails: async function(id) {
 		try {
-			const response = await axios.get(`https://api.themoviedb.org/3/movie/${id}?api_key=${APIKEY}&language=en-US`);
+			const response = await axios.get(`${TMDBURL}/movie/${id}?api_key=${APIKEY}&language=en-US`);
 			console.log('tmdb response: ', response);
 			if(response.statusText === 'OK') {
 				return response.data;
@@ -139,7 +206,7 @@ const tmdbRequests = {
 
 	getMovieVideos: async function(id) {
 		try {
-			const response = await axios.get(`https://api.themoviedb.org/3/movie/${id}/videos?api_key=${APIKEY}&language=en-US`);
+			const response = await axios.get(`${TMDBURL}/movie/${id}/videos?api_key=${APIKEY}&language=en-US`);
 			console.log('tmdb movie response: ', response);
 			if(response.statusText === 'OK') {
 				return response.data;
@@ -161,13 +228,11 @@ const tmdbRequests = {
 const movieList = {
 	addMovie: function(movieData) {
 		movieArrays[movieData.array].push(movieData);
-		// this.assignIndex(movieData.array);
 	},
 
 	deleteMovie: function(array, id) {
 		let index = movieArrays[array].findIndex(ele => ele._id === id);
 		movieArrays[array].splice(index, 1);
-		// this.assignIndex(array);
 	},
 
 	approveMovie: function(array, id) {
@@ -175,16 +240,25 @@ const movieList = {
 		const movie = movieArrays[array][index];
 
 		movie.approved = !movie.approved;
+
+		return movie;
 	},
 	
 	updateMovie: function(movieToUpdate, movieDetails, videos) {
-		let tempVids = videos.map(video => `${videoPath}${video.key}`);
+		let tempVids = videos.map(video => `${videoPath}/${video.key}`);
+		let movieIdx = movieArrays[movieToUpdate.array].findIndex(ele => ele._id === movieToUpdate._id);
 
-		movieToUpdate = {...movieToUpdate, 
+		movieToUpdate = {...movieToUpdate,
+			title: movieDetails.title, 
+			hasInfo: true,
 			summary: movieDetails.overview,
 			posterPath: `${imagePath}${movieDetails.poster_path}`,
 			videoPaths: tempVids
 		}
+
+		movieArrays[movieToUpdate.array][movieIdx] = movieToUpdate;
+
+		return movieToUpdate;
 	}
 }
 
@@ -241,20 +315,17 @@ const handlers = {
 
 	listButtonsHandler: function(e) {
 		if(e.target.tagName !== 'BUTTON' && e.target.tagName !== 'LI') {return}
+
+		const id = e.target.parentNode.dataset.id;
+		const userUL = this;
+		let array = helpers.getArray(this.id);
+
 		if(e.target.tagName === 'LI') {
 			if(e.target.dataset.movie_info === 'false') {
 				handlers.openMovieModal(e.target)
+			}else if(e.target.dataset.movie_info === 'true') {
+				handlers.openTrailerModal(array, e.target.dataset.id);
 			}
-		}
-	
-		const id = e.target.parentNode.dataset.id;
-		const userUL = this;
-		let array;
-
-		if(this.id === 'listDanny') {
-			array = 'dannyArr';
-		} else if(this.id === 'listLola') {
-			array = 'lolaArr';
 		}
 
 		if(e.target.className === 'btnDelete') {
@@ -263,7 +334,8 @@ const handlers = {
 			});
 			
 		}else if(e.target.className === 'btnApprove' || e.target.className === 'btnApprove js-approve') {
-			httpRequests.approveMovie(array, id).then(() => {
+			let movieApproved = movieList.approveMovie(array, id);
+			httpRequests.approveMovie(movieApproved).then(() => {
 				view.displayMovies(userUL);	
 			});	
 		}
@@ -273,69 +345,74 @@ const handlers = {
 		const movieModal = document.getElementById('movie_modal');
 		const movieId = target.dataset.id;
 
-		let array;
-		if(target.parentNode.id === 'listDanny') {
-			array = 'dannyArr';
-		}else if(target.parentNode.id === 'listLola') {
-			array = 'lolaArr';
-		}
+		let array = helpers.getArray(target.parentNode.id);
 		
 		const movieTitle = movieArrays[array].find(ele => ele._id === movieId).title;
 
 		movieModal.style.display = 'block';
+		movieModal.addEventListener('click', handlers.handleModals.bind(target));
 
 		tmdbRequests.getMovies(movieTitle).then(() => {
-			view.displayMovieResults(target, movieArrays.searchedMovies);
-			
+			view.displayMovieResults(movieArrays.searchedMovies);
 		});
 	},
 
-	closeMovieModal: function() {
+	handleModals: function(e) {
+		if(e.target.className === 'close_modal' || e.target.className === 'close_modal-span') {
+			handlers.closeModals();
+		}else if(e.target.dataset.movie_id) {
+			handlers.chooseMovie(e.target.dataset.movie_id, this);
+		}
+	},
+
+	closeModals: function() {
 		const movieModal = document.getElementById('movie_modal');
-		const movieList = document.getElementById('movie_modal-list');
+		const trailerModal = document.getElementById('trailer_modal');
+
+		movieModal.removeEventListener('click', handlers.handleModals.bind());
+		trailerModal.removeEventListener('click', handlers.handleModals);
 
 		movieArrays.searchedMovies = [];
+		document.getElementById('player').src = "";
 		movieModal.style.display = 'none';
-		movieList.removeEventListener('click', handlers.chooseMovie);
+		trailerModal.style.display = 'none';
 	},
 
-	chooseMovie: function(e) {
-		if(e.target.tagName !== 'BUTTON') {return}
-		
-		const button = e.target;
-		const targetListItem = this;
-		let array;
-		if(targetListItem.parentNode.id === 'listDanny') {
-			array = 'dannyArr';
-		}else if(targetListItem.parentNode.id === 'listLola') {
-			array = 'lolaArr';
-		}
+	chooseMovie: function(movieID, listItem) {
+		let array = helpers.getArray(listItem.parentNode.id);
 
-		const movieToUpdate = movieArrays[array].find(movie => movie._id === targetListItem.dataset.id);
+		const movieToUpdate = movieArrays[array].find(movie => movie._id === listItem.dataset.id);
 
-		tmdbRequests.getMovieDetails(button.dataset.movie_id).then(details => {
-			console.log('details: ', details);
+		tmdbRequests.getMovieDetails(movieID).then(details => {
 			tmdbRequests.getMovieVideos(details.id).then(videos => {
-				targetListItem.dataset.movie_info = 'true';
-				movieList.updateMovie(movieToUpdate, details, videos.results);
+				listItem.dataset.movie_info = 'true';
+				const updatedMovie = movieList.updateMovie(movieToUpdate, details, videos.results);
+				httpRequests.updateMovie(updatedMovie, listItem.parentNode);
 			});
 		});
+	},
+
+	openTrailerModal: function(array, movieID) {
+		const trailerModal = document.getElementById('trailer_modal');
+		trailerModal.addEventListener('click', handlers.handleModals);
+
+		const movie = movieArrays[array].find(movie => movie._id === movieID);
+
+		console.log(movie);
+		trailer_modal.style.display = 'block';
+		document.getElementById('player').src = movie.videoPaths[0];
 	}
 }
-
 
 ////////////
 /// VIEW ///
 ////////////
 const view = {
 	displayMovies: function(userUL) {
-		let array;
+		let array = helpers.getArray(userUL.id);
 
-		if(userUL.id === 'listDanny') {
-			array = 'dannyArr';
-		} else if(userUL.id === 'listLola') {
-			array = 'lolaArr';
-		}
+		console.log('display movies ul: ', userUL);
+		console.log('display movies array: ', movieArrays[array]);
 
 		userUL.innerHTML = movieArrays[array].map(movie => {
 			let hasInfo;
@@ -354,13 +431,7 @@ const view = {
 	},
 
 	displayApproved: function(userUL) {
-		let array; 
-
-		if(userUL.id === 'listDanny') {
-			array = 'dannyArr';
-		} else if(userUL.id === 'listLola') {
-			array = 'lolaArr';
-		}
+		let array = helpers.getArray(userUL.id);
 
 		movieArrays[array].forEach((movie, index) => {
 			if(movie.approved) {
@@ -373,13 +444,11 @@ const view = {
 		});
 	},
 
-	displayMovieResults: function(target, movieArray) {
+	displayMovieResults: function(movieArray) {
 		const movieList = document.getElementById('movie_modal-list');
 		if(movieArray.length === 0) {
 			return movieList.innerHTML = `<li>No results for that search</li>`;
 		}
-
-		movieList.addEventListener('click', handlers.chooseMovie.bind(target));
 
 		movieList.innerHTML = movieArray.map(movie => {
 			let posterPath;

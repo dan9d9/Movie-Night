@@ -13,10 +13,22 @@ const MovieSchema = mongoose.Schema({
 		type: Boolean,
 		required: true
 	},
-	hasInfo: Boolean,
-	summary: String,
-	posterPath: String,
-	videoPaths: Array
+	hasInfo: {
+		type: Boolean,
+		default: false
+	},
+	summary: {
+		type: String,
+		default: ''
+	},
+	posterPath: {
+		type: String,
+		default: ''
+	},
+	videoPaths: {
+		type: Array,
+		default: []
+	}
 });
 
 module.exports = mongoose.model('Movies', MovieSchema);

@@ -70,7 +70,23 @@ router.patch('/:movieId', async(req, res) => {
     catch(err){
       res.json({message: err})
     }
-})
+});
+
+// UPDATE MOVIE
+router.put('/update', async(req, res) => {
+	const {_id, title, hasInfo, summary, posterPath, videoPaths} = req.body;
+
+	try{
+      const updated = await Movie.findOneAndUpdate(
+        {_id}, 
+        {title, hasInfo, summary, posterPath, videoPaths},
+        );
+      res.status(200).json(updated);
+    }
+    catch(e){
+        res.send({e})
+    }
+});
 
 
 module.exports = router;
