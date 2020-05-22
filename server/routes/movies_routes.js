@@ -28,7 +28,7 @@ router.get('/:movieId', async (req, res) => {
 // ADD NEW MOVIE
 router.post('/new', async (req, res) => {
 	const { title, array, approved } = req.body;
-	if(!title) {return res.status(400).json({message: 'Missing title'})}
+	if(!title || !array || approved === undefined) {return res.status(400).json({message: 'Missing parameter'})}
 
 	const movie = new Movie({
 		title,
@@ -46,7 +46,7 @@ router.post('/new', async (req, res) => {
 
 
 // DELETE ONE MOVIE
-router.delete('/:movieId', async (req, res) => {
+router.delete('/delete/:movieId', async (req, res) => {
     const { movieId } = req.params;
     try{
       const deleted = await Movie.deleteOne({_id: movieId});
@@ -58,7 +58,7 @@ router.delete('/:movieId', async (req, res) => {
 });
 
 // APPROVE MOVIE
-router.patch('/:movieId', async(req, res) => {
+router.patch('/approve/:movieId', async(req, res) => {
 	const { movieId } = req.params;
 	try{
       const toUpdate = await Movie.findById({_id: movieId});

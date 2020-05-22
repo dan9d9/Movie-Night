@@ -4,7 +4,6 @@
 	<meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>L & D Film list</title>
-	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 	<link href="https://fonts.googleapis.com/css?family=Karla|Montserrat&display=swap" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
@@ -55,13 +54,11 @@
 	      <span class="close_modal-span">CLOSE</span>
 	    </button>
 	    <div id='movie_trailer-inner' class='movie_modal-inner movie_trailer-inner'>
-	    	<div>
-		    	<div id='player'></div>
-	    	</div>
+	    	<iframe id='player' width="560" height="315" src="" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 	    </div>
  	</div>
 
-	<script src="index.js"></script>
+	<script src="bundle.js"></script>
 </body>
 
 </html>

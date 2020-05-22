@@ -219,6 +219,7 @@ ul {
   transform: translate(-50%, -50%);
   width: 90%;
   height: 90%;
+  min-height: 320px;
   background-color: #C7C7C7;
 }
 
@@ -257,27 +258,26 @@ ul {
   width: max-content;
 }
 
+.trailer_modal {
+  /* display: flex; GETS SET IN JS */
+  justify-content: center;
+  align-items: center;
+}
+
 .movie_trailer-inner {
   background-color: black;
   width: 100%;
-  height: auto;
+  max-width: 750px;
+  max-height: 500px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
-.movie_trailer-inner div {
-  width: 100%;
-}
-
-#movie_trailer-title {
-  color: white;
-  text-align: center;
-}
-
 #player {
   width: 100%;
+  max-width: 560px;
 }
 
 /*****MEDIA QUERIES*****/
@@ -302,11 +302,6 @@ ul {
     display: flex;
     flex-direction: row;
     font-size: 1rem;
-  }
-
-  .movie_trailer-inner {
-    width: 80%;
-    max-width: 700px;
   }
 
 }

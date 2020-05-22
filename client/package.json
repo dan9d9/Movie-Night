@@ -2,14 +2,16 @@
   "name": "client",
   "version": "1.0.0",
   "description": "",
-  "main": "script.js",
+  "main": "index.js",
   "scripts": {
-    "start": "py -3 -m http.server"
+    "start": "py -3 -m http.server",
+    "build": "browserify script.js > bundle.js"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
-    "axios": "^0.19.2"
-  },
+    "axios": "^0.19.2",
+    "browserify": "^16.5.1"
+  }
 }
