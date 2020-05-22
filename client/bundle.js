@@ -2077,9 +2077,6 @@ const view = {
 	displayMovies: function(userUL) {
 		const array = helpers.getArray(userUL.id);
 
-		console.log('display movies ul: ', userUL);
-		console.log('display movies array: ', movieArrays[array]);
-
 		userUL.innerHTML = movieArrays[array].map(movie => {
 			let hasInfo;
 			movie.hasInfo ? hasInfo = 'true' : hasInfo = 'false';

@@ -9,7 +9,6 @@ const MONGOATLAS = process.env.MONGOATLAS;
 
 // Middlewares
 app.use(helmet());
-app.use(helmet.frameguard({ action: 'sameorigin' }));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
@@ -30,6 +29,7 @@ async function connecting() {
 	    { 
 	      useUnifiedTopology: true , 
 	      useNewUrlParser: true,
+	      useFindAndModify: false
 	    }),
 	    console.log('Connected to the DB')
 	} catch ( error ) {
