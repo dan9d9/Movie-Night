@@ -1,0 +1,23 @@
+{
+  "name": "movies-to-watch-list",
+  "version": "1.0.0",
+  "description": "Basically a to-do list repurposed for saving movies to watch later.",
+  "main": ".eslintrc.js",
+  "dependencies": {
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dan9d9/Movies-to-watch-list.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dan9d9/Movies-to-watch-list/issues"
+  },
+  "homepage": "https://github.com/dan9d9/Movies-to-watch-list#readme"
+}
