@@ -185,8 +185,102 @@ process.chdir = function (dir) {
 process.umask = function() { return 0; };
 
 },{}],2:[function(require,module,exports){
+const axios = require('axios');
+const serverURL = 'http://localhost:3000';
+// /////////////////////
+// /// HTTP REQUESTS ///
+// /////////////////////
+const httpRequests = {
+	addMovie: async function(movieTitle, array) {
+		try {
+			const response = await axios.post(`${serverURL}/movies/new`, {
+				title: movieTitle,
+				array,
+				approved: false
+			});
+			if(response.statusText === 'OK') {
+				return response.data;	
+			}
+		}
+		catch(err) {
+			if(err.response) {
+				console.log('error response: ', err.response);
+			}else {
+				console.log('error: ', err);	
+			}
+		}	
+	}, 
+
+	deleteMovie: async function(array, id) {
+		try {
+			const response = await axios.delete(`${serverURL}/movies/delete/${id}`);
+			if(response.statusText === 'OK') {
+				return response.data;	
+			}
+		}catch(err) {
+			if(err.response) {
+				console.log('error response: ', err.response);
+			}else {
+				console.log('error: ', err);	
+			}
+		}
+	},
+
+	getMovies: async function() {
+		try {
+			const response = await axios.get(`${serverURL}/movies`);
+			if(response.statusText === 'OK') {
+				return response.data;
+			}
+		}catch(err) {
+			if(err.response) {
+				console.log(err.response);
+			}else {
+				console.log(err);	
+			}
+		}
+	},
+
+	approveMovie: async function(movie) {
+		try {
+			await axios.patch(`${serverURL}/movies/approve/${movie._id}`);
+		}catch(err) {
+			if(err.response) {
+				console.log('error response: ', err.response);
+			}else {
+				console.log('error: ', err);	
+			}
+		}
+	},
+
+	updateMovie: async function(movie) {
+		try {
+			const response = await axios.put(`${serverURL}/movies/update`, {
+				_id: movie._id,
+				title: movie.title, 
+				hasInfo: movie.hasInfo,
+				summary: movie.summary,
+				posterPath: movie.posterPath,
+				videoPaths: movie.videoPaths
+			});
+
+			if(response.statusText === 'OK') {
+				return response.data;	
+			}
+		}catch(err) {
+			if(err.response) {
+				console.log('error response: ', err.response);
+			}else {
+				console.log('error: ', err);	
+			}
+		}
+	}
+}
+
+module.exports = httpRequests;
+},{"axios":3}],3:[function(require,module,exports){
 module.exports = require('./lib/axios');
-},{"./lib/axios":4}],3:[function(require,module,exports){
+},{"./lib/axios":5}],4:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -368,7 +462,7 @@ module.exports = function xhrAdapter(config) {
   });
 };
 
-},{"../core/buildFullPath":10,"../core/createError":11,"./../core/settle":15,"./../helpers/buildURL":19,"./../helpers/cookies":21,"./../helpers/isURLSameOrigin":23,"./../helpers/parseHeaders":25,"./../utils":27}],4:[function(require,module,exports){
+},{"../core/buildFullPath":11,"../core/createError":12,"./../core/settle":16,"./../helpers/buildURL":20,"./../helpers/cookies":22,"./../helpers/isURLSameOrigin":24,"./../helpers/parseHeaders":26,"./../utils":28}],5:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -423,7 +517,7 @@ module.exports = axios;
 // Allow use of default import syntax in TypeScript
 module.exports.default = axios;
 
-},{"./cancel/Cancel":5,"./cancel/CancelToken":6,"./cancel/isCancel":7,"./core/Axios":8,"./core/mergeConfig":14,"./defaults":17,"./helpers/bind":18,"./helpers/spread":26,"./utils":27}],5:[function(require,module,exports){
+},{"./cancel/Cancel":6,"./cancel/CancelToken":7,"./cancel/isCancel":8,"./core/Axios":9,"./core/mergeConfig":15,"./defaults":18,"./helpers/bind":19,"./helpers/spread":27,"./utils":28}],6:[function(require,module,exports){
 'use strict';
 
 /**
@@ -444,7 +538,7 @@ Cancel.prototype.__CANCEL__ = true;
 
 module.exports = Cancel;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
 var Cancel = require('./Cancel');
@@ -503,14 +597,14 @@ CancelToken.source = function source() {
 
 module.exports = CancelToken;
 
-},{"./Cancel":5}],7:[function(require,module,exports){
+},{"./Cancel":6}],8:[function(require,module,exports){
 'use strict';
 
 module.exports = function isCancel(value) {
   return !!(value && value.__CANCEL__);
 };
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -606,7 +700,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = Axios;
 
-},{"../helpers/buildURL":19,"./../utils":27,"./InterceptorManager":9,"./dispatchRequest":12,"./mergeConfig":14}],9:[function(require,module,exports){
+},{"../helpers/buildURL":20,"./../utils":28,"./InterceptorManager":10,"./dispatchRequest":13,"./mergeConfig":15}],10:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -660,7 +754,7 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 
 module.exports = InterceptorManager;
 
-},{"./../utils":27}],10:[function(require,module,exports){
+},{"./../utils":28}],11:[function(require,module,exports){
 'use strict';
 
 var isAbsoluteURL = require('../helpers/isAbsoluteURL');
@@ -682,7 +776,7 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
   return requestedURL;
 };
 
-},{"../helpers/combineURLs":20,"../helpers/isAbsoluteURL":22}],11:[function(require,module,exports){
+},{"../helpers/combineURLs":21,"../helpers/isAbsoluteURL":23}],12:[function(require,module,exports){
 'use strict';
 
 var enhanceError = require('./enhanceError');
@@ -702,7 +796,7 @@ module.exports = function createError(message, config, code, request, response) 
   return enhanceError(error, config, code, request, response);
 };
 
-},{"./enhanceError":13}],12:[function(require,module,exports){
+},{"./enhanceError":14}],13:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -783,7 +877,7 @@ module.exports = function dispatchRequest(config) {
   });
 };
 
-},{"../cancel/isCancel":7,"../defaults":17,"./../utils":27,"./transformData":16}],13:[function(require,module,exports){
+},{"../cancel/isCancel":8,"../defaults":18,"./../utils":28,"./transformData":17}],14:[function(require,module,exports){
 'use strict';
 
 /**
@@ -827,7 +921,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
   return error;
 };
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -902,7 +996,7 @@ module.exports = function mergeConfig(config1, config2) {
   return config;
 };
 
-},{"../utils":27}],15:[function(require,module,exports){
+},{"../utils":28}],16:[function(require,module,exports){
 'use strict';
 
 var createError = require('./createError');
@@ -929,7 +1023,7 @@ module.exports = function settle(resolve, reject, response) {
   }
 };
 
-},{"./createError":11}],16:[function(require,module,exports){
+},{"./createError":12}],17:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -951,7 +1045,7 @@ module.exports = function transformData(data, headers, fns) {
   return data;
 };
 
-},{"./../utils":27}],17:[function(require,module,exports){
+},{"./../utils":28}],18:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -1052,7 +1146,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 module.exports = defaults;
 
 }).call(this,require('_process'))
-},{"./adapters/http":3,"./adapters/xhr":3,"./helpers/normalizeHeaderName":24,"./utils":27,"_process":1}],18:[function(require,module,exports){
+},{"./adapters/http":4,"./adapters/xhr":4,"./helpers/normalizeHeaderName":25,"./utils":28,"_process":1}],19:[function(require,module,exports){
 'use strict';
 
 module.exports = function bind(fn, thisArg) {
@@ -1065,7 +1159,7 @@ module.exports = function bind(fn, thisArg) {
   };
 };
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1138,7 +1232,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
   return url;
 };
 
-},{"./../utils":27}],20:[function(require,module,exports){
+},{"./../utils":28}],21:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1154,7 +1248,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
     : baseURL;
 };
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1209,7 +1303,7 @@ module.exports = (
     })()
 );
 
-},{"./../utils":27}],22:[function(require,module,exports){
+},{"./../utils":28}],23:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1225,7 +1319,7 @@ module.exports = function isAbsoluteURL(url) {
   return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
 };
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1295,7 +1389,7 @@ module.exports = (
     })()
 );
 
-},{"./../utils":27}],24:[function(require,module,exports){
+},{"./../utils":28}],25:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -1309,7 +1403,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
   });
 };
 
-},{"../utils":27}],25:[function(require,module,exports){
+},{"../utils":28}],26:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1364,7 +1458,7 @@ module.exports = function parseHeaders(headers) {
   return parsed;
 };
 
-},{"./../utils":27}],26:[function(require,module,exports){
+},{"./../utils":28}],27:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1393,7 +1487,7 @@ module.exports = function spread(callback) {
   };
 };
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 var bind = require('./helpers/bind');
@@ -1739,13 +1833,11 @@ module.exports = {
   trim: trim
 };
 
-},{"./helpers/bind":18}],28:[function(require,module,exports){
-const axios = require('axios');
-// const httpRequests = require('./httpRequests');
+},{"./helpers/bind":19}],29:[function(require,module,exports){
+const myAPI = require('./myAPI');
 const tmdbAPI = require('./tmdbAPI');
 const imagePath = 'https://image.tmdb.org/t/p/w185';
 const videoPath = 'https://www.youtube.com/embed';
-const serverURL = 'http://localhost:3000';
 
 
 //////////////
@@ -1772,98 +1864,6 @@ const helpers = {
 	}
 }
 
-// /////////////////////
-// /// HTTP REQUESTS ///
-// /////////////////////
-const httpRequests = {
-	addMovie: async function(movieTitle, array) {
-		try {
-			const response = await axios.post(`${serverURL}/movies/new`, {
-				title: movieTitle,
-				array,
-				approved: false
-			});
-			console.log('post response: ', response);
-			if(response.statusText === 'OK') {
-				return response.data;	
-			}
-		}
-		catch(err) {
-			if(err.response) {
-				console.log('error response: ', err.response);
-			}else {
-				console.log('error: ', err);	
-			}
-		}	
-	}, 
-
-	deleteMovie: async function(array, id) {
-		try {
-			const response = await axios.delete(`${serverURL}/movies/delete/${id}`);
-			if(response.statusText === 'OK') {
-				return response.data;	
-			}
-		}catch(err) {
-			if(err.response) {
-				console.log('error response: ', err.response);
-			}else {
-				console.log('error: ', err);	
-			}
-		}
-	},
-
-	getMovies: async function() {
-		try {
-			const response = await axios.get(`${serverURL}/movies`);
-			console.log('get response: ', response);
-			if(response.statusText === 'OK') {
-				return response.data;
-			}
-		}catch(err) {
-			if(err.response) {
-				console.log(err.response);
-			}else {
-				console.log(err);	
-			}
-		}
-	},
-
-	approveMovie: async function(movie) {
-		try {
-			await axios.patch(`${serverURL}/movies/approve/${movie._id}`);
-		}catch(err) {
-			if(err.response) {
-				console.log('error response: ', err.response);
-			}else {
-				console.log('error: ', err);	
-			}
-		}
-	},
-
-	updateMovie: async function(movie) {
-		try {
-			const response = await axios.put(`${serverURL}/movies/update`, {
-				_id: movie._id,
-				title: movie.title, 
-				hasInfo: movie.hasInfo,
-				summary: movie.summary,
-				posterPath: movie.posterPath,
-				videoPaths: movie.videoPaths
-			});
-
-			if(response.statusText === 'OK') {
-				return response.data;	
-			}
-		}catch(err) {
-			if(err.response) {
-				console.log('error response: ', err.response);
-			}else {
-				console.log('error: ', err);	
-			}
-		}
-	}
-}
-
 
 /////////////////////
 /// ARRAY METHODS ///
@@ -1874,12 +1874,13 @@ const movieList = {
 	},
 
 	deleteMovie: function(array, id) {
-		let index = movieArrays[array].findIndex(ele => ele._id === id);
+		const index = movieArrays[array].findIndex(ele => ele._id === id);
+
 		movieArrays[array].splice(index, 1);
 	},
 
 	approveMovie: function(array, id) {
-		let index = movieArrays[array].findIndex(ele => ele._id === id);
+		const index = movieArrays[array].findIndex(ele => ele._id === id);
 		const movie = movieArrays[array][index];
 
 		movie.approved = !movie.approved;
@@ -1888,8 +1889,8 @@ const movieList = {
 	},
 	
 	updateMovie: function(movieToUpdate, movieDetails, videos) {
-		let tempVids = videos.map(video => `${videoPath}/${video.key}`);
-		let movieIdx = movieArrays[movieToUpdate.array].findIndex(ele => ele._id === movieToUpdate._id);
+		const tempVids = videos.map(video => `${videoPath}/${video.key}`);
+		const movieIdx = movieArrays[movieToUpdate.array].findIndex(ele => ele._id === movieToUpdate._id);
 
 		movieToUpdate = {...movieToUpdate,
 			title: movieDetails.title, 
@@ -1929,14 +1930,14 @@ const handlers = {
 			inputLola.value = '';
 		}
 
-		httpRequests.addMovie(movieTitle, array).then(response => {
+		myAPI.addMovie(movieTitle, array).then(response => {
 			movieList.addMovie(response);
 			view.displayMovies(userUL)
 		});
 	},
 
 	inputPressEnter: function(e) {
-		if(e.keyCode != 13) {return}
+		if(e.keyCode !== 13) {return}
 		
 		const movieTitle = this.value;
 		let array;
@@ -1952,7 +1953,7 @@ const handlers = {
 
 		this.value = '';
 
-		httpRequests.addMovie(movieTitle, array).then(response => {
+		myAPI.addMovie(movieTitle, array).then(response => {
 			movieList.addMovie(response);
 			view.displayMovies(userUL);
 		});
@@ -1963,7 +1964,7 @@ const handlers = {
 
 		const id = e.target.parentNode.dataset.id;
 		const userUL = this;
-		let array = helpers.getArray(this.id);
+		const array = helpers.getArray(this.id);
 
 		if(e.target.tagName === 'LI') {
 			if(e.target.dataset.movie_info === 'false') {
@@ -1971,17 +1972,14 @@ const handlers = {
 			}else if(e.target.dataset.movie_info === 'true') {
 				handlers.openTrailerModal(array, e.target.dataset.id);
 			}
-		}
-
-		if(e.target.className === 'btnDelete') {
-			httpRequests.deleteMovie(array, id).then(response => {
+		}else if(e.target.className === 'btnDelete') {
+			myAPI.deleteMovie(array, id).then(response => {
 				movieList.deleteMovie(array, id);
 				view.displayMovies(userUL);
-			});
-			
+			});	
 		}else if(e.target.className === 'btnApprove' || e.target.className === 'btnApprove js-approve') {
 			let movieApproved = movieList.approveMovie(array, id);
-			httpRequests.approveMovie(movieApproved).then(() => {
+			myAPI.approveMovie(movieApproved).then(() => {
 				view.displayMovies(userUL);	
 			});	
 		}
@@ -1990,13 +1988,15 @@ const handlers = {
 	openMovieModal: function(target) {
 		const movieModal = document.getElementById('movie_modal');
 		const movieId = target.dataset.id;
-
-		let array = helpers.getArray(target.parentNode.id);
-		
+		const array = helpers.getArray(target.parentNode.id);	
 		const movieTitle = movieArrays[array].find(ele => ele._id === movieId).title;
 
 		movieModal.style.display = 'block';
-		movieModal.addEventListener('click', handlers.handleModals.bind(target));
+
+		// Bound function in event listener creates separate reference each time
+		// Create new property on handlers as a stable reference for removeEventHandler
+		handlers.tempHandleModals = handlers.handleModals.bind(target);
+		movieModal.addEventListener('click', handlers.tempHandleModals);
 
 		tmdbAPI.getMovies(movieTitle).then(movieResults => {
 			movieArrays.searchedMovies = [...movieResults];
@@ -2019,7 +2019,7 @@ const handlers = {
 		const h2 = innerTrailer.querySelector('h2');
 		const youtubePlayer = document.getElementById('player');
 
-		movieModal.removeEventListener('click', handlers.handleModals.bind());
+		movieModal.removeEventListener('click', handlers.tempHandleModals);
 		trailerModal.removeEventListener('click', handlers.handleModals);
 
 		if(h2) {innerTrailer.removeChild(h2)};
@@ -2031,19 +2031,15 @@ const handlers = {
 	},
 
 	chooseMovie: function(movieID, listItem) {
-		let array = helpers.getArray(listItem.parentNode.id);
-
+		const array = helpers.getArray(listItem.parentNode.id);
 		const movieToUpdate = movieArrays[array].find(movie => movie._id === listItem.dataset.id);
 
 		tmdbAPI.getMovieDetails(movieID).then(details => {
-			console.log('details: ', details);
 			tmdbAPI.getMovieVideos(details.id).then(videos => {
-				console.log('movies', videos);
-				listItem.dataset.movie_info = 'true';
-
 				const updatedMovie = movieList.updateMovie(movieToUpdate, details, videos.results);
-				httpRequests.updateMovie(updatedMovie, listItem.parentNode).then(response => {
-					console.log('update response', response);
+
+				listItem.dataset.movie_info = 'true';
+				myAPI.updateMovie(updatedMovie).then(response => {
 					handlers.closeModals();
 					view.displayMovies(listItem.parentNode);
 				});
@@ -2068,9 +2064,9 @@ const handlers = {
 			newTag.style.color = 'white';
 			newTag.appendChild(newText);
 			innerTrailer.insertBefore(newTag, youtubePlayer);
+		}else {
+			youtubePlayer.src = `${movie.videoPaths[0]}?origin=${location.origin}`;
 		}
-		console.log(`${movie.videoPaths[0]}?origin=${location.origin}`);
-		document.getElementById('player').src = `${movie.videoPaths[0]}?origin=${location.origin}`;
 	}
 }
 
@@ -2079,7 +2075,7 @@ const handlers = {
 ////////////
 const view = {
 	displayMovies: function(userUL) {
-		let array = helpers.getArray(userUL.id);
+		const array = helpers.getArray(userUL.id);
 
 		console.log('display movies ul: ', userUL);
 		console.log('display movies array: ', movieArrays[array]);
@@ -2101,7 +2097,7 @@ const view = {
 	},
 
 	displayApproved: function(userUL) {
-		let array = helpers.getArray(userUL.id);
+		const array = helpers.getArray(userUL.id);
 
 		movieArrays[array].forEach((movie, index) => {
 			if(movie.approved) {
@@ -2116,22 +2112,21 @@ const view = {
 
 	displayMovieResults: function(movieArray) {
 		const movieList = document.getElementById('movie_modal-list');
+
 		if(movieArray.length === 0) {
 			return movieList.innerHTML = `<li>No results for that search</li>`;
 		}
 
 		movieList.innerHTML = movieArray.map(movie => {
-			let posterPath;
+			let posterPath, year;
 			movie.poster_path ? posterPath = imagePath + movie.poster_path : posterPath = '';
-
-			let date;
-			movie.release_date ? date = movie.release_date.split('-')[0] : date = '';
+			movie.release_date ? year = movie.release_date.split('-')[0] : year = '';
 
 			return `
 				<li class='movie_modal-movie'>
 					<img src='${posterPath}' alt='missing movie poster'/>
 					<div>
-						<p>${movie.title} - ${date}</p>
+						<p>${movie.title} - ${year}</p>
 						<p>${movie.overview}</p>
 					</div>
 					<button data-movie_id=${movie.id}>Choose</button>
@@ -2162,7 +2157,7 @@ const events = {
 /// ON LOAD ///
 ///////////////
 window.onload = function() {
-	httpRequests.getMovies()
+	myAPI.getMovies()
 		.then(response => {
 			movieArrays.allMovies = [...response];
 			movieArrays.dannyArr = movieArrays.allMovies.filter(movie => movie.array === 'dannyArr');
@@ -2173,7 +2168,7 @@ window.onload = function() {
 		});
 }
 	
-},{"./tmdbAPI":29,"axios":2}],29:[function(require,module,exports){
+},{"./myAPI":2,"./tmdbAPI":30}],30:[function(require,module,exports){
 const axios = require('axios');
 const APIKEY = 'ad4a44a2296a174ca3a693f429400547';
 const serverURL = 'http://localhost:3000';
@@ -2230,4 +2225,4 @@ const tmdbRequests = {
 }
 
 module.exports = tmdbRequests;
-},{"axios":2}]},{},[28]);
+},{"axios":3}]},{},[29]);

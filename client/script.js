@@ -1,9 +1,7 @@
-const axios = require('axios');
-// const httpRequests = require('./httpRequests');
+const myAPI = require('./myAPI');
 const tmdbAPI = require('./tmdbAPI');
 const imagePath = 'https://image.tmdb.org/t/p/w185';
 const videoPath = 'https://www.youtube.com/embed';
-const serverURL = 'http://localhost:3000';
 
 
 //////////////
@@ -30,98 +28,6 @@ const helpers = {
 	}
 }
 
-// /////////////////////
-// /// HTTP REQUESTS ///
-// /////////////////////
-const httpRequests = {
-	addMovie: async function(movieTitle, array) {
-		try {
-			const response = await axios.post(`${serverURL}/movies/new`, {
-				title: movieTitle,
-				array,
-				approved: false
-			});
-			console.log('post response: ', response);
-			if(response.statusText === 'OK') {
-				return response.data;	
-			}
-		}
-		catch(err) {
-			if(err.response) {
-				console.log('error response: ', err.response);
-			}else {
-				console.log('error: ', err);	
-			}
-		}	
-	}, 
-
-	deleteMovie: async function(array, id) {
-		try {
-			const response = await axios.delete(`${serverURL}/movies/delete/${id}`);
-			if(response.statusText === 'OK') {
-				return response.data;	
-			}
-		}catch(err) {
-			if(err.response) {
-				console.log('error response: ', err.response);
-			}else {
-				console.log('error: ', err);	
-			}
-		}
-	},
-
-	getMovies: async function() {
-		try {
-			const response = await axios.get(`${serverURL}/movies`);
-			console.log('get response: ', response);
-			if(response.statusText === 'OK') {
-				return response.data;
-			}
-		}catch(err) {
-			if(err.response) {
-				console.log(err.response);
-			}else {
-				console.log(err);	
-			}
-		}
-	},
-
-	approveMovie: async function(movie) {
-		try {
-			await axios.patch(`${serverURL}/movies/approve/${movie._id}`);
-		}catch(err) {
-			if(err.response) {
-				console.log('error response: ', err.response);
-			}else {
-				console.log('error: ', err);	
-			}
-		}
-	},
-
-	updateMovie: async function(movie) {
-		try {
-			const response = await axios.put(`${serverURL}/movies/update`, {
-				_id: movie._id,
-				title: movie.title, 
-				hasInfo: movie.hasInfo,
-				summary: movie.summary,
-				posterPath: movie.posterPath,
-				videoPaths: movie.videoPaths
-			});
-
-			if(response.statusText === 'OK') {
-				return response.data;	
-			}
-		}catch(err) {
-			if(err.response) {
-				console.log('error response: ', err.response);
-			}else {
-				console.log('error: ', err);	
-			}
-		}
-	}
-}
-
 
 /////////////////////
 /// ARRAY METHODS ///
@@ -132,12 +38,13 @@ const movieList = {
 	},
 
 	deleteMovie: function(array, id) {
-		let index = movieArrays[array].findIndex(ele => ele._id === id);
+		const index = movieArrays[array].findIndex(ele => ele._id === id);
+
 		movieArrays[array].splice(index, 1);
 	},
 
 	approveMovie: function(array, id) {
-		let index = movieArrays[array].findIndex(ele => ele._id === id);
+		const index = movieArrays[array].findIndex(ele => ele._id === id);
 		const movie = movieArrays[array][index];
 
 		movie.approved = !movie.approved;
@@ -146,8 +53,8 @@ const movieList = {
 	},
 	
 	updateMovie: function(movieToUpdate, movieDetails, videos) {
-		let tempVids = videos.map(video => `${videoPath}/${video.key}`);
-		let movieIdx = movieArrays[movieToUpdate.array].findIndex(ele => ele._id === movieToUpdate._id);
+		const tempVids = videos.map(video => `${videoPath}/${video.key}`);
+		const movieIdx = movieArrays[movieToUpdate.array].findIndex(ele => ele._id === movieToUpdate._id);
 
 		movieToUpdate = {...movieToUpdate,
 			title: movieDetails.title, 
@@ -187,14 +94,14 @@ const handlers = {
 			inputLola.value = '';
 		}
 
-		httpRequests.addMovie(movieTitle, array).then(response => {
+		myAPI.addMovie(movieTitle, array).then(response => {
 			movieList.addMovie(response);
 			view.displayMovies(userUL)
 		});
 	},
 
 	inputPressEnter: function(e) {
-		if(e.keyCode != 13) {return}
+		if(e.keyCode !== 13) {return}
 		
 		const movieTitle = this.value;
 		let array;
@@ -210,7 +117,7 @@ const handlers = {
 
 		this.value = '';
 
-		httpRequests.addMovie(movieTitle, array).then(response => {
+		myAPI.addMovie(movieTitle, array).then(response => {
 			movieList.addMovie(response);
 			view.displayMovies(userUL);
 		});
@@ -221,7 +128,7 @@ const handlers = {
 
 		const id = e.target.parentNode.dataset.id;
 		const userUL = this;
-		let array = helpers.getArray(this.id);
+		const array = helpers.getArray(this.id);
 
 		if(e.target.tagName === 'LI') {
 			if(e.target.dataset.movie_info === 'false') {
@@ -229,17 +136,14 @@ const handlers = {
 			}else if(e.target.dataset.movie_info === 'true') {
 				handlers.openTrailerModal(array, e.target.dataset.id);
 			}
-		}
-
-		if(e.target.className === 'btnDelete') {
-			httpRequests.deleteMovie(array, id).then(response => {
+		}else if(e.target.className === 'btnDelete') {
+			myAPI.deleteMovie(array, id).then(response => {
 				movieList.deleteMovie(array, id);
 				view.displayMovies(userUL);
-			});
-			
+			});	
 		}else if(e.target.className === 'btnApprove' || e.target.className === 'btnApprove js-approve') {
 			let movieApproved = movieList.approveMovie(array, id);
-			httpRequests.approveMovie(movieApproved).then(() => {
+			myAPI.approveMovie(movieApproved).then(() => {
 				view.displayMovies(userUL);	
 			});	
 		}
@@ -248,13 +152,15 @@ const handlers = {
 	openMovieModal: function(target) {
 		const movieModal = document.getElementById('movie_modal');
 		const movieId = target.dataset.id;
-
-		let array = helpers.getArray(target.parentNode.id);
-		
+		const array = helpers.getArray(target.parentNode.id);	
 		const movieTitle = movieArrays[array].find(ele => ele._id === movieId).title;
 
 		movieModal.style.display = 'block';
-		movieModal.addEventListener('click', handlers.handleModals.bind(target));
+
+		// Bound function in event listener creates separate reference each time
+		// Create new property on handlers as a stable reference for removeEventHandler
+		handlers.tempHandleModals = handlers.handleModals.bind(target);
+		movieModal.addEventListener('click', handlers.tempHandleModals);
 
 		tmdbAPI.getMovies(movieTitle).then(movieResults => {
 			movieArrays.searchedMovies = [...movieResults];
@@ -277,7 +183,7 @@ const handlers = {
 		const h2 = innerTrailer.querySelector('h2');
 		const youtubePlayer = document.getElementById('player');
 
-		movieModal.removeEventListener('click', handlers.handleModals.bind());
+		movieModal.removeEventListener('click', handlers.tempHandleModals);
 		trailerModal.removeEventListener('click', handlers.handleModals);
 
 		if(h2) {innerTrailer.removeChild(h2)};
@@ -289,19 +195,15 @@ const handlers = {
 	},
 
 	chooseMovie: function(movieID, listItem) {
-		let array = helpers.getArray(listItem.parentNode.id);
-
+		const array = helpers.getArray(listItem.parentNode.id);
 		const movieToUpdate = movieArrays[array].find(movie => movie._id === listItem.dataset.id);
 
 		tmdbAPI.getMovieDetails(movieID).then(details => {
-			console.log('details: ', details);
 			tmdbAPI.getMovieVideos(details.id).then(videos => {
-				console.log('movies', videos);
-				listItem.dataset.movie_info = 'true';
-
 				const updatedMovie = movieList.updateMovie(movieToUpdate, details, videos.results);
-				httpRequests.updateMovie(updatedMovie, listItem.parentNode).then(response => {
-					console.log('update response', response);
+
+				listItem.dataset.movie_info = 'true';
+				myAPI.updateMovie(updatedMovie).then(response => {
 					handlers.closeModals();
 					view.displayMovies(listItem.parentNode);
 				});
@@ -326,9 +228,9 @@ const handlers = {
 			newTag.style.color = 'white';
 			newTag.appendChild(newText);
 			innerTrailer.insertBefore(newTag, youtubePlayer);
+		}else {
+			youtubePlayer.src = `${movie.videoPaths[0]}?origin=${location.origin}`;
 		}
-		console.log(`${movie.videoPaths[0]}?origin=${location.origin}`);
-		document.getElementById('player').src = `${movie.videoPaths[0]}?origin=${location.origin}`;
 	}
 }
 
@@ -337,7 +239,7 @@ const handlers = {
 ////////////
 const view = {
 	displayMovies: function(userUL) {
-		let array = helpers.getArray(userUL.id);
+		const array = helpers.getArray(userUL.id);
 
 		console.log('display movies ul: ', userUL);
 		console.log('display movies array: ', movieArrays[array]);
@@ -359,7 +261,7 @@ const view = {
 	},
 
 	displayApproved: function(userUL) {
-		let array = helpers.getArray(userUL.id);
+		const array = helpers.getArray(userUL.id);
 
 		movieArrays[array].forEach((movie, index) => {
 			if(movie.approved) {
@@ -374,22 +276,21 @@ const view = {
 
 	displayMovieResults: function(movieArray) {
 		const movieList = document.getElementById('movie_modal-list');
+
 		if(movieArray.length === 0) {
 			return movieList.innerHTML = `<li>No results for that search</li>`;
 		}
 
 		movieList.innerHTML = movieArray.map(movie => {
-			let posterPath;
+			let posterPath, year;
 			movie.poster_path ? posterPath = imagePath + movie.poster_path : posterPath = '';
-
-			let date;
-			movie.release_date ? date = movie.release_date.split('-')[0] : date = '';
+			movie.release_date ? year = movie.release_date.split('-')[0] : year = '';
 
 			return `
 				<li class='movie_modal-movie'>
 					<img src='${posterPath}' alt='missing movie poster'/>
 					<div>
-						<p>${movie.title} - ${date}</p>
+						<p>${movie.title} - ${year}</p>
 						<p>${movie.overview}</p>
 					</div>
 					<button data-movie_id=${movie.id}>Choose</button>
@@ -420,7 +321,7 @@ const events = {
 /// ON LOAD ///
 ///////////////
 window.onload = function() {
-	httpRequests.getMovies()
+	myAPI.getMovies()
 		.then(response => {
 			movieArrays.allMovies = [...response];
 			movieArrays.dannyArr = movieArrays.allMovies.filter(movie => movie.array === 'dannyArr');
