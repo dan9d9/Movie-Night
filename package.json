@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "Basically a to-do list repurposed for saving movies to watch later.",
   "main": ".eslintrc.js",
-  "dependencies": {
-    "dotenv": "^8.2.0"
-  },
+  "dependencies": {},
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
