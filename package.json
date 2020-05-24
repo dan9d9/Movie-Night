@@ -4,8 +4,7 @@
   "description": "Basically a to-do list repurposed for saving movies to watch later.",
   "main": "./client/bundle.js",
   "scripts": {
-    "start": "node ./server/server.js",
-    "build": "browserify ./client/script.js > ./client/bundle.js"
+    "start": "node ./server/server.js"
   },
   "repository": {
     "type": "git",
