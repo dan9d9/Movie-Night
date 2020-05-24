@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const helmet = require('helmet');
 require('dotenv').config();
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 const MONGOATLAS = process.env.MONGOATLAS;
 
 // Middlewares
@@ -17,6 +17,7 @@ const cors = require('cors');
 app.use(cors());
 
 // ROUTES
+app.use(express.static("client"));
 app.use('/movies', require('./routes/movies_routes.js'));
 app.use('/users', require('./routes/users_routes.js'));
 

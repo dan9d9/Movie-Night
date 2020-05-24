@@ -190,14 +190,15 @@ const APIKEY = 'ad4a44a2296a174ca3a693f429400547';
 module.exports = APIKEY;
 },{}],3:[function(require,module,exports){
 const axios = require('axios');
-const serverURL = 'http://localhost:3000';
+// const serverURL = 'http://localhost:5000';
+
 // /////////////////////
 // /// HTTP REQUESTS ///
 // /////////////////////
 const httpRequests = {
 	addMovie: async function(movieTitle, array) {
 		try {
-			const response = await axios.post(`${serverURL}/movies/new`, {
+			const response = await axios.post(`/movies/new`, {
 				title: movieTitle,
 				array,
 				approved: false
@@ -217,7 +218,7 @@ const httpRequests = {
 
 	deleteMovie: async function(array, id) {
 		try {
-			const response = await axios.delete(`${serverURL}/movies/delete/${id}`);
+			const response = await axios.delete(`/movies/delete/${id}`);
 			if(response.statusText === 'OK') {
 				return response.data;	
 			}
@@ -232,7 +233,7 @@ const httpRequests = {
 
 	getMovies: async function() {
 		try {
-			const response = await axios.get(`${serverURL}/movies`);
+			const response = await axios.get(`/movies`);
 			if(response.statusText === 'OK') {
 				return response.data;
 			}
@@ -247,7 +248,7 @@ const httpRequests = {
 
 	approveMovie: async function(movie) {
 		try {
-			await axios.patch(`${serverURL}/movies/approve/${movie._id}`);
+			await axios.patch(`/movies/approve/${movie._id}`);
 		}catch(err) {
 			if(err.response) {
 				console.log('error response: ', err.response);
@@ -259,7 +260,7 @@ const httpRequests = {
 
 	updateMovie: async function(movie) {
 		try {
-			const response = await axios.put(`${serverURL}/movies/update`, {
+			const response = await axios.put(`/movies/update`, {
 				_id: movie._id,
 				title: movie.title, 
 				hasInfo: movie.hasInfo,
