@@ -18,8 +18,7 @@ const cors = require('cors');
 app.use(cors());
 
 // ROUTES
-app.use(express.static(__dirname));
-app.use(express.static(path.join(__dirname, '../client')));
+app.use(express.static(path.join(__dirname, '../client/public')));
 app.use('/movies', require('./routes/movies_routes.js'));
 app.use('/users', require('./routes/users_routes.js'));
 
