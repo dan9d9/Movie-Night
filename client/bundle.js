@@ -1,4 +1,312 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+
+},{}],2:[function(require,module,exports){
+(function (process){
+// .dirname, .basename, and .extname methods are extracted from Node.js v8.11.1,
+// backported and transplited with Babel, with backwards-compat fixes
+
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// resolves . and .. elements in a path array with directory names there
+// must be no slashes, empty elements, or device names (c:\) in the array
+// (so also no leading and trailing slashes - it does not distinguish
+// relative and absolute paths)
+function normalizeArray(parts, allowAboveRoot) {
+  // if the path tries to go above the root, `up` ends up > 0
+  var up = 0;
+  for (var i = parts.length - 1; i >= 0; i--) {
+    var last = parts[i];
+    if (last === '.') {
+      parts.splice(i, 1);
+    } else if (last === '..') {
+      parts.splice(i, 1);
+      up++;
+    } else if (up) {
+      parts.splice(i, 1);
+      up--;
+    }
+  }
+
+  // if the path is allowed to go above the root, restore leading ..s
+  if (allowAboveRoot) {
+    for (; up--; up) {
+      parts.unshift('..');
+    }
+  }
+
+  return parts;
+}
+
+// path.resolve([from ...], to)
+// posix version
+exports.resolve = function() {
+  var resolvedPath = '',
+      resolvedAbsolute = false;
+
+  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
+    var path = (i >= 0) ? arguments[i] : process.cwd();
+
+    // Skip empty and invalid entries
+    if (typeof path !== 'string') {
+      throw new TypeError('Arguments to path.resolve must be strings');
+    } else if (!path) {
+      continue;
+    }
+
+    resolvedPath = path + '/' + resolvedPath;
+    resolvedAbsolute = path.charAt(0) === '/';
+  }
+
+  // At this point the path should be resolved to a full absolute path, but
+  // handle relative paths to be safe (might happen when process.cwd() fails)
+
+  // Normalize the path
+  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
+    return !!p;
+  }), !resolvedAbsolute).join('/');
+
+  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
+};
+
+// path.normalize(path)
+// posix version
+exports.normalize = function(path) {
+  var isAbsolute = exports.isAbsolute(path),
+      trailingSlash = substr(path, -1) === '/';
+
+  // Normalize the path
+  path = normalizeArray(filter(path.split('/'), function(p) {
+    return !!p;
+  }), !isAbsolute).join('/');
+
+  if (!path && !isAbsolute) {
+    path = '.';
+  }
+  if (path && trailingSlash) {
+    path += '/';
+  }
+
+  return (isAbsolute ? '/' : '') + path;
+};
+
+// posix version
+exports.isAbsolute = function(path) {
+  return path.charAt(0) === '/';
+};
+
+// posix version
+exports.join = function() {
+  var paths = Array.prototype.slice.call(arguments, 0);
+  return exports.normalize(filter(paths, function(p, index) {
+    if (typeof p !== 'string') {
+      throw new TypeError('Arguments to path.join must be strings');
+    }
+    return p;
+  }).join('/'));
+};
+
+
+// path.relative(from, to)
+// posix version
+exports.relative = function(from, to) {
+  from = exports.resolve(from).substr(1);
+  to = exports.resolve(to).substr(1);
+
+  function trim(arr) {
+    var start = 0;
+    for (; start < arr.length; start++) {
+      if (arr[start] !== '') break;
+    }
+
+    var end = arr.length - 1;
+    for (; end >= 0; end--) {
+      if (arr[end] !== '') break;
+    }
+
+    if (start > end) return [];
+    return arr.slice(start, end - start + 1);
+  }
+
+  var fromParts = trim(from.split('/'));
+  var toParts = trim(to.split('/'));
+
+  var length = Math.min(fromParts.length, toParts.length);
+  var samePartsLength = length;
+  for (var i = 0; i < length; i++) {
+    if (fromParts[i] !== toParts[i]) {
+      samePartsLength = i;
+      break;
+    }
+  }
+
+  var outputParts = [];
+  for (var i = samePartsLength; i < fromParts.length; i++) {
+    outputParts.push('..');
+  }
+
+  outputParts = outputParts.concat(toParts.slice(samePartsLength));
+
+  return outputParts.join('/');
+};
+
+exports.sep = '/';
+exports.delimiter = ':';
+
+exports.dirname = function (path) {
+  if (typeof path !== 'string') path = path + '';
+  if (path.length === 0) return '.';
+  var code = path.charCodeAt(0);
+  var hasRoot = code === 47 /*/*/;
+  var end = -1;
+  var matchedSlash = true;
+  for (var i = path.length - 1; i >= 1; --i) {
+    code = path.charCodeAt(i);
+    if (code === 47 /*/*/) {
+        if (!matchedSlash) {
+          end = i;
+          break;
+        }
+      } else {
+      // We saw the first non-path separator
+      matchedSlash = false;
+    }
+  }
+
+  if (end === -1) return hasRoot ? '/' : '.';
+  if (hasRoot && end === 1) {
+    // return '//';
+    // Backwards-compat fix:
+    return '/';
+  }
+  return path.slice(0, end);
+};
+
+function basename(path) {
+  if (typeof path !== 'string') path = path + '';
+
+  var start = 0;
+  var end = -1;
+  var matchedSlash = true;
+  var i;
+
+  for (i = path.length - 1; i >= 0; --i) {
+    if (path.charCodeAt(i) === 47 /*/*/) {
+        // If we reached a path separator that was not part of a set of path
+        // separators at the end of the string, stop now
+        if (!matchedSlash) {
+          start = i + 1;
+          break;
+        }
+      } else if (end === -1) {
+      // We saw the first non-path separator, mark this as the end of our
+      // path component
+      matchedSlash = false;
+      end = i + 1;
+    }
+  }
+
+  if (end === -1) return '';
+  return path.slice(start, end);
+}
+
+// Uses a mixed approach for backwards-compatibility, as ext behavior changed
+// in new Node.js versions, so only basename() above is backported here
+exports.basename = function (path, ext) {
+  var f = basename(path);
+  if (ext && f.substr(-1 * ext.length) === ext) {
+    f = f.substr(0, f.length - ext.length);
+  }
+  return f;
+};
+
+exports.extname = function (path) {
+  if (typeof path !== 'string') path = path + '';
+  var startDot = -1;
+  var startPart = 0;
+  var end = -1;
+  var matchedSlash = true;
+  // Track the state of characters (if any) we see before our first dot and
+  // after any path separator we find
+  var preDotState = 0;
+  for (var i = path.length - 1; i >= 0; --i) {
+    var code = path.charCodeAt(i);
+    if (code === 47 /*/*/) {
+        // If we reached a path separator that was not part of a set of path
+        // separators at the end of the string, stop now
+        if (!matchedSlash) {
+          startPart = i + 1;
+          break;
+        }
+        continue;
+      }
+    if (end === -1) {
+      // We saw the first non-path separator, mark this as the end of our
+      // extension
+      matchedSlash = false;
+      end = i + 1;
+    }
+    if (code === 46 /*.*/) {
+        // If this is our first dot, mark it as the start of our extension
+        if (startDot === -1)
+          startDot = i;
+        else if (preDotState !== 1)
+          preDotState = 1;
+    } else if (startDot !== -1) {
+      // We saw a non-dot and non-path separator before our dot, so we should
+      // have a good chance at having a non-empty extension
+      preDotState = -1;
+    }
+  }
+
+  if (startDot === -1 || end === -1 ||
+      // We saw a non-dot character immediately before the dot
+      preDotState === 0 ||
+      // The (right-most) trimmed path component is exactly '..'
+      preDotState === 1 && startDot === end - 1 && startDot === startPart + 1) {
+    return '';
+  }
+  return path.slice(startDot, end);
+};
+
+function filter (xs, f) {
+    if (xs.filter) return xs.filter(f);
+    var res = [];
+    for (var i = 0; i < xs.length; i++) {
+        if (f(xs[i], i, xs)) res.push(xs[i]);
+    }
+    return res;
+}
+
+// String.prototype.substr - negative index don't work in IE8
+var substr = 'ab'.substr(-1) === 'b'
+    ? function (str, start, len) { return str.substr(start, len) }
+    : function (str, start, len) {
+        if (start < 0) start = str.length + start;
+        return str.substr(start, len);
+    }
+;
+
+}).call(this,require('_process'))
+},{"_process":3}],3:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -184,11 +492,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],2:[function(require,module,exports){
-const APIKEY = 'ad4a44a2296a174ca3a693f429400547';
-
-module.exports = APIKEY;
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 const axios = require('axios');
 // const serverURL = 'http://localhost:5000';
 
@@ -283,9 +587,400 @@ const httpRequests = {
 }
 
 module.exports = httpRequests;
-},{"axios":4}],4:[function(require,module,exports){
+},{"axios":7}],5:[function(require,module,exports){
+const myAPI = require('./myAPI');
+const tmdbAPI = require('./tmdbAPI');
+const imagePath = 'https://image.tmdb.org/t/p/w185';
+const videoPath = 'https://www.youtube.com/embed';
+
+
+//////////////
+/// ARRAYS ///
+//////////////
+const movieArrays = {
+	dannyArr: [],
+	lolaArr: [],
+	allMovies: [],
+	searchedMovies: []
+}
+
+
+///////////////
+/// HELPERS ///
+///////////////
+const helpers = {
+	getArray: function(userUL) {
+		if(userUL === 'listDanny') {
+			return 'dannyArr';
+		}else if(userUL === 'listLola') {
+			return'lolaArr';
+		}
+	}
+}
+
+
+/////////////////////
+/// ARRAY METHODS ///
+/////////////////////
+const movieList = {
+	addMovie: function(movieData) {
+		movieArrays[movieData.array].push(movieData);
+	},
+
+	deleteMovie: function(array, id) {
+		const index = movieArrays[array].findIndex(ele => ele._id === id);
+
+		movieArrays[array].splice(index, 1);
+	},
+
+	approveMovie: function(array, id) {
+		const index = movieArrays[array].findIndex(ele => ele._id === id);
+		const movie = movieArrays[array][index];
+
+		movie.approved = !movie.approved;
+
+		return movie;
+	},
+	
+	updateMovie: function(movieToUpdate, movieDetails, videos) {
+		const tempVids = videos.map(video => `${videoPath}/${video.key}`);
+		const movieIdx = movieArrays[movieToUpdate.array].findIndex(ele => ele._id === movieToUpdate._id);
+
+		movieToUpdate = {...movieToUpdate,
+			title: movieDetails.title, 
+			hasInfo: true,
+			summary: movieDetails.overview,
+			posterPath: `${imagePath}${movieDetails.poster_path}`,
+			videoPaths: tempVids
+		}
+
+		movieArrays[movieToUpdate.array][movieIdx] = movieToUpdate;
+
+		return movieToUpdate;
+	}
+}
+
+
+////////////////
+/// HANDLERS ///
+////////////////
+const handlers = {
+	inputButtonClick: function() {
+		const inputDanny = document.getElementById('inputDanny');
+		const inputLola = document.getElementById('inputLola');
+		let movieTitle;
+		let array;
+		let userUL;
+
+		if(this.id === 'btnDanny') {
+			movieTitle = inputDanny.value;
+			userUL = document.getElementById('listDanny');
+			array = 'dannyArr';
+			inputDanny.value = '';
+		} else if(this.id === 'btnLola') {
+			movieTitle = inputLola.value;
+			userUL = document.getElementById('listLola');
+			array = 'lolaArr';
+			inputLola.value = '';
+		}
+
+		myAPI.addMovie(movieTitle, array).then(response => {
+			movieList.addMovie(response);
+			view.displayMovies(userUL)
+		});
+	},
+
+	inputPressEnter: function(e) {
+		if(e.keyCode !== 13) {return}
+		
+		const movieTitle = this.value;
+		let array;
+		let userUL;
+
+		if(this.id === 'inputDanny') {
+			userUL = document.getElementById('listDanny');
+			array = 'dannyArr';
+		} else if(this.id === 'inputLola') {
+			userUL = document.getElementById('listLola');
+			array = 'lolaArr';
+		}
+
+		this.value = '';
+
+		myAPI.addMovie(movieTitle, array).then(response => {
+			movieList.addMovie(response);
+			view.displayMovies(userUL);
+		});
+	},
+
+	listButtonsHandler: function(e) {
+		if(e.target.tagName !== 'BUTTON' && e.target.tagName !== 'LI') {return}
+
+		const id = e.target.parentNode.dataset.id;
+		const userUL = this;
+		const array = helpers.getArray(this.id);
+
+		if(e.target.tagName === 'LI') {
+			if(e.target.dataset.movie_info === 'false') {
+				handlers.openMovieModal(e.target)
+			}else if(e.target.dataset.movie_info === 'true') {
+				handlers.openTrailerModal(array, e.target.dataset.id);
+			}
+		}else if(e.target.className === 'btnDelete') {
+			myAPI.deleteMovie(array, id).then(response => {
+				movieList.deleteMovie(array, id);
+				view.displayMovies(userUL);
+			});	
+		}else if(e.target.className === 'btnApprove' || e.target.className === 'btnApprove js-approve') {
+			let movieApproved = movieList.approveMovie(array, id);
+			myAPI.approveMovie(movieApproved).then(() => {
+				view.displayMovies(userUL);	
+			});	
+		}
+	},
+
+	openMovieModal: function(target) {
+		const movieModal = document.getElementById('movie_modal');
+		const movieId = target.dataset.id;
+		const array = helpers.getArray(target.parentNode.id);	
+		const movieTitle = movieArrays[array].find(ele => ele._id === movieId).title;
+
+		movieModal.style.display = 'block';
+
+		// Bound function in event listener creates separate reference each time
+		// Create new property on handlers as a stable reference for removeEventHandler
+		handlers.tempHandleModals = handlers.handleModals.bind(target);
+		movieModal.addEventListener('click', handlers.tempHandleModals);
+
+		tmdbAPI.getMovies(movieTitle).then(movieResults => {
+			movieArrays.searchedMovies = [...movieResults];
+			view.displayMovieResults(movieArrays.searchedMovies);
+		});
+	},
+
+	handleModals: function(e) {
+		if(e.target.className === 'close_modal' || e.target.className === 'close_modal-span') {
+			handlers.closeModals();
+		}else if(e.target.dataset.movie_id) {
+			handlers.chooseMovie(e.target.dataset.movie_id, this);
+		}
+	},
+
+	closeModals: function() {
+		const movieModal = document.getElementById('movie_modal');
+		const trailerModal = document.getElementById('trailer_modal');
+		const innerTrailer = document.getElementById('movie_trailer-inner');
+		const h2 = innerTrailer.querySelector('h2');
+		const youtubePlayer = document.getElementById('player');
+
+		movieModal.removeEventListener('click', handlers.tempHandleModals);
+		trailerModal.removeEventListener('click', handlers.handleModals);
+
+		if(h2) {innerTrailer.removeChild(h2)};
+		movieArrays.searchedMovies = [];
+		youtubePlayer.style.display = 'inline-block';
+		youtubePlayer.src = "";
+		movieModal.style.display = 'none';
+		trailerModal.style.display = 'none';
+	},
+
+	chooseMovie: function(movieID, listItem) {
+		const array = helpers.getArray(listItem.parentNode.id);
+		const movieToUpdate = movieArrays[array].find(movie => movie._id === listItem.dataset.id);
+
+		tmdbAPI.getMovieDetails(movieID).then(details => {
+			tmdbAPI.getMovieVideos(details.id).then(videos => {
+				const updatedMovie = movieList.updateMovie(movieToUpdate, details, videos.results);
+
+				listItem.dataset.movie_info = 'true';
+				myAPI.updateMovie(updatedMovie).then(response => {
+					handlers.closeModals();
+					view.displayMovies(listItem.parentNode);
+				});
+			});
+		});
+	},
+
+	openTrailerModal: function(array, movieID) {
+		const trailerModal = document.getElementById('trailer_modal');
+		const innerTrailer = document.getElementById('movie_trailer-inner');
+		const youtubePlayer = document.getElementById('player');
+
+		trailerModal.addEventListener('click', handlers.handleModals);
+		trailer_modal.style.display = 'flex';
+
+		const movie = movieArrays[array].find(movie => movie._id === movieID);
+		if(movie.videoPaths.length === 0) {
+			youtubePlayer.style.display = 'none';
+
+			let newTag = document.createElement('h2');
+			let newText = document.createTextNode('No trailer found for this movie!');
+			newTag.style.color = 'white';
+			newTag.appendChild(newText);
+			innerTrailer.insertBefore(newTag, youtubePlayer);
+		}else {
+			youtubePlayer.src = `${movie.videoPaths[0]}?origin=${location.origin}`;
+		}
+	}
+}
+
+////////////
+/// VIEW ///
+////////////
+const view = {
+	displayMovies: function(userUL) {
+		const array = helpers.getArray(userUL.id);
+
+		userUL.innerHTML = movieArrays[array].map(movie => {
+			let hasInfo;
+			movie.hasInfo ? hasInfo = 'true' : hasInfo = 'false';
+
+			return `
+				<li class='itemClass' data-movie_info=${hasInfo} data-id=${movie._id}>
+					${movie.title}
+					<button class='btnApprove'>\u2713</button>
+					<button class='btnDelete'>\u2717</button>
+				</li>
+			`;
+		}).join('');
+
+		view.displayApproved(userUL);
+	},
+
+	displayApproved: function(userUL) {
+		const array = helpers.getArray(userUL.id);
+
+		movieArrays[array].forEach((movie, index) => {
+			if(movie.approved) {
+				const movieLiToApprove = userUL.querySelector(`li[data-id='${movie._id}']`);
+				const movieButtonToApprove = movieLiToApprove.children[0];
+
+				movieLiToApprove.classList.toggle('js-approve');
+				movieButtonToApprove.classList.toggle('js-approve');
+			}	
+		});
+	},
+
+	displayMovieResults: function(movieArray) {
+		const movieList = document.getElementById('movie_modal-list');
+
+		if(movieArray.length === 0) {
+			return movieList.innerHTML = `<li>No results for that search</li>`;
+		}
+
+		movieList.innerHTML = movieArray.map(movie => {
+			let posterPath, year;
+			movie.poster_path ? posterPath = imagePath + movie.poster_path : posterPath = '';
+			movie.release_date ? year = movie.release_date.split('-')[0] : year = '';
+
+			return `
+				<li class='movie_modal-movie'>
+					<img src='${posterPath}' alt='missing movie poster'/>
+					<div>
+						<p>${movie.title} - ${year}</p>
+						<p>${movie.overview}</p>
+					</div>
+					<button data-movie_id=${movie.id}>Choose</button>
+				</li>
+			`
+		}).join('');
+	}
+}
+
+
+///////////////////////
+/// EVENT LISTENERS ///
+///////////////////////
+const events = {
+	listeners: function() {
+		const inputButtons = document.querySelectorAll('.btnContainer button');
+		const inputs = Array.from(document.getElementsByClassName('input'));
+		const usersUL = document.querySelectorAll('ul');
+
+		inputButtons.forEach(btn => btn.addEventListener('click', handlers.inputButtonClick));
+		inputs.forEach(input => input.addEventListener('keypress', handlers.inputPressEnter));
+		usersUL.forEach(ul => ul.addEventListener('click', handlers.listButtonsHandler));
+	}	
+}
+
+
+///////////////
+/// ON LOAD ///
+///////////////
+window.onload = function() {
+	myAPI.getMovies()
+		.then(response => {
+			movieArrays.allMovies = [...response];
+			movieArrays.dannyArr = movieArrays.allMovies.filter(movie => movie.array === 'dannyArr');
+			movieArrays.lolaArr = movieArrays.allMovies.filter(movie => movie.array === 'lolaArr');
+			view.displayMovies(document.getElementById('listDanny'));
+			view.displayMovies(document.getElementById('listLola'));
+			events.listeners();
+		});
+}
+	
+},{"./myAPI":4,"./tmdbAPI":6}],6:[function(require,module,exports){
+(function (process){
+require('dotenv').config();
+const axios = require('axios');
+const KEY = process.env.APIKEY;
+const TMDBURL = 'https://api.themoviedb.org/3';
+
+//////////////////////////
+/// TMDB API REQUESTS ///
+//////////////////////////
+const tmdbRequests = {
+	getMovies: async function(query) {
+		try {
+			const response = await axios.get(`${TMDBURL}/search/movie?api_key=${KEY}&language=en-US&query=${query}&page=1&include_adult=false`);
+			if(response.statusText === 'OK') {
+				return response.data.results;
+			}
+		}catch(err) {
+			if(err.response) {
+				console.log(err.response);
+			}else {
+				console.log(err);	
+			}
+		}
+	},
+
+	getMovieDetails: async function(id) {
+		try {
+			const response = await axios.get(`${TMDBURL}/movie/${id}?api_key=${KEY}&language=en-US`);
+			if(response.statusText === 'OK') {
+				return response.data;
+			}
+		}catch(err) {
+			if(err.response) {
+				console.log(err.response);
+			}else {
+				console.log(err);	
+			}
+		}
+	},
+
+	getMovieVideos: async function(id) {
+		try {
+			const response = await axios.get(`${TMDBURL}/movie/${id}/videos?api_key=${KEY}&language=en-US`);
+			if(response.statusText === 'OK') {
+				return response.data;
+			}
+		}catch(err) {
+			if(err.response) {
+				console.log(err.response);
+			}else {
+				console.log(err);	
+			}
+		}
+	}
+}
+
+module.exports = tmdbRequests;
+}).call(this,require('_process'))
+},{"_process":3,"axios":7,"dotenv":33}],7:[function(require,module,exports){
 module.exports = require('./lib/axios');
-},{"./lib/axios":6}],5:[function(require,module,exports){
+},{"./lib/axios":9}],8:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -467,7 +1162,7 @@ module.exports = function xhrAdapter(config) {
   });
 };
 
-},{"../core/buildFullPath":12,"../core/createError":13,"./../core/settle":17,"./../helpers/buildURL":21,"./../helpers/cookies":23,"./../helpers/isURLSameOrigin":25,"./../helpers/parseHeaders":27,"./../utils":29}],6:[function(require,module,exports){
+},{"../core/buildFullPath":15,"../core/createError":16,"./../core/settle":20,"./../helpers/buildURL":24,"./../helpers/cookies":26,"./../helpers/isURLSameOrigin":28,"./../helpers/parseHeaders":30,"./../utils":32}],9:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -522,7 +1217,7 @@ module.exports = axios;
 // Allow use of default import syntax in TypeScript
 module.exports.default = axios;
 
-},{"./cancel/Cancel":7,"./cancel/CancelToken":8,"./cancel/isCancel":9,"./core/Axios":10,"./core/mergeConfig":16,"./defaults":19,"./helpers/bind":20,"./helpers/spread":28,"./utils":29}],7:[function(require,module,exports){
+},{"./cancel/Cancel":10,"./cancel/CancelToken":11,"./cancel/isCancel":12,"./core/Axios":13,"./core/mergeConfig":19,"./defaults":22,"./helpers/bind":23,"./helpers/spread":31,"./utils":32}],10:[function(require,module,exports){
 'use strict';
 
 /**
@@ -543,7 +1238,7 @@ Cancel.prototype.__CANCEL__ = true;
 
 module.exports = Cancel;
 
-},{}],8:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 var Cancel = require('./Cancel');
@@ -602,14 +1297,14 @@ CancelToken.source = function source() {
 
 module.exports = CancelToken;
 
-},{"./Cancel":7}],9:[function(require,module,exports){
+},{"./Cancel":10}],12:[function(require,module,exports){
 'use strict';
 
 module.exports = function isCancel(value) {
   return !!(value && value.__CANCEL__);
 };
 
-},{}],10:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -705,7 +1400,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = Axios;
 
-},{"../helpers/buildURL":21,"./../utils":29,"./InterceptorManager":11,"./dispatchRequest":14,"./mergeConfig":16}],11:[function(require,module,exports){
+},{"../helpers/buildURL":24,"./../utils":32,"./InterceptorManager":14,"./dispatchRequest":17,"./mergeConfig":19}],14:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -759,7 +1454,7 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 
 module.exports = InterceptorManager;
 
-},{"./../utils":29}],12:[function(require,module,exports){
+},{"./../utils":32}],15:[function(require,module,exports){
 'use strict';
 
 var isAbsoluteURL = require('../helpers/isAbsoluteURL');
@@ -781,7 +1476,7 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
   return requestedURL;
 };
 
-},{"../helpers/combineURLs":22,"../helpers/isAbsoluteURL":24}],13:[function(require,module,exports){
+},{"../helpers/combineURLs":25,"../helpers/isAbsoluteURL":27}],16:[function(require,module,exports){
 'use strict';
 
 var enhanceError = require('./enhanceError');
@@ -801,7 +1496,7 @@ module.exports = function createError(message, config, code, request, response) 
   return enhanceError(error, config, code, request, response);
 };
 
-},{"./enhanceError":15}],14:[function(require,module,exports){
+},{"./enhanceError":18}],17:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -882,7 +1577,7 @@ module.exports = function dispatchRequest(config) {
   });
 };
 
-},{"../cancel/isCancel":9,"../defaults":19,"./../utils":29,"./transformData":18}],15:[function(require,module,exports){
+},{"../cancel/isCancel":12,"../defaults":22,"./../utils":32,"./transformData":21}],18:[function(require,module,exports){
 'use strict';
 
 /**
@@ -926,7 +1621,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
   return error;
 };
 
-},{}],16:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -1001,7 +1696,7 @@ module.exports = function mergeConfig(config1, config2) {
   return config;
 };
 
-},{"../utils":29}],17:[function(require,module,exports){
+},{"../utils":32}],20:[function(require,module,exports){
 'use strict';
 
 var createError = require('./createError');
@@ -1028,7 +1723,7 @@ module.exports = function settle(resolve, reject, response) {
   }
 };
 
-},{"./createError":13}],18:[function(require,module,exports){
+},{"./createError":16}],21:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1050,7 +1745,7 @@ module.exports = function transformData(data, headers, fns) {
   return data;
 };
 
-},{"./../utils":29}],19:[function(require,module,exports){
+},{"./../utils":32}],22:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -1151,7 +1846,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 module.exports = defaults;
 
 }).call(this,require('_process'))
-},{"./adapters/http":5,"./adapters/xhr":5,"./helpers/normalizeHeaderName":26,"./utils":29,"_process":1}],20:[function(require,module,exports){
+},{"./adapters/http":8,"./adapters/xhr":8,"./helpers/normalizeHeaderName":29,"./utils":32,"_process":3}],23:[function(require,module,exports){
 'use strict';
 
 module.exports = function bind(fn, thisArg) {
@@ -1164,7 +1859,7 @@ module.exports = function bind(fn, thisArg) {
   };
 };
 
-},{}],21:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1237,7 +1932,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
   return url;
 };
 
-},{"./../utils":29}],22:[function(require,module,exports){
+},{"./../utils":32}],25:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1253,7 +1948,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
     : baseURL;
 };
 
-},{}],23:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1308,7 +2003,7 @@ module.exports = (
     })()
 );
 
-},{"./../utils":29}],24:[function(require,module,exports){
+},{"./../utils":32}],27:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1324,7 +2019,7 @@ module.exports = function isAbsoluteURL(url) {
   return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
 };
 
-},{}],25:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1394,7 +2089,7 @@ module.exports = (
     })()
 );
 
-},{"./../utils":29}],26:[function(require,module,exports){
+},{"./../utils":32}],29:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -1408,7 +2103,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
   });
 };
 
-},{"../utils":29}],27:[function(require,module,exports){
+},{"../utils":32}],30:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1463,7 +2158,7 @@ module.exports = function parseHeaders(headers) {
   return parsed;
 };
 
-},{"./../utils":29}],28:[function(require,module,exports){
+},{"./../utils":32}],31:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1492,7 +2187,7 @@ module.exports = function spread(callback) {
   };
 };
 
-},{}],29:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 'use strict';
 
 var bind = require('./helpers/bind');
@@ -1838,392 +2533,121 @@ module.exports = {
   trim: trim
 };
 
-},{"./helpers/bind":20}],30:[function(require,module,exports){
-const myAPI = require('./myAPI');
-const tmdbAPI = require('./tmdbAPI');
-const imagePath = 'https://image.tmdb.org/t/p/w185';
-const videoPath = 'https://www.youtube.com/embed';
+},{"./helpers/bind":23}],33:[function(require,module,exports){
+(function (process){
+/* @flow */
+/*::
 
-
-//////////////
-/// ARRAYS ///
-//////////////
-const movieArrays = {
-	dannyArr: [],
-	lolaArr: [],
-	allMovies: [],
-	searchedMovies: []
+type DotenvParseOptions = {
+  debug?: boolean
 }
 
+// keys and values from src
+type DotenvParseOutput = { [string]: string }
 
-///////////////
-/// HELPERS ///
-///////////////
-const helpers = {
-	getArray: function(userUL) {
-		if(userUL === 'listDanny') {
-			return 'dannyArr';
-		}else if(userUL === 'listLola') {
-			return'lolaArr';
-		}
-	}
+type DotenvConfigOptions = {
+  path?: string, // path to .env file
+  encoding?: string, // encoding of .env file
+  debug?: string // turn on logging for debugging purposes
 }
 
-
-/////////////////////
-/// ARRAY METHODS ///
-/////////////////////
-const movieList = {
-	addMovie: function(movieData) {
-		movieArrays[movieData.array].push(movieData);
-	},
-
-	deleteMovie: function(array, id) {
-		const index = movieArrays[array].findIndex(ele => ele._id === id);
-
-		movieArrays[array].splice(index, 1);
-	},
-
-	approveMovie: function(array, id) {
-		const index = movieArrays[array].findIndex(ele => ele._id === id);
-		const movie = movieArrays[array][index];
-
-		movie.approved = !movie.approved;
-
-		return movie;
-	},
-	
-	updateMovie: function(movieToUpdate, movieDetails, videos) {
-		const tempVids = videos.map(video => `${videoPath}/${video.key}`);
-		const movieIdx = movieArrays[movieToUpdate.array].findIndex(ele => ele._id === movieToUpdate._id);
-
-		movieToUpdate = {...movieToUpdate,
-			title: movieDetails.title, 
-			hasInfo: true,
-			summary: movieDetails.overview,
-			posterPath: `${imagePath}${movieDetails.poster_path}`,
-			videoPaths: tempVids
-		}
-
-		movieArrays[movieToUpdate.array][movieIdx] = movieToUpdate;
-
-		return movieToUpdate;
-	}
+type DotenvConfigOutput = {
+  parsed?: DotenvParseOutput,
+  error?: Error
 }
 
+*/
 
-////////////////
-/// HANDLERS ///
-////////////////
-const handlers = {
-	inputButtonClick: function() {
-		const inputDanny = document.getElementById('inputDanny');
-		const inputLola = document.getElementById('inputLola');
-		let movieTitle;
-		let array;
-		let userUL;
+const fs = require('fs')
+const path = require('path')
 
-		if(this.id === 'btnDanny') {
-			movieTitle = inputDanny.value;
-			userUL = document.getElementById('listDanny');
-			array = 'dannyArr';
-			inputDanny.value = '';
-		} else if(this.id === 'btnLola') {
-			movieTitle = inputLola.value;
-			userUL = document.getElementById('listLola');
-			array = 'lolaArr';
-			inputLola.value = '';
-		}
-
-		myAPI.addMovie(movieTitle, array).then(response => {
-			movieList.addMovie(response);
-			view.displayMovies(userUL)
-		});
-	},
-
-	inputPressEnter: function(e) {
-		if(e.keyCode !== 13) {return}
-		
-		const movieTitle = this.value;
-		let array;
-		let userUL;
-
-		if(this.id === 'inputDanny') {
-			userUL = document.getElementById('listDanny');
-			array = 'dannyArr';
-		} else if(this.id === 'inputLola') {
-			userUL = document.getElementById('listLola');
-			array = 'lolaArr';
-		}
-
-		this.value = '';
-
-		myAPI.addMovie(movieTitle, array).then(response => {
-			movieList.addMovie(response);
-			view.displayMovies(userUL);
-		});
-	},
-
-	listButtonsHandler: function(e) {
-		if(e.target.tagName !== 'BUTTON' && e.target.tagName !== 'LI') {return}
-
-		const id = e.target.parentNode.dataset.id;
-		const userUL = this;
-		const array = helpers.getArray(this.id);
-
-		if(e.target.tagName === 'LI') {
-			if(e.target.dataset.movie_info === 'false') {
-				handlers.openMovieModal(e.target)
-			}else if(e.target.dataset.movie_info === 'true') {
-				handlers.openTrailerModal(array, e.target.dataset.id);
-			}
-		}else if(e.target.className === 'btnDelete') {
-			myAPI.deleteMovie(array, id).then(response => {
-				movieList.deleteMovie(array, id);
-				view.displayMovies(userUL);
-			});	
-		}else if(e.target.className === 'btnApprove' || e.target.className === 'btnApprove js-approve') {
-			let movieApproved = movieList.approveMovie(array, id);
-			myAPI.approveMovie(movieApproved).then(() => {
-				view.displayMovies(userUL);	
-			});	
-		}
-	},
-
-	openMovieModal: function(target) {
-		const movieModal = document.getElementById('movie_modal');
-		const movieId = target.dataset.id;
-		const array = helpers.getArray(target.parentNode.id);	
-		const movieTitle = movieArrays[array].find(ele => ele._id === movieId).title;
-
-		movieModal.style.display = 'block';
-
-		// Bound function in event listener creates separate reference each time
-		// Create new property on handlers as a stable reference for removeEventHandler
-		handlers.tempHandleModals = handlers.handleModals.bind(target);
-		movieModal.addEventListener('click', handlers.tempHandleModals);
-
-		tmdbAPI.getMovies(movieTitle).then(movieResults => {
-			movieArrays.searchedMovies = [...movieResults];
-			view.displayMovieResults(movieArrays.searchedMovies);
-		});
-	},
-
-	handleModals: function(e) {
-		if(e.target.className === 'close_modal' || e.target.className === 'close_modal-span') {
-			handlers.closeModals();
-		}else if(e.target.dataset.movie_id) {
-			handlers.chooseMovie(e.target.dataset.movie_id, this);
-		}
-	},
-
-	closeModals: function() {
-		const movieModal = document.getElementById('movie_modal');
-		const trailerModal = document.getElementById('trailer_modal');
-		const innerTrailer = document.getElementById('movie_trailer-inner');
-		const h2 = innerTrailer.querySelector('h2');
-		const youtubePlayer = document.getElementById('player');
-
-		movieModal.removeEventListener('click', handlers.tempHandleModals);
-		trailerModal.removeEventListener('click', handlers.handleModals);
-
-		if(h2) {innerTrailer.removeChild(h2)};
-		movieArrays.searchedMovies = [];
-		youtubePlayer.style.display = 'inline-block';
-		youtubePlayer.src = "";
-		movieModal.style.display = 'none';
-		trailerModal.style.display = 'none';
-	},
-
-	chooseMovie: function(movieID, listItem) {
-		const array = helpers.getArray(listItem.parentNode.id);
-		const movieToUpdate = movieArrays[array].find(movie => movie._id === listItem.dataset.id);
-
-		tmdbAPI.getMovieDetails(movieID).then(details => {
-			tmdbAPI.getMovieVideos(details.id).then(videos => {
-				const updatedMovie = movieList.updateMovie(movieToUpdate, details, videos.results);
-
-				listItem.dataset.movie_info = 'true';
-				myAPI.updateMovie(updatedMovie).then(response => {
-					handlers.closeModals();
-					view.displayMovies(listItem.parentNode);
-				});
-			});
-		});
-	},
-
-	openTrailerModal: function(array, movieID) {
-		const trailerModal = document.getElementById('trailer_modal');
-		const innerTrailer = document.getElementById('movie_trailer-inner');
-		const youtubePlayer = document.getElementById('player');
-
-		trailerModal.addEventListener('click', handlers.handleModals);
-		trailer_modal.style.display = 'flex';
-
-		const movie = movieArrays[array].find(movie => movie._id === movieID);
-		if(movie.videoPaths.length === 0) {
-			youtubePlayer.style.display = 'none';
-
-			let newTag = document.createElement('h2');
-			let newText = document.createTextNode('No trailer found for this movie!');
-			newTag.style.color = 'white';
-			newTag.appendChild(newText);
-			innerTrailer.insertBefore(newTag, youtubePlayer);
-		}else {
-			youtubePlayer.src = `${movie.videoPaths[0]}?origin=${location.origin}`;
-		}
-	}
+function log (message /*: string */) {
+  console.log(`[dotenv][DEBUG] ${message}`)
 }
 
-////////////
-/// VIEW ///
-////////////
-const view = {
-	displayMovies: function(userUL) {
-		const array = helpers.getArray(userUL.id);
+const NEWLINE = '\n'
+const RE_INI_KEY_VAL = /^\s*([\w.-]+)\s*=\s*(.*)?\s*$/
+const RE_NEWLINES = /\\n/g
+const NEWLINES_MATCH = /\n|\r|\r\n/
 
-		userUL.innerHTML = movieArrays[array].map(movie => {
-			let hasInfo;
-			movie.hasInfo ? hasInfo = 'true' : hasInfo = 'false';
+// Parses src into an Object
+function parse (src /*: string | Buffer */, options /*: ?DotenvParseOptions */) /*: DotenvParseOutput */ {
+  const debug = Boolean(options && options.debug)
+  const obj = {}
 
-			return `
-				<li class='itemClass' data-movie_info=${hasInfo} data-id=${movie._id}>
-					${movie.title}
-					<button class='btnApprove'>\u2713</button>
-					<button class='btnDelete'>\u2717</button>
-				</li>
-			`;
-		}).join('');
+  // convert Buffers before splitting into lines and processing
+  src.toString().split(NEWLINES_MATCH).forEach(function (line, idx) {
+    // matching "KEY' and 'VAL' in 'KEY=VAL'
+    const keyValueArr = line.match(RE_INI_KEY_VAL)
+    // matched?
+    if (keyValueArr != null) {
+      const key = keyValueArr[1]
+      // default undefined or missing values to empty string
+      let val = (keyValueArr[2] || '')
+      const end = val.length - 1
+      const isDoubleQuoted = val[0] === '"' && val[end] === '"'
+      const isSingleQuoted = val[0] === "'" && val[end] === "'"
 
-		view.displayApproved(userUL);
-	},
+      // if single or double quoted, remove quotes
+      if (isSingleQuoted || isDoubleQuoted) {
+        val = val.substring(1, end)
 
-	displayApproved: function(userUL) {
-		const array = helpers.getArray(userUL.id);
+        // if double quoted, expand newlines
+        if (isDoubleQuoted) {
+          val = val.replace(RE_NEWLINES, NEWLINE)
+        }
+      } else {
+        // remove surrounding whitespace
+        val = val.trim()
+      }
 
-		movieArrays[array].forEach((movie, index) => {
-			if(movie.approved) {
-				const movieLiToApprove = userUL.querySelector(`li[data-id='${movie._id}']`);
-				const movieButtonToApprove = movieLiToApprove.children[0];
+      obj[key] = val
+    } else if (debug) {
+      log(`did not match key and value when parsing line ${idx + 1}: ${line}`)
+    }
+  })
 
-				movieLiToApprove.classList.toggle('js-approve');
-				movieButtonToApprove.classList.toggle('js-approve');
-			}	
-		});
-	},
-
-	displayMovieResults: function(movieArray) {
-		const movieList = document.getElementById('movie_modal-list');
-
-		if(movieArray.length === 0) {
-			return movieList.innerHTML = `<li>No results for that search</li>`;
-		}
-
-		movieList.innerHTML = movieArray.map(movie => {
-			let posterPath, year;
-			movie.poster_path ? posterPath = imagePath + movie.poster_path : posterPath = '';
-			movie.release_date ? year = movie.release_date.split('-')[0] : year = '';
-
-			return `
-				<li class='movie_modal-movie'>
-					<img src='${posterPath}' alt='missing movie poster'/>
-					<div>
-						<p>${movie.title} - ${year}</p>
-						<p>${movie.overview}</p>
-					</div>
-					<button data-movie_id=${movie.id}>Choose</button>
-				</li>
-			`
-		}).join('');
-	}
+  return obj
 }
 
+// Populates process.env from .env file
+function config (options /*: ?DotenvConfigOptions */) /*: DotenvConfigOutput */ {
+  let dotenvPath = path.resolve(process.cwd(), '.env')
+  let encoding /*: string */ = 'utf8'
+  let debug = false
 
-///////////////////////
-/// EVENT LISTENERS ///
-///////////////////////
-const events = {
-	listeners: function() {
-		const inputButtons = document.querySelectorAll('.btnContainer button');
-		const inputs = Array.from(document.getElementsByClassName('input'));
-		const usersUL = document.querySelectorAll('ul');
+  if (options) {
+    if (options.path != null) {
+      dotenvPath = options.path
+    }
+    if (options.encoding != null) {
+      encoding = options.encoding
+    }
+    if (options.debug != null) {
+      debug = true
+    }
+  }
 
-		inputButtons.forEach(btn => btn.addEventListener('click', handlers.inputButtonClick));
-		inputs.forEach(input => input.addEventListener('keypress', handlers.inputPressEnter));
-		usersUL.forEach(ul => ul.addEventListener('click', handlers.listButtonsHandler));
-	}	
+  try {
+    // specifying an encoding returns a string instead of a buffer
+    const parsed = parse(fs.readFileSync(dotenvPath, { encoding }), { debug })
+
+    Object.keys(parsed).forEach(function (key) {
+      if (!Object.prototype.hasOwnProperty.call(process.env, key)) {
+        process.env[key] = parsed[key]
+      } else if (debug) {
+        log(`"${key}" is already defined in \`process.env\` and will not be overwritten`)
+      }
+    })
+
+    return { parsed }
+  } catch (e) {
+    return { error: e }
+  }
 }
 
+module.exports.config = config
+module.exports.parse = parse
 
-///////////////
-/// ON LOAD ///
-///////////////
-window.onload = function() {
-	myAPI.getMovies()
-		.then(response => {
-			movieArrays.allMovies = [...response];
-			movieArrays.dannyArr = movieArrays.allMovies.filter(movie => movie.array === 'dannyArr');
-			movieArrays.lolaArr = movieArrays.allMovies.filter(movie => movie.array === 'lolaArr');
-			view.displayMovies(document.getElementById('listDanny'));
-			view.displayMovies(document.getElementById('listLola'));
-			events.listeners();
-		});
-}
-	
-},{"./myAPI":3,"./tmdbAPI":31}],31:[function(require,module,exports){
-const axios = require('axios');
-const KEY = require('./apiKey');
-const TMDBURL = 'https://api.themoviedb.org/3';
-
-//////////////////////////
-/// TMDB API REQUESTS ///
-//////////////////////////
-const tmdbRequests = {
-	getMovies: async function(query) {
-		try {
-			const response = await axios.get(`${TMDBURL}/search/movie?api_key=${KEY}&language=en-US&query=${query}&page=1&include_adult=false`);
-			if(response.statusText === 'OK') {
-				return response.data.results;
-			}
-		}catch(err) {
-			if(err.response) {
-				console.log(err.response);
-			}else {
-				console.log(err);	
-			}
-		}
-	},
-
-	getMovieDetails: async function(id) {
-		try {
-			const response = await axios.get(`${TMDBURL}/movie/${id}?api_key=${KEY}&language=en-US`);
-			if(response.statusText === 'OK') {
-				return response.data;
-			}
-		}catch(err) {
-			if(err.response) {
-				console.log(err.response);
-			}else {
-				console.log(err);	
-			}
-		}
-	},
-
-	getMovieVideos: async function(id) {
-		try {
-			const response = await axios.get(`${TMDBURL}/movie/${id}/videos?api_key=${KEY}&language=en-US`);
-			if(response.statusText === 'OK') {
-				return response.data;
-			}
-		}catch(err) {
-			if(err.response) {
-				console.log(err.response);
-			}else {
-				console.log(err);	
-			}
-		}
-	}
-}
-
-module.exports = tmdbRequests;
-},{"./apiKey":2,"axios":4}]},{},[30]);
+}).call(this,require('_process'))
+},{"_process":3,"fs":1,"path":2}]},{},[5]);
