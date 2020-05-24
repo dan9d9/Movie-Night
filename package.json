@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node ./server/server.js",
     "build": "browserify ./client/script.js > ./client/bundle.js",
-    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install npm && run build"
+    "heroku-postbuild": "npm run build"
   },
   "repository": {
     "type": "git",
