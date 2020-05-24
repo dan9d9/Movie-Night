@@ -2,7 +2,7 @@
   "name": "movies-to-watch-list",
   "version": "1.0.0",
   "description": "Basically a to-do list repurposed for saving movies to watch later.",
-  "main": "./client/script.js",
+  "main": "./server/server.js",
   "scripts": {
     "start": "node ./server/server.js"
   },
