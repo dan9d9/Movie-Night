@@ -5,8 +5,7 @@
   "main": "./client/bundle.js",
   "scripts": {
     "start": "node ./server/server.js",
-    "build": "browserify ./client/script.js > ./client/bundle.js",
-    "heroku-postbuild": "browserify ./client/script.js > ./client/bundle.js"
+    "build": "browserify ./client/script.js > ./client/bundle.js"
   },
   "repository": {
     "type": "git",
