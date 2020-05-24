@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
+const path = require('path');
 require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -17,7 +18,8 @@ const cors = require('cors');
 app.use(cors());
 
 // ROUTES
-app.use(express.static("client"));
+app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, '../client')));
 app.use('/movies', require('./routes/movies_routes.js'));
 app.use('/users', require('./routes/users_routes.js'));
 

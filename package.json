@@ -2,9 +2,9 @@
   "name": "movies-to-watch-list",
   "version": "1.0.0",
   "description": "Basically a to-do list repurposed for saving movies to watch later.",
-  "main": "./server/server.js",
+  "main": "./server/index.js",
   "scripts": {
-    "start": "node ./server/server.js"
+    "start": "node ./server/index.js"
   },
   "repository": {
     "type": "git",
