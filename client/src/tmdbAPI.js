@@ -1,6 +1,6 @@
 require('dotenv').config();
 const axios = require('axios');
-const KEY = process.env.APIKEY;
+const APIKEY = require('../config');
 const TMDBURL = 'https://api.themoviedb.org/3';
 
 //////////////////////////
@@ -9,7 +9,7 @@ const TMDBURL = 'https://api.themoviedb.org/3';
 const tmdbRequests = {
 	getMovies: async function(query) {
 		try {
-			const response = await axios.get(`${TMDBURL}/search/movie?api_key=${KEY}&language=en-US&query=${query}&page=1&include_adult=false`);
+			const response = await axios.get(`${TMDBURL}/search/movie?api_key=${APIKEY}&language=en-US&query=${query}&page=1&include_adult=false`);
 			if(response.statusText === 'OK') {
 				return response.data.results;
 			}
@@ -24,7 +24,7 @@ const tmdbRequests = {
 
 	getMovieDetails: async function(id) {
 		try {
-			const response = await axios.get(`${TMDBURL}/movie/${id}?api_key=${KEY}&language=en-US`);
+			const response = await axios.get(`${TMDBURL}/movie/${id}?api_key=${APIKEY}&language=en-US`);
 			if(response.statusText === 'OK') {
 				return response.data;
 			}
@@ -39,7 +39,7 @@ const tmdbRequests = {
 
 	getMovieVideos: async function(id) {
 		try {
-			const response = await axios.get(`${TMDBURL}/movie/${id}/videos?api_key=${KEY}&language=en-US`);
+			const response = await axios.get(`${TMDBURL}/movie/${id}/videos?api_key=${APIKEY}&language=en-US`);
 			if(response.statusText === 'OK') {
 				return response.data;
 			}

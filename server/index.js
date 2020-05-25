@@ -3,10 +3,10 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const path = require('path');
-require('dotenv').config();
 const app = express();
+const { MONGOATLAS, APIKEY } = require('../config');
+console.log('key, ', APIKEY);
 const PORT = process.env.PORT || 5000;
-const MONGOATLAS = process.env.MONGOATLAS;
 
 // Middlewares
 app.use(helmet());
