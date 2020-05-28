@@ -1,4 +1,5 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+<<<<<<< HEAD
 (function (process){
 const dotenv = require('dotenv');
 dotenv.config();
@@ -271,6 +272,10 @@ const handlers = {
 		// Create new property on handlers as a stable reference for removeEventHandler
 		handlers.tempHandleModals = handlers.handleModals.bind(target);
 		movieModal.addEventListener('click', handlers.tempHandleModals);
+=======
+// shim for using process in browser
+var process = module.exports = {};
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
 		tmdbAPI.getMovies(movieTitle).then(movieResults => {
 			movieArrays.searchedMovies = [...movieResults];
@@ -417,6 +422,7 @@ const events = {
 		const inputs = Array.from(document.getElementsByClassName('input'));
 		const usersUL = document.querySelectorAll('ul');
 
+<<<<<<< HEAD
 		inputButtons.forEach(btn => btn.addEventListener('click', handlers.inputButtonClick));
 		inputs.forEach(input => input.addEventListener('keypress', handlers.inputPressEnter));
 		usersUL.forEach(ul => ul.addEventListener('click', handlers.listButtonsHandler));
@@ -444,6 +450,48 @@ require('dotenv').config();
 const axios = require('axios');
 const APIKEY = require('../config');
 const TMDBURL = 'https://api.themoviedb.org/3';
+=======
+},{}],2:[function(require,module,exports){
+const APIKEY = "ad4a44a2296a174ca3a693f429400547";
+console.log('apikey: ', APIKEY);
+
+module.exports = { APIKEY }
+},{}],3:[function(require,module,exports){
+const URL = window.location.hostname === `localhost`
+            ? `http://localhost:5000`
+            : `http://167.172.102.224`;
+
+module.exports = { 
+  URL
+}
+},{}],4:[function(require,module,exports){
+const axios = require('axios');
+const { URL } = require('../config');
+
+// /////////////////////
+// /// HTTP REQUESTS ///
+// /////////////////////
+const httpRequests = {
+	addMovie: async function(movieTitle, array) {
+		try {
+			const response = await axios.post(`${URL}/movies/new`, {
+				title: movieTitle,
+				array,
+				approved: false
+			});
+			if(response.statusText === 'OK') {
+				return response.data;	
+			}
+		}
+		catch(err) {
+			if(err.response) {
+				console.log('error response: ', err.response);
+			}else {
+				console.log('error: ', err);	
+			}
+		}	
+	}, 
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
 //////////////////////////
 /// TMDB API REQUESTS ///
@@ -451,7 +499,11 @@ const TMDBURL = 'https://api.themoviedb.org/3';
 const tmdbRequests = {
 	getMovies: async function(query) {
 		try {
+<<<<<<< HEAD
 			const response = await axios.get(`${TMDBURL}/search/movie?api_key=${APIKEY}&language=en-US&query=${query}&page=1&include_adult=false`);
+=======
+			const response = await axios.delete(`${URL}/movies/delete/${id}`);
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 			if(response.statusText === 'OK') {
 				return response.data.results;
 			}
@@ -466,7 +518,11 @@ const tmdbRequests = {
 
 	getMovieDetails: async function(id) {
 		try {
+<<<<<<< HEAD
 			const response = await axios.get(`${TMDBURL}/movie/${id}?api_key=${APIKEY}&language=en-US`);
+=======
+			const response = await axios.get(`${URL}/movies`);
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 			if(response.statusText === 'OK') {
 				return response.data;
 			}
@@ -481,7 +537,19 @@ const tmdbRequests = {
 
 	getMovieVideos: async function(id) {
 		try {
+<<<<<<< HEAD
 			const response = await axios.get(`${TMDBURL}/movie/${id}/videos?api_key=${APIKEY}&language=en-US`);
+=======
+			const response = await axios.put(`${URL}/movies/update`, {
+				_id: movie._id,
+				title: movie.title, 
+				hasInfo: movie.hasInfo,
+				summary: movie.summary,
+				posterPath: movie.posterPath,
+				videoPaths: movie.videoPaths
+			});
+
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 			if(response.statusText === 'OK') {
 				return response.data;
 			}
@@ -495,11 +563,88 @@ const tmdbRequests = {
 	}
 }
 
+<<<<<<< HEAD
 module.exports = tmdbRequests;
 },{"../config":1,"axios":5,"dotenv":32}],5:[function(require,module,exports){
 module.exports = require('./lib/axios');
 },{"./lib/axios":7}],6:[function(require,module,exports){
 'use strict';
+=======
+module.exports = httpRequests;
+},{"../config":3,"axios":7}],5:[function(require,module,exports){
+const myAPI = require('./myAPI');
+const tmdbAPI = require('./tmdbAPI');
+const imagePath = 'https://image.tmdb.org/t/p/w185';
+const videoPath = 'https://www.youtube.com/embed';
+
+
+//////////////
+/// ARRAYS ///
+//////////////
+const movieArrays = {
+	dannyArr: [],
+	lolaArr: [],
+	allMovies: [],
+	searchedMovies: []
+}
+
+
+///////////////
+/// HELPERS ///
+///////////////
+const helpers = {
+	getArray: function(userUL) {
+		if(userUL === 'listDanny') {
+			return 'dannyArr';
+		}else if(userUL === 'listLola') {
+			return'lolaArr';
+		}
+	}
+}
+
+
+/////////////////////
+/// ARRAY METHODS ///
+/////////////////////
+const movieList = {
+	addMovie: function(movieData) {
+		movieArrays[movieData.array].push(movieData);
+	},
+
+	deleteMovie: function(array, id) {
+		const index = movieArrays[array].findIndex(ele => ele._id === id);
+
+		movieArrays[array].splice(index, 1);
+	},
+
+	approveMovie: function(array, id) {
+		const index = movieArrays[array].findIndex(ele => ele._id === id);
+		const movie = movieArrays[array][index];
+
+		movie.approved = !movie.approved;
+
+		return movie;
+	},
+	
+	updateMovie: function(movieToUpdate, movieDetails, videos) {
+		const tempVids = videos.map(video => `${videoPath}/${video.key}`);
+		const movieIdx = movieArrays[movieToUpdate.array].findIndex(ele => ele._id === movieToUpdate._id);
+
+		movieToUpdate = {...movieToUpdate,
+			title: movieDetails.title, 
+			hasInfo: true,
+			summary: movieDetails.overview,
+			posterPath: `${imagePath}${movieDetails.poster_path}`,
+			videoPaths: tempVids
+		}
+
+		movieArrays[movieToUpdate.array][movieIdx] = movieToUpdate;
+
+		return movieToUpdate;
+	}
+}
+
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
 var utils = require('./../utils');
 var settle = require('./../core/settle');
@@ -724,11 +869,33 @@ axios.Cancel = require('./cancel/Cancel');
 axios.CancelToken = require('./cancel/CancelToken');
 axios.isCancel = require('./cancel/isCancel');
 
+<<<<<<< HEAD
 // Expose all/spread
 axios.all = function all(promises) {
   return Promise.all(promises);
 };
 axios.spread = require('./helpers/spread');
+=======
+///////////////
+/// ON LOAD ///
+///////////////
+window.onload = function() {
+	myAPI.getMovies()
+		.then(response => {
+			movieArrays.allMovies = [...response];
+			movieArrays.dannyArr = movieArrays.allMovies.filter(movie => movie.array === 'dannyArr');
+			movieArrays.lolaArr = movieArrays.allMovies.filter(movie => movie.array === 'lolaArr');
+			view.displayMovies(document.getElementById('listDanny'));
+			view.displayMovies(document.getElementById('listLola'));
+			events.listeners();
+		});
+}
+	
+},{"./myAPI":4,"./tmdbAPI":6}],6:[function(require,module,exports){
+const axios = require('axios');
+const { APIKEY } = require('../apiConfig');
+const TMDBURL = 'https://api.themoviedb.org/3';
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
 module.exports = axios;
 
@@ -748,6 +915,7 @@ function Cancel(message) {
   this.message = message;
 }
 
+<<<<<<< HEAD
 Cancel.prototype.toString = function toString() {
   return 'Cancel' + (this.message ? ': ' + this.message : '');
 };
@@ -757,6 +925,12 @@ Cancel.prototype.__CANCEL__ = true;
 module.exports = Cancel;
 
 },{}],9:[function(require,module,exports){
+=======
+module.exports = tmdbRequests;
+},{"../apiConfig":2,"axios":7}],7:[function(require,module,exports){
+module.exports = require('./lib/axios');
+},{"./lib/axios":9}],8:[function(require,module,exports){
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 'use strict';
 
 var Cancel = require('./Cancel');
@@ -1014,7 +1188,11 @@ module.exports = function createError(message, config, code, request, response) 
   return enhanceError(error, config, code, request, response);
 };
 
+<<<<<<< HEAD
 },{"./enhanceError":16}],15:[function(require,module,exports){
+=======
+},{"../core/buildFullPath":15,"../core/createError":16,"./../core/settle":20,"./../helpers/buildURL":24,"./../helpers/cookies":26,"./../helpers/isURLSameOrigin":28,"./../helpers/parseHeaders":30,"./../utils":32}],9:[function(require,module,exports){
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 'use strict';
 
 var utils = require('./../utils');
@@ -1095,7 +1273,11 @@ module.exports = function dispatchRequest(config) {
   });
 };
 
+<<<<<<< HEAD
 },{"../cancel/isCancel":10,"../defaults":20,"./../utils":30,"./transformData":19}],16:[function(require,module,exports){
+=======
+},{"./cancel/Cancel":10,"./cancel/CancelToken":11,"./cancel/isCancel":12,"./core/Axios":13,"./core/mergeConfig":19,"./defaults":22,"./helpers/bind":23,"./helpers/spread":31,"./utils":32}],10:[function(require,module,exports){
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 'use strict';
 
 /**
@@ -1139,7 +1321,11 @@ module.exports = function enhanceError(error, config, code, request, response) {
   return error;
 };
 
+<<<<<<< HEAD
 },{}],17:[function(require,module,exports){
+=======
+},{}],11:[function(require,module,exports){
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 'use strict';
 
 var utils = require('../utils');
@@ -1259,12 +1445,29 @@ module.exports = function transformData(data, headers, fns) {
   utils.forEach(fns, function transform(fn) {
     data = fn(data, headers);
   });
+<<<<<<< HEAD
+=======
+  return {
+    token: token,
+    cancel: cancel
+  };
+};
+
+module.exports = CancelToken;
+
+},{"./Cancel":10}],12:[function(require,module,exports){
+'use strict';
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
   return data;
 };
 
+<<<<<<< HEAD
 },{"./../utils":30}],20:[function(require,module,exports){
 (function (process){
+=======
+},{}],13:[function(require,module,exports){
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 'use strict';
 
 var utils = require('./utils');
@@ -1377,7 +1580,11 @@ module.exports = function bind(fn, thisArg) {
   };
 };
 
+<<<<<<< HEAD
 },{}],22:[function(require,module,exports){
+=======
+},{"../helpers/buildURL":24,"./../utils":32,"./InterceptorManager":14,"./dispatchRequest":17,"./mergeConfig":19}],14:[function(require,module,exports){
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 'use strict';
 
 var utils = require('./../utils');
@@ -1447,8 +1654,13 @@ module.exports = function buildURL(url, params, paramsSerializer) {
     url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
   }
 
+<<<<<<< HEAD
   return url;
 };
+=======
+},{"./../utils":32}],15:[function(require,module,exports){
+'use strict';
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
 },{"./../utils":30}],23:[function(require,module,exports){
 'use strict';
@@ -1466,7 +1678,11 @@ module.exports = function combineURLs(baseURL, relativeURL) {
     : baseURL;
 };
 
+<<<<<<< HEAD
 },{}],24:[function(require,module,exports){
+=======
+},{"../helpers/combineURLs":25,"../helpers/isAbsoluteURL":27}],16:[function(require,module,exports){
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 'use strict';
 
 var utils = require('./../utils');
@@ -1537,7 +1753,11 @@ module.exports = function isAbsoluteURL(url) {
   return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
 };
 
+<<<<<<< HEAD
 },{}],26:[function(require,module,exports){
+=======
+},{"./enhanceError":18}],17:[function(require,module,exports){
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 'use strict';
 
 var utils = require('./../utils');
@@ -1621,7 +1841,11 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
   });
 };
 
+<<<<<<< HEAD
 },{"../utils":30}],28:[function(require,module,exports){
+=======
+},{"../cancel/isCancel":12,"../defaults":22,"./../utils":32,"./transformData":21}],18:[function(require,module,exports){
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 'use strict';
 
 var utils = require('./../utils');
@@ -1676,7 +1900,11 @@ module.exports = function parseHeaders(headers) {
   return parsed;
 };
 
+<<<<<<< HEAD
 },{"./../utils":30}],29:[function(require,module,exports){
+=======
+},{}],19:[function(require,module,exports){
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 'use strict';
 
 /**
@@ -1747,6 +1975,7 @@ function isBuffer(val) {
     && typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
 }
 
+<<<<<<< HEAD
 /**
  * Determine if a value is an ArrayBuffer
  *
@@ -1756,6 +1985,10 @@ function isBuffer(val) {
 function isArrayBuffer(val) {
   return toString.call(val) === '[object ArrayBuffer]';
 }
+=======
+},{"../utils":32}],20:[function(require,module,exports){
+'use strict';
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
 /**
  * Determine if a value is a FormData
@@ -1780,8 +2013,17 @@ function isArrayBufferView(val) {
   } else {
     result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
   }
+<<<<<<< HEAD
   return result;
 }
+=======
+};
+
+},{"./createError":16}],21:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
 /**
  * Determine if a value is a String
@@ -1789,9 +2031,31 @@ function isArrayBufferView(val) {
  * @param {Object} val The value to test
  * @returns {boolean} True if value is a String, otherwise false
  */
+<<<<<<< HEAD
 function isString(val) {
   return typeof val === 'string';
 }
+=======
+module.exports = function transformData(data, headers, fns) {
+  /*eslint no-param-reassign:0*/
+  utils.forEach(fns, function transform(fn) {
+    data = fn(data, headers);
+  });
+
+  return data;
+};
+
+},{"./../utils":32}],22:[function(require,module,exports){
+(function (process){
+'use strict';
+
+var utils = require('./utils');
+var normalizeHeaderName = require('./helpers/normalizeHeaderName');
+
+var DEFAULT_CONTENT_TYPE = {
+  'Content-Type': 'application/x-www-form-urlencoded'
+};
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
 /**
  * Determine if a value is a Number
@@ -1904,6 +2168,7 @@ function isStandardBrowserEnv() {
                                            navigator.product === 'NS')) {
     return false;
   }
+<<<<<<< HEAD
   return (
     typeof window !== 'undefined' &&
     typeof document !== 'undefined'
@@ -1927,6 +2192,36 @@ function forEach(obj, fn) {
   if (obj === null || typeof obj === 'undefined') {
     return;
   }
+=======
+};
+
+utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+  defaults.headers[method] = {};
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+});
+
+module.exports = defaults;
+
+}).call(this,require('_process'))
+},{"./adapters/http":8,"./adapters/xhr":8,"./helpers/normalizeHeaderName":29,"./utils":32,"_process":1}],23:[function(require,module,exports){
+'use strict';
+
+module.exports = function bind(fn, thisArg) {
+  return function wrap() {
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
+    return fn.apply(thisArg, args);
+  };
+};
+
+},{}],24:[function(require,module,exports){
+'use strict';
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
   // Force an array if not already something iterable
   if (typeof obj !== 'object') {
@@ -2002,11 +2297,19 @@ function deepMerge(/* obj1, obj2, obj3, ... */) {
     }
   }
 
+<<<<<<< HEAD
   for (var i = 0, l = arguments.length; i < l; i++) {
     forEach(arguments[i], assignValue);
   }
   return result;
 }
+=======
+  return url;
+};
+
+},{"./../utils":32}],25:[function(require,module,exports){
+'use strict';
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
 /**
  * Extends object a by mutably adding to it the properties of object b.
@@ -2016,6 +2319,7 @@ function deepMerge(/* obj1, obj2, obj3, ... */) {
  * @param {Object} thisArg The object to bind function to
  * @return {Object} The resulting value of object a
  */
+<<<<<<< HEAD
 function extend(a, b, thisArg) {
   forEach(b, function assignValue(val, key) {
     if (thisArg && typeof val === 'function') {
@@ -2026,6 +2330,32 @@ function extend(a, b, thisArg) {
   });
   return a;
 }
+=======
+module.exports = function combineURLs(baseURL, relativeURL) {
+  return relativeURL
+    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
+};
+
+},{}],26:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs support document.cookie
+    (function standardBrowserEnv() {
+      return {
+        write: function write(name, value, expires, path, domain, secure) {
+          var cookie = [];
+          cookie.push(name + '=' + encodeURIComponent(value));
+
+          if (utils.isNumber(expires)) {
+            cookie.push('expires=' + new Date(expires).toGMTString());
+          }
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
 module.exports = {
   isArray: isArray,
@@ -2076,14 +2406,24 @@ type DotenvConfigOutput = {
   error?: Error
 }
 
+<<<<<<< HEAD
 */
+=======
+},{"./../utils":32}],27:[function(require,module,exports){
+'use strict';
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
 const fs = require('fs')
 const path = require('path')
 
+<<<<<<< HEAD
 function log (message /*: string */) {
   console.log(`[dotenv][DEBUG] ${message}`)
 }
+=======
+},{}],28:[function(require,module,exports){
+'use strict';
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
 const NEWLINE = '\n'
 const RE_INI_KEY_VAL = /^\s*([\w.-]+)\s*=\s*(.*)?\s*$/
@@ -2127,8 +2467,13 @@ function parse (src /*: string | Buffer */, options /*: ?DotenvParseOptions */) 
     }
   })
 
+<<<<<<< HEAD
   return obj
 }
+=======
+},{"./../utils":32}],29:[function(require,module,exports){
+'use strict';
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
 // Populates process.env from .env file
 function config (options /*: ?DotenvConfigOptions */) /*: DotenvConfigOutput */ {
@@ -2148,9 +2493,14 @@ function config (options /*: ?DotenvConfigOptions */) /*: DotenvConfigOutput */ 
     }
   }
 
+<<<<<<< HEAD
   try {
     // specifying an encoding returns a string instead of a buffer
     const parsed = parse(fs.readFileSync(dotenvPath, { encoding }), { debug })
+=======
+},{"../utils":32}],30:[function(require,module,exports){
+'use strict';
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
     Object.keys(parsed).forEach(function (key) {
       if (!Object.prototype.hasOwnProperty.call(process.env, key)) {
@@ -2214,7 +2564,17 @@ function normalizeArray(parts, allowAboveRoot) {
       parts.splice(i, 1);
       up--;
     }
+<<<<<<< HEAD
   }
+=======
+  });
+
+  return parsed;
+};
+
+},{"./../utils":32}],31:[function(require,module,exports){
+'use strict';
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
   // if the path is allowed to go above the root, restore leading ..s
   if (allowAboveRoot) {
@@ -2223,8 +2583,13 @@ function normalizeArray(parts, allowAboveRoot) {
     }
   }
 
+<<<<<<< HEAD
   return parts;
 }
+=======
+},{}],32:[function(require,module,exports){
+'use strict';
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
 
 // path.resolve([from ...], to)
 // posix version
@@ -2475,6 +2840,7 @@ var substr = 'ab'.substr(-1) === 'b'
     }
 ;
 
+<<<<<<< HEAD
 }).call(this,require('_process'))
 },{"_process":34}],34:[function(require,module,exports){
 // shim for using process in browser
@@ -2663,3 +3029,6 @@ process.chdir = function (dir) {
 process.umask = function() { return 0; };
 
 },{}]},{},[3]);
+=======
+},{"./helpers/bind":23}]},{},[5]);
+>>>>>>> 9344bc45211dd3881b68be6fbd85413ff74bb144
