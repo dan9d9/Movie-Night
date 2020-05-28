@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const path = require('path');
 const app = express();
-const { MONGOATLAS } = require('../config');
+const { MONGOATLAS } = require('./config');
 const PORT = process.env.PORT || 5000;
 
 // Middlewares

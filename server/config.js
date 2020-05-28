@@ -3,6 +3,5 @@ dotenv.config();
 
 module.exports = {
   MONGOATLAS: process.env.MONGOATLAS,
-  APIKEY: process.env.APIKEY,
 };
 
