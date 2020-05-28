@@ -71,6 +71,8 @@ h1 {
 
 .input {
   width: 100%;
+  height: 25px;
+  padding-left: 5px;
   border: none;
   border-radius: 2px;
   box-shadow: 0px 0px 3px 0px black;
@@ -85,7 +87,6 @@ h1 {
 
 button {
   position: relative;
-  width: 100%;
   height: 100%;
   padding: 0.5em;
   border: none;
@@ -94,10 +95,23 @@ button {
   z-index: 1;
 }
 
+.btnContainer button {
+  background-image: radial-gradient(circle, rgb(253, 253, 253) 10%, rgb(163, 233, 163) 90%);
+  background-size: 1000%;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: all 0.3s;
+  box-shadow: 1px 1px 1px 1px rgb(68, 68, 68);
+}
+
+.btnContainer button:hover {
+  background-size: 100%;
+}
+
 .btnSpan {
+  display: inline-block;
+  width: 100%;
   position: relative;
-  left: -3px;
-  z-index: -1;
 }
 
 /*****Lists*****/
@@ -107,6 +121,10 @@ ul {
   padding: 1em;
   padding-bottom: 0;
   border-radius: 2px;
+}
+
+li {
+  cursor: default;
 }
 
 /*****JS added classes*****/
@@ -121,7 +139,7 @@ ul {
   padding-right: 3.5em;
   box-shadow: 1px 1px 2px 1px black;
   border-radius: 2px;
-  background-image: linear-gradient(to right, hsl(0, 0%, 100%), hsl(180, 3%, 92%), hsl(0, 0%, 92%));
+  background-image: linear-gradient(to right, hsl(0, 0%, 100%), hsl(0, 0%, 94%), hsl(0, 0%, 73%));
   word-wrap: break-word;
 }
 
@@ -189,6 +207,21 @@ ul {
   z-index: 1;
 }
 
+
+.movie_modal-inner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  height: 90%;
+  min-height: 320px;
+  background-color: rgb(62, 59, 62);
+  background-color: rgba(62, 59, 62, 0.75);
+  border-radius: 5px;
+  padding: 4em 2em 2em;
+}
+
 .close_modal {
   position: absolute;
   display: flex;
@@ -197,7 +230,7 @@ ul {
   width: max-content;
   height: 45px;
   left: 50%;
-  top: 2em;
+  top: 1em;
   transform: translate(-50%, 0);
   background-color: black;
   border: 2px solid gray;
@@ -212,19 +245,9 @@ ul {
   margin-bottom: 0.03em;
 }
 
-.movie_modal-inner {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 90%;
-  height: 90%;
-  min-height: 320px;
-  background-color: #C7C7C7;
-}
-
 #movie_modal-list {
   max-height: 100%;
+  padding-top: 0;
 }
 
 .movie_modal-movie {
@@ -237,10 +260,12 @@ ul {
   border: 1px solid black;
   padding: 0.5em;
   font-size: 0.9rem;
+  background-color: white;
+  border-radius: 5px;
 }
 
 .movie_modal-movie img {
-  min-width: 92px;
+  min-width: 150px;
   max-width: 100%;
   text-align: center;
 }
@@ -256,6 +281,8 @@ ul {
 
 .movie_modal-movie button {
   width: max-content;
+  background-color: black;
+  color: white;
 }
 
 .trailer_modal {

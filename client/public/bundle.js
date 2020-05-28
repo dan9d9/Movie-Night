@@ -339,8 +339,7 @@ const movieList = {
 	},
 
 	approveMovie: function(array, id) {
-		const index = movieArrays[array].findIndex(ele => ele._id === id);
-		const movie = movieArrays[array][index];
+		const movie = movieArrays[array].find(ele => ele._id === id);
 
 		movie.approved = !movie.approved;
 
@@ -371,23 +370,23 @@ const movieList = {
 ////////////////
 const handlers = {
 	inputButtonClick: function() {
-		const inputDanny = document.getElementById('inputDanny');
-		const inputLola = document.getElementById('inputLola');
-		let movieTitle;
-		let array;
-		let userUL;
+		let movieTitle, array, userUL, input;
 
 		if(this.id === 'btnDanny') {
-			movieTitle = inputDanny.value;
+      input = document.getElementById('inputDanny');
+			movieTitle = inputDanny.value.trim();
 			userUL = document.getElementById('listDanny');
 			array = 'dannyArr';
-			inputDanny.value = '';
 		} else if(this.id === 'btnLola') {
-			movieTitle = inputLola.value;
+      input = document.getElementById('inputLola');
+			movieTitle = inputLola.value.trim();
 			userUL = document.getElementById('listLola');
 			array = 'lolaArr';
-			inputLola.value = '';
-		}
+    }
+
+    if(!movieTitle) {return input.placeholder = 'Please enter a valid movie title'};
+    input.value = '';
+    input.placeholder = 'Enter a movie';
 
 		myAPI.addMovie(movieTitle, array).then(response => {
 			movieList.addMovie(response);
@@ -396,11 +395,13 @@ const handlers = {
 	},
 
 	inputPressEnter: function(e) {
-		if(e.keyCode !== 13) {return}
-		
-		const movieTitle = this.value;
+		if(e.keyCode !== 13) {return};
+    
+		const movieTitle = this.value.trim();
+    if(!movieTitle) {return this.placeholder = 'Please enter a valid movie title'};
+
 		let array;
-		let userUL;
+    let userUL;
 
 		if(this.id === 'inputDanny') {
 			userUL = document.getElementById('listDanny');
@@ -410,7 +411,8 @@ const handlers = {
 			array = 'lolaArr';
 		}
 
-		this.value = '';
+    this.value = '';
+    this.placeholder = 'Enter a movie';
 
 		myAPI.addMovie(movieTitle, array).then(response => {
 			movieList.addMovie(response);
@@ -432,7 +434,7 @@ const handlers = {
 				handlers.openTrailerModal(array, e.target.dataset.id);
 			}
 		}else if(e.target.className === 'btnDelete') {
-			myAPI.deleteMovie(array, id).then(response => {
+			myAPI.deleteMovie(array, id).then(() => {
 				movieList.deleteMovie(array, id);
 				view.displayMovies(userUL);
 			});	
