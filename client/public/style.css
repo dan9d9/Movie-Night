@@ -209,6 +209,7 @@ li {
 
 
 .movie_modal-inner {
+  display: none;
   position: absolute;
   left: 50%;
   top: 50%;
@@ -220,6 +221,7 @@ li {
   background-color: rgba(62, 59, 62, 0.75);
   border-radius: 5px;
   padding: 4em 2em 2em;
+  z-index: 1;
 }
 
 .close_modal {
@@ -285,21 +287,24 @@ li {
   color: white;
 }
 
-.trailer_modal {
-  /* display: flex; GETS SET IN JS */
-  justify-content: center;
-  align-items: center;
-}
-
 .movie_trailer-inner {
+  display: none;
   background-color: black;
   width: 100%;
   max-width: 750px;
   max-height: 500px;
-  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  z-index: 1;
+}
+
+.movie_modal-visible {
+  display: block;
+}
+
+.trailer_modal-visible {
+  display: flex;
 }
 
 #player {
