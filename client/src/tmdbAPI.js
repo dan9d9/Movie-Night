@@ -8,8 +8,8 @@ const TMDBURL = 'https://api.themoviedb.org/3';
 const tmdbRequests = {
 	getMovies: async function(query) {
 		try {
-			const response = await axios.get(`${TMDBURL}/search/movie?api_key=${APIKEY}&language=en-US&query=${query}&page=1&include_adult=false`);
-			if(response.statusText === 'OK') {
+      const response = await axios.get(`${TMDBURL}/search/movie?api_key=${APIKEY}&language=en-US&query=${query}&page=1&include_adult=false`);
+			if(response.statusText === 'OK' || response.status === 200) {
 				return response.data.results;
 			}
 		}catch(err) {
@@ -24,7 +24,7 @@ const tmdbRequests = {
 	getMovieDetails: async function(id) {
 		try {
 			const response = await axios.get(`${TMDBURL}/movie/${id}?api_key=${APIKEY}&language=en-US`);
-			if(response.statusText === 'OK') {
+			if(response.statusText === 'OK' || response.status === 200) {
 				return response.data;
 			}
 		}catch(err) {
@@ -39,7 +39,7 @@ const tmdbRequests = {
 	getMovieVideos: async function(id) {
 		try {
 			const response = await axios.get(`${TMDBURL}/movie/${id}/videos?api_key=${APIKEY}&language=en-US`);
-			if(response.statusText === 'OK') {
+			if(response.statusText === 'OK' || response.status === 200) {
 				return response.data;
 			}
 		}catch(err) {
