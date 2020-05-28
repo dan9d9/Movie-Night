@@ -1,5 +1,5 @@
 const axios = require('axios');
-// const serverURL = 'http://localhost:5000';
+const { URL } = require('../config');
 
 // /////////////////////
 // /// HTTP REQUESTS ///
@@ -7,7 +7,7 @@ const axios = require('axios');
 const httpRequests = {
 	addMovie: async function(movieTitle, array) {
 		try {
-			const response = await axios.post(`/movies/new`, {
+			const response = await axios.post(`${URL}/movies/new`, {
 				title: movieTitle,
 				array,
 				approved: false
@@ -27,7 +27,7 @@ const httpRequests = {
 
 	deleteMovie: async function(array, id) {
 		try {
-			const response = await axios.delete(`/movies/delete/${id}`);
+			const response = await axios.delete(`${URL}/movies/delete/${id}`);
 			if(response.statusText === 'OK') {
 				return response.data;	
 			}
@@ -42,7 +42,7 @@ const httpRequests = {
 
 	getMovies: async function() {
 		try {
-			const response = await axios.get(`/movies`);
+			const response = await axios.get(`${URL}/movies`);
 			if(response.statusText === 'OK') {
 				return response.data;
 			}
@@ -69,7 +69,7 @@ const httpRequests = {
 
 	updateMovie: async function(movie) {
 		try {
-			const response = await axios.put(`/movies/update`, {
+			const response = await axios.put(`${URL}/movies/update`, {
 				_id: movie._id,
 				title: movie.title, 
 				hasInfo: movie.hasInfo,

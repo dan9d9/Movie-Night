@@ -1,7 +1,8 @@
 require('dotenv').config();
 const axios = require('axios');
-const APIKEY = require('../config');
+const APIKEY = require('../../config');
 const TMDBURL = 'https://api.themoviedb.org/3';
+console.log('api key: ', APIKEY);
 
 //////////////////////////
 /// TMDB API REQUESTS ///
