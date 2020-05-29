@@ -27,12 +27,13 @@ const helpers = {
 		}
   },
   
-  createNoTrailerEle: function(parentEle) {
+  createH2Ele: function(parentEle, beforeThisEle, text) {
     let newTag = document.createElement('h2');
-    let newText = document.createTextNode('No trailer found for this movie!');
+    let newText = document.createTextNode(`No ${text} found for this movie!`);
     newTag.style.color = 'white';
+    newTag.style.textAlign = 'center';
     newTag.appendChild(newText);
-    parentEle.insertBefore(newTag, youtubePlayer);
+    parentEle.insertBefore(newTag, beforeThisEle);
   }
 }
 
@@ -95,8 +96,10 @@ const handlers = {
 			array = 'lolaArr';
     }
 
-    if(!movieTitle) {return input.placeholder = 'Please enter a valid movie title'};
     input.value = '';
+    if(!movieTitle) {
+      return input.placeholder = 'Please enter a valid movie title'
+    };
     input.placeholder = 'Enter a movie';
 
 		myAPI.addMovie(movieTitle, array).then(response => {
@@ -108,8 +111,13 @@ const handlers = {
 	inputPressEnter: function(e) {
 		if(e.keyCode !== 13) {return};
     
-		const movieTitle = this.value.trim();
-    if(!movieTitle) {return this.placeholder = 'Please enter a valid movie title'};
+    const movieTitle = this.value.trim();
+    
+    this.value = '';
+    if(!movieTitle) {
+      return this.placeholder = 'Please enter a valid movie title'
+    };
+    this.placeholder = 'Enter a movie';
 
 		let array;
     let userUL;
@@ -121,9 +129,6 @@ const handlers = {
 			userUL = document.getElementById('listLola');
 			array = 'lolaArr';
 		}
-
-    this.value = '';
-    this.placeholder = 'Enter a movie';
 
 		myAPI.addMovie(movieTitle, array).then(response => {
 			modifyMovieArray.addMovie(response);
@@ -203,7 +208,7 @@ const modals = {
 		
 
 		tmdbAPI.getMovies(movieTitle).then(movieResults => {
-			movieArrays.searchedMovies = [...movieResults];
+      movieArrays.searchedMovies = [...movieResults];
 			view.displayMovieResults(movieArrays.searchedMovies);
 		});
   },
@@ -235,7 +240,7 @@ const modals = {
 		if(movie.videoPaths.length === 0) {
 			youtubePlayer.style.display = 'none';
 
-      helpers.createNoTrailerEle(trailerModal);
+      helpers.createH2Ele(trailerModal, youtubePlayer, 'trailer');
 		}else {
 			youtubePlayer.src = `${movie.videoPaths[0]}?origin=${location.origin}`;
 		}
@@ -244,15 +249,22 @@ const modals = {
   closeModals: function() {
     const movieModal = document.getElementById('movie_modal');
     const movieResultsModal = document.getElementById('results_modal');
-		const trailerModal = document.getElementById('trailer_modal');
-		const h2 = trailerModal.querySelector('h2');
+    const modifyMovieArray = document.getElementById('movie_modal-list');
+    const trailerModal = document.getElementById('trailer_modal');
+    const h2 = trailerModal.querySelector('h2') || movieResultsModal.querySelector('h2');
 		const youtubePlayer = document.getElementById('player');
 
     movieModal.removeEventListener('click', handlers.closeModalsHandler);
     movieResultsModal.removeEventListener('click', handlers.boundResultsHandler);
 
-		if(h2) {trailerModal.removeChild(h2)};
-		movieArrays.searchedMovies = [];
+		if(h2 && h2.parentElement.id === 'trailer_modal') {
+      trailerModal.removeChild(h2)
+    }else if(h2 && h2.parentElement.id === 'results_modal') {
+      movieResultsModal.removeChild(h2)
+    };
+
+    movieArrays.searchedMovies = [];
+    modifyMovieArray.innerHTML = '';
 		youtubePlayer.style.display = 'inline-block';
     youtubePlayer.src = "";
 
@@ -300,10 +312,11 @@ const view = {
 	},
 
 	displayMovieResults: function(movieArray) {
-		const modifyMovieArray = document.getElementById('movie_modal-list');
+    const modifyMovieArray = document.getElementById('movie_modal-list');
+    const movieResultsModal = document.getElementById('results_modal');
 
 		if(movieArray.length === 0) {
-			return modifyMovieArray.innerHTML = `<li>No results for that search</li>`;
+      return helpers.createH2Ele(movieResultsModal, modifyMovieArray, 'results');
 		}
 
 		modifyMovieArray.innerHTML = movieArray.map(movie => {
@@ -334,9 +347,9 @@ const events = {
 		const inputButtons = document.querySelectorAll('.btnContainer button');
 		const inputs = Array.from(document.getElementsByClassName('input'));
     const usersUL = document.querySelectorAll('ul');
-    const welcomeModal = document.getElementById('welcome_modal');
+    const welcomeModalBtn = document.querySelector('#welcome_modal button');
 
-    welcomeModal.addEventListener('click', handlers.closeWelcomeModal);
+    welcomeModalBtn.addEventListener('click', handlers.closeWelcomeModal);
 		inputButtons.forEach(btn => btn.addEventListener('click', handlers.inputButtonClick));
 		inputs.forEach(input => input.addEventListener('keypress', handlers.inputPressEnter));
 		usersUL.forEach(ul => ul.addEventListener('click', handlers.listButtonsHandler));
