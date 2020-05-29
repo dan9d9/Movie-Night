@@ -188,7 +188,6 @@ process.umask = function() { return 0; };
 const APIKEY = "ad4a44a2296a174ca3a693f429400547";
 
 module.exports = { APIKEY }
-
 },{}],3:[function(require,module,exports){
 const URL = window.location.hostname === `localhost`
             ? `http://localhost:5000`
@@ -463,6 +462,13 @@ const handlers = {
     if(e.target.className === 'close_modal' || e.target.className === 'close_modal-span') {
       modals.closeModals();
     }
+  },
+
+  closeWelcomeModal: function() {
+    const welcomeModal = document.getElementById('welcome_modal');
+
+    welcomeModal.classList.add('modal-hide');
+    welcomeModal.removeEventListener('click', handlers.closeWelcomeModal);
   }
 }
 
@@ -473,15 +479,14 @@ const handlers = {
 const modals = {
   openMovieModal: function() {
     const movieModal = document.getElementById('movie_modal');
-    movieModal.classList.add('movie_modal-visible');
+    movieModal.classList.add('modal-visible-block');
 
 		movieModal.addEventListener('click', handlers.closeModalsHandler);
   },
 
   openMovieResultsModal: function(clickedListItem) {
     const movieResultsModal = document.getElementById('results_modal');
-    movieResultsModal.classList.add('movie_modal-visible');
-    // movieResultsModal.style.display = 'block';
+    movieResultsModal.classList.add('modal-visible-block');
 
     handlers.boundResultsHandler = handlers.resultsModalHandler.bind(null, clickedListItem);
     movieResultsModal.addEventListener('click', handlers.boundResultsHandler);
@@ -518,7 +523,7 @@ const modals = {
 		const trailerModal = document.getElementById('trailer_modal');
 		const youtubePlayer = document.getElementById('player');
 
-    trailerModal.classList.add('trailer_modal-visible');
+    trailerModal.classList.add('modal-visible-flex');
 
 		const movie = movieArrays[array].find(movie => movie._id === movieID);
 		if(movie.videoPaths.length === 0) {
@@ -538,19 +543,17 @@ const modals = {
 		const youtubePlayer = document.getElementById('player');
 
     movieModal.removeEventListener('click', handlers.closeModalsHandler);
-    movieResultsModal.addEventListener('click', handlers.boundResultsHandler);
+    movieResultsModal.removeEventListener('click', handlers.boundResultsHandler);
 
 		if(h2) {trailerModal.removeChild(h2)};
 		movieArrays.searchedMovies = [];
 		youtubePlayer.style.display = 'inline-block';
     youtubePlayer.src = "";
 
-    trailerModal.classList.remove('trailer_modal-visible');
-    movieResultsModal.classList.remove('movie_modal-visible');
-    movieModal.classList.remove('movie_modal-visible');
-	},
-  
-
+    trailerModal.classList.remove('modal-visible-flex');
+    movieResultsModal.classList.remove('modal-visible-block');
+    movieModal.classList.remove('modal-visible-block');
+	}
 }
 
 ////////////
@@ -625,7 +628,9 @@ const events = {
 		const inputButtons = document.querySelectorAll('.btnContainer button');
 		const inputs = Array.from(document.getElementsByClassName('input'));
     const usersUL = document.querySelectorAll('ul');
+    const welcomeModal = document.getElementById('welcome_modal');
 
+    welcomeModal.addEventListener('click', handlers.closeWelcomeModal);
 		inputButtons.forEach(btn => btn.addEventListener('click', handlers.inputButtonClick));
 		inputs.forEach(input => input.addEventListener('keypress', handlers.inputPressEnter));
 		usersUL.forEach(ul => ul.addEventListener('click', handlers.listButtonsHandler));

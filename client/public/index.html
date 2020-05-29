@@ -9,34 +9,49 @@
 </head>
 
 <body>
+  <div id="welcome_modal" class="welcome_modal">
+    <button type="button" aria-label="Close"><span>&times;</span></button>
+    <h1>Welcome to Movie Night!</h1>
+    <h2>The intent of Movie Night is to make it easier for couples to agree on a movie to watch. Keep a list of movies you want to watch, watch trailers, and approve of your partners movies. Now next time you have a movie night you'll have a list of movies already agreed upon! (How you decide between the movies then is your problem) </h2>
+    <ol>
+      <li>Type the movie you want to watch in the respective list and press enter. As this is only a demo at the moment, you can choose either list.</li>
+      <li>Click on the list item of the title you entered.</li>
+      <li>A modal will appear listing movies similar to what you entered. If no movies appear or the movie you want to watch is not shown, you may have mistyped the title. Delete the item and try again.</li>
+      <li>When you find the movie you want to watch in the list, click the <span>choose</span> button.</li>
+      <li>Your list has now been updated with the official movie title and movie trailer.</li>
+      <li>Click on your updated list item to view the trailer.</li>
+      <li>If you want to watch one of your partner's movies, click the approve button on the movie item. Now you'll have movies you both want to watch next time you have a movie night!</li>
+    </ol>
+  </div>
+  
  	<div class="container cont-left">
-	    <h1 id='title'>Danny's Movie List</h1>
-	    <div class='inputBtnContainer'>
-		    <div class="inputContainer">
-		     	<input id="inputDanny" class="input" type="text" placeholder="Enter a movie">
-		    </div>
-		    <div class="btnContainer">
-		     	<button id="btnDanny"><span class="btnSpan">Add</span></button>
-		    </div> 
-	    </div> 
-	    <ul id="listDanny" class="list">      
-	    	<!--JS Li elements here-->
-	    </ul>  
-  	</div>
-  	<div class="container cont-right">
-	    <h1>Lola's Movie List</h1>
-	    <div class='inputBtnContainer'>
-		    <div class="inputContainer">
-		     	<input id="inputLola" class="input" type="text" placeholder="Enter a movie">
-		    </div>
-		    <div class="btnContainer">
-		     	<button id="btnLola"><span class="btnSpan">Add</span></button>
-		    </div> 
-	    </div> 
-	    <ul id="listLola" class="list">
-	    	<!--JS Li elements here-->      
-	    </ul>  
- 	</div>
+    <h1 id='title'>Danny's Movie List</h1>
+    <div class='inputBtnContainer'>
+      <div class="inputContainer">
+        <input id="inputDanny" class="input" type="text" placeholder="Enter a movie">
+      </div>
+      <div class="btnContainer">
+        <button id="btnDanny"><span class="btnSpan">Add</span></button>
+      </div> 
+    </div> 
+    <ul id="listDanny" class="list">      
+      <!--JS Li elements here-->
+    </ul>  
+  </div>
+  <div class="container cont-right">
+    <h1>Lola's Movie List</h1>
+    <div class='inputBtnContainer'>
+      <div class="inputContainer">
+        <input id="inputLola" class="input" type="text" placeholder="Enter a movie">
+      </div>
+      <div class="btnContainer">
+        <button id="btnLola"><span class="btnSpan">Add</span></button>
+      </div> 
+    </div> 
+    <ul id="listLola" class="list">
+      <!--JS Li elements here-->      
+    </ul>  
+  </div>
 
  	<div id='movie_modal' class='movie_modal'>
     <div id='results_modal' class='movie_modal-inner'>
