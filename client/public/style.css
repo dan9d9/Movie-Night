@@ -196,7 +196,64 @@ li {
   box-shadow: 0px 0px 2px 1px green;
 }
 
-/* MOVIE MODAL */
+/* MODALS */
+.welcome_modal {
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  width: 90%;
+  max-width: 700px;
+  height: 80%;
+  background-color: white;
+  z-index: 2;
+  padding: 0.5em;
+  padding-top: 0;
+  overflow: auto;
+  border-radius: 10px;
+}
+
+.welcome_modal button {
+  display: flex;
+  align-items: center;
+  position: sticky;
+  left: 90%;
+  top: 0.5em;
+  width: 30px;
+  height: 30px;
+  background-color: black;
+  border-radius: 50%;
+}
+
+.welcome_modal button span {
+  width: 100%;
+  font-size: 1.1rem;
+  color: white;
+}
+
+.welcome_modal h1 {
+  text-align: center;
+  margin-bottom: 0.5em
+}
+
+.welcome_modal h2 {
+  font-size: 1.05rem;
+  margin-bottom: 0.5em;
+}
+
+.welcome_modal ol {
+  padding: 1em;
+}
+
+.welcome_modal ol span {
+  font-style: italic;
+  font-weight: bold;
+}
+
+.welcome_modal li:not(:last-child) {
+  margin-bottom: 0.5em;
+}
+
 .movie_modal {
   display: none;
   position: fixed;
@@ -299,12 +356,16 @@ li {
   z-index: 1;
 }
 
-.movie_modal-visible {
+.modal-visible-block {
   display: block;
 }
 
-.trailer_modal-visible {
+.modal-visible-flex {
   display: flex;
+}
+
+.modal-hide {
+  display: none;
 }
 
 #player {
@@ -324,6 +385,10 @@ li {
 
   ul {
     max-height: 80%;
+  }
+
+  .welcome_modal button {
+    left: 95%;
   }
 
   .close_modal {
