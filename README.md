@@ -11,6 +11,8 @@ each others movies so they don't spend an hour deciding on a movie! :D
 * Vanilla JS
 * Express
 * Node
+* MongoDB
+* Mongoose
 * Browserify
 * Axios
 
