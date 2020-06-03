@@ -24,9 +24,11 @@ h1 {
 /*****Individual containers*****/
 .container {
   width: 100%;
-  min-height: 50%;
+  height: 100%;
+  min-height: 240px;
   padding: 0.5em;
   padding-bottom: 0;
+  overflow: auto;
 }
 
 .container h1 {
@@ -400,5 +402,4 @@ li {
     flex-direction: row;
     font-size: 1rem;
   }
-
 }
