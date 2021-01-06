@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/dan9d9/Movies-to-watch-list#readme",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "browserify": "^16.5.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
