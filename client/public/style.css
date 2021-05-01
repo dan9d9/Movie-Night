@@ -402,6 +402,10 @@ li {
     max-height: 80%;
   }
 
+  .welcome_modal {
+    height: auto;
+  }
+
   .welcome_modal button {
     left: 95%;
   }

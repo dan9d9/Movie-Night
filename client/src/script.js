@@ -20,7 +20,7 @@ const prevButton = document.getElementById('prevTrailer');
 const nextButton = document.getElementById('nextTrailer');
 
 //////////////
-/// ARRAYS ///
+/// STATE ///
 //////////////
 const state = {
   dannyArr: [],
@@ -248,16 +248,18 @@ const modals = {
   },
 
   openTrailerModal: function (array, movieID) {
+    youtubePlayer.style.display = 'inline-block';
+    trailerCounter.style.display = 'block';
     prevButton.style.display = 'block';
     nextButton.style.display = 'block';
 
     trailerModal.classList.add('modal-visible-flex');
     state.currentMovie = state[array].find((movie) => movie._id === movieID);
-    console.log(state.currentMovie);
     view.refreshTrailerCounter();
 
     if (state.currentMovie.videoPaths.length === 0) {
       helpers.createH2Ele(trailerModal, trailerContainer, 'trailer');
+      trailerCounter.style.display = 'none';
       youtubePlayer.style.display = 'none';
       prevButton.style.display = 'none';
       nextButton.style.display = 'none';
@@ -310,7 +312,6 @@ const modals = {
     state.currentMovie = {};
     state.currentTrailer = 0;
     modalMovieList.innerHTML = '';
-    youtubePlayer.style.display = 'inline-block';
     youtubePlayer.src = '';
 
     trailerModal.classList.remove('modal-visible-flex');
@@ -384,9 +385,11 @@ const view = {
   },
 
   refreshTrailerCounter: function () {
-    trailerCounter.innerHTML = `${state.currentTrailer + 1}/${
-      state.currentMovie.videoPaths.length
-    }`;
+    let trailerCount = state.currentTrailer;
+
+    state.currentMovie.videoPaths.length === 0 ? (trailerCount = 0) : (trailerCount += 1);
+
+    trailerCounter.innerHTML = `${trailerCount}/${state.currentMovie.videoPaths.length}`;
   },
 };
 
