@@ -1,194 +1,8 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-// shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-},{}],2:[function(require,module,exports){
 const APIKEY = "ad4a44a2296a174ca3a693f429400547";
 
 module.exports = { APIKEY }
-},{}],3:[function(require,module,exports){
+},{}],2:[function(require,module,exports){
 const URL = window.location.hostname === `localhost`
             ? `http://localhost:5000`
             : `http://167.172.102.224`;
@@ -196,7 +10,7 @@ const URL = window.location.hostname === `localhost`
 module.exports = { 
   URL
 }
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 const axios = require('axios');
 const { URL } = require('../config');
 
@@ -291,321 +105,379 @@ const httpRequests = {
 }
 
 module.exports = httpRequests;
-},{"../config":3,"axios":7}],5:[function(require,module,exports){
+},{"../config":2,"axios":6}],4:[function(require,module,exports){
 const myAPI = require('./myAPI');
 const tmdbAPI = require('./tmdbAPI');
 const BASE_IMAGE_PATH = 'https://image.tmdb.org/t/p/w185';
 const BASE_VIDEO_PATH = 'https://www.youtube.com/embed';
 
+const inputDanny = document.getElementById('inputDanny');
+const inputLola = document.getElementById('inputLola');
+const listDanny = document.getElementById('listDanny');
+const listLola = document.getElementById('listLola');
+
+const welcomeModal = document.getElementById('welcome_modal');
+const movieModal = document.getElementById('movie_modal');
+const movieResultsModal = document.getElementById('results_modal');
+const modalMovieList = document.getElementById('movie_modal-list');
+const trailerModal = document.getElementById('trailer_modal');
+const trailerCounter = document.getElementById('trailer_counter');
+const trailerContainer = document.getElementById('trailer_container');
+const youtubePlayer = document.getElementById('player');
+const prevButton = document.getElementById('prevTrailer');
+const nextButton = document.getElementById('nextTrailer');
 
 //////////////
 /// ARRAYS ///
 //////////////
-const movieArrays = {
-	dannyArr: [],
-	lolaArr: [],
-	allMovies: [],
-	searchedMovies: []
-}
-
+const state = {
+  dannyArr: [],
+  lolaArr: [],
+  allMovies: [],
+  searchedMovies: [],
+  currentMovie: {},
+  currentTrailer: 0,
+};
 
 ///////////////
 /// HELPERS ///
 ///////////////
 const helpers = {
-	getArray: function(userUL) {
-		if(userUL === 'listDanny') {
-			return 'dannyArr';
-		}else if(userUL === 'listLola') {
-			return'lolaArr';
-		}
+  getArray: function (userUL) {
+    if (userUL === 'listDanny') {
+      return 'dannyArr';
+    } else if (userUL === 'listLola') {
+      return 'lolaArr';
+    }
   },
-  
-  createNoTrailerEle: function(parentEle) {
-    let newTag = document.createElement('h2');
-    let newText = document.createTextNode('No trailer found for this movie!');
-    newTag.style.color = 'white';
-    newTag.appendChild(newText);
-    parentEle.insertBefore(newTag, youtubePlayer);
-  }
-}
 
+  createH2Ele: function (parentEle, beforeThisEle, text) {
+    let newTag = document.createElement('h2');
+    let newText = document.createTextNode(`No ${text} found for this movie!`);
+    newTag.style.color = 'white';
+    newTag.style.textAlign = 'center';
+    newTag.appendChild(newText);
+    parentEle.insertBefore(newTag, beforeThisEle);
+  },
+};
 
 /////////////////////
 /// ARRAY METHODS ///
 /////////////////////
 const modifyMovieArray = {
-	addMovie: function(movieData) {
-		movieArrays[movieData.array].push(movieData);
-	},
+  addMovie: function (movieData) {
+    state[movieData.array].push(movieData);
+  },
 
-	deleteMovie: function(array, id) {
-		const index = movieArrays[array].findIndex(ele => ele._id === id);
-		movieArrays[array].splice(index, 1);
-	},
+  deleteMovie: function (array, id) {
+    const index = state[array].findIndex((ele) => ele._id === id);
+    state[array].splice(index, 1);
+  },
 
-	approveMovie: function(array, id) {
-		const movie = movieArrays[array].find(ele => ele._id === id);
-		movie.approved = !movie.approved;
-		return movie;
-	},
-	
-	updateMovie: function(movieToUpdate, movieDetails, videos) {
-		const tempVids = videos.map(video => `${BASE_VIDEO_PATH}/${video.key}`);
-		const movieIdx = movieArrays[movieToUpdate.array].findIndex(ele => ele._id === movieToUpdate._id);
+  approveMovie: function (array, id) {
+    const movie = state[array].find((ele) => ele._id === id);
+    movie.approved = !movie.approved;
+    return movie;
+  },
 
-		movieToUpdate = {
+  updateMovie: function (movieToUpdate, movieDetails, videos) {
+    const tempVids = videos.map((video) => `${BASE_VIDEO_PATH}/${video.key}`);
+    const movieIdx = state[movieToUpdate.array].findIndex((ele) => ele._id === movieToUpdate._id);
+
+    movieToUpdate = {
       ...movieToUpdate,
-			title: movieDetails.title, 
-			hasInfo: true,
-			summary: movieDetails.overview,
-			posterPath: `${BASE_IMAGE_PATH}${movieDetails.poster_path}`,
-			videoPaths: tempVids
-		}
+      title: movieDetails.title,
+      hasInfo: true,
+      summary: movieDetails.overview,
+      posterPath: `${BASE_IMAGE_PATH}${movieDetails.poster_path}`,
+      videoPaths: tempVids,
+    };
 
-		movieArrays[movieToUpdate.array][movieIdx] = movieToUpdate;
+    state[movieToUpdate.array][movieIdx] = movieToUpdate;
 
-		return movieToUpdate;
-	}
-}
-
+    return movieToUpdate;
+  },
+};
 
 ////////////////
 /// HANDLERS ///
 ////////////////
 const handlers = {
-	inputButtonClick: function() {
-		let movieTitle, array, userUL, input;
+  inputButtonClick: function () {
+    let movieTitle, array, userUL, input;
 
-		if(this.id === 'btnDanny') {
-      input = document.getElementById('inputDanny');
-			movieTitle = inputDanny.value.trim();
-			userUL = document.getElementById('listDanny');
-			array = 'dannyArr';
-		} else if(this.id === 'btnLola') {
-      input = document.getElementById('inputLola');
-			movieTitle = inputLola.value.trim();
-			userUL = document.getElementById('listLola');
-			array = 'lolaArr';
+    if (this.id === 'btnDanny') {
+      movieTitle = inputDanny.value.trim();
+      userUL = listDanny;
+      array = 'dannyArr';
+    } else if (this.id === 'btnLola') {
+      movieTitle = inputLola.value.trim();
+      userUL = listLola;
+      array = 'lolaArr';
     }
 
-    if(!movieTitle) {return input.placeholder = 'Please enter a valid movie title'};
     input.value = '';
+    if (!movieTitle) {
+      return (input.placeholder = 'Please enter a valid movie title');
+    }
     input.placeholder = 'Enter a movie';
 
-		myAPI.addMovie(movieTitle, array).then(response => {
-			modifyMovieArray.addMovie(response);
-			view.displayMovies(userUL)
-		});
-	},
-
-	inputPressEnter: function(e) {
-		if(e.keyCode !== 13) {return};
-    
-		const movieTitle = this.value.trim();
-    if(!movieTitle) {return this.placeholder = 'Please enter a valid movie title'};
-
-		let array;
-    let userUL;
-
-		if(this.id === 'inputDanny') {
-			userUL = document.getElementById('listDanny');
-			array = 'dannyArr';
-		} else if(this.id === 'inputLola') {
-			userUL = document.getElementById('listLola');
-			array = 'lolaArr';
-		}
-
-    this.value = '';
-    this.placeholder = 'Enter a movie';
-
-		myAPI.addMovie(movieTitle, array).then(response => {
-			modifyMovieArray.addMovie(response);
-			view.displayMovies(userUL);
-		});
-	},
-
-	listButtonsHandler: function(e) {
-		if(e.target.tagName !== 'BUTTON' && e.target.tagName !== 'LI') {return}
-
-		const id = e.target.parentNode.dataset.id;
-		const userUL = this;
-		const array = helpers.getArray(this.id);
-
-		if(e.target.tagName === 'LI') {
-      modals.openMovieModal();
-			if(e.target.dataset.movie_info === 'false') {
-				modals.openMovieResultsModal(e.target);
-			}else if(e.target.dataset.movie_info === 'true') {
-				modals.openTrailerModal(array, e.target.dataset.id);
-			}
-		}else if(e.target.className === 'btnDelete') {
-			myAPI.deleteMovie(array, id).then(() => {
-				modifyMovieArray.deleteMovie(array, id);
-				view.displayMovies(userUL);
-			});	
-		}else if(e.target.className === 'btnApprove' || e.target.className === 'btnApprove js-approve') {
-			let movieApproved = modifyMovieArray.approveMovie(array, id);
-			myAPI.approveMovie(movieApproved).then(() => {
-				view.displayMovies(userUL);	
-      });
-		}
+    myAPI.addMovie(movieTitle, array).then((response) => {
+      modifyMovieArray.addMovie(response);
+      view.displayMovies(userUL);
+    });
   },
 
-  resultsModalHandler: function(clickOrigin, e) {
-    if(e.target.dataset.movie_id) {
+  inputPressEnter: function (e) {
+    if (e.keyCode !== 13) {
+      return;
+    }
+
+    const movieTitle = this.value.trim();
+
+    this.value = '';
+    if (!movieTitle) {
+      return (this.placeholder = 'Please enter a valid movie title');
+    }
+    this.placeholder = 'Enter a movie';
+
+    let array;
+    let userUL;
+
+    if (this.id === 'inputDanny') {
+      userUL = listDanny;
+      array = 'dannyArr';
+    } else if (this.id === 'inputLola') {
+      userUL = listLola;
+      array = 'lolaArr';
+    }
+
+    myAPI.addMovie(movieTitle, array).then((response) => {
+      modifyMovieArray.addMovie(response);
+      view.displayMovies(userUL);
+    });
+  },
+
+  listButtonsHandler: function (e) {
+    if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'LI') {
+      return;
+    }
+
+    const id = e.target.parentNode.dataset.id;
+    const userUL = this;
+    const array = helpers.getArray(this.id);
+
+    if (e.target.tagName === 'LI') {
+      modals.openMovieModal();
+      if (e.target.dataset.movie_info === 'false') {
+        modals.openMovieResultsModal(e.target);
+      } else if (e.target.dataset.movie_info === 'true') {
+        modals.openTrailerModal(array, e.target.dataset.id);
+      }
+    } else if (e.target.className === 'btnDelete') {
+      myAPI.deleteMovie(array, id).then(() => {
+        modifyMovieArray.deleteMovie(array, id);
+        view.displayMovies(userUL);
+      });
+    } else if (
+      e.target.className === 'btnApprove' ||
+      e.target.className === 'btnApprove js-approve'
+    ) {
+      let movieApproved = modifyMovieArray.approveMovie(array, id);
+      myAPI.approveMovie(movieApproved).then(() => {
+        view.displayMovies(userUL);
+      });
+    }
+  },
+
+  resultsModalHandler: function (clickOrigin, e) {
+    if (e.target.dataset.movie_id) {
       modals.chooseMovie(e.target.dataset.movie_id, clickOrigin);
     }
   },
 
-  closeModalsHandler: function(e) {
-    if(e.target.className === 'close_modal' || e.target.className === 'close_modal-span') {
+  closeModalsHandler: function (e) {
+    if (e.target.className === 'close_modal' || e.target.className === 'close_modal-span') {
       modals.closeModals();
+    } else if (e.target.id === 'prevTrailer') {
+      modals.prevTrailer();
+    } else if (e.target.id === 'nextTrailer') {
+      modals.nextTrailer();
     }
   },
 
-  closeWelcomeModal: function() {
-    const welcomeModal = document.getElementById('welcome_modal');
-
+  closeWelcomeModal: function () {
     welcomeModal.classList.add('modal-hide');
     welcomeModal.removeEventListener('click', handlers.closeWelcomeModal);
-  }
-}
-
+  },
+};
 
 //////////////////////
 /// MODALS METHODS ///
 //////////////////////
 const modals = {
-  openMovieModal: function() {
-    const movieModal = document.getElementById('movie_modal');
+  openMovieModal: function () {
     movieModal.classList.add('modal-visible-block');
 
-		movieModal.addEventListener('click', handlers.closeModalsHandler);
+    movieModal.addEventListener('click', handlers.closeModalsHandler);
   },
 
-  openMovieResultsModal: function(clickedListItem) {
-    const movieResultsModal = document.getElementById('results_modal');
+  openMovieResultsModal: function (clickedListItem) {
     movieResultsModal.classList.add('modal-visible-block');
 
     handlers.boundResultsHandler = handlers.resultsModalHandler.bind(null, clickedListItem);
     movieResultsModal.addEventListener('click', handlers.boundResultsHandler);
-    
-		const movieId = clickedListItem.dataset.id;
-		const array = helpers.getArray(clickedListItem.parentNode.id);	
-		const movieTitle = movieArrays[array].find(ele => ele._id === movieId).title;
-		
 
-		tmdbAPI.getMovies(movieTitle).then(movieResults => {
-			movieArrays.searchedMovies = [...movieResults];
-			view.displayMovieResults(movieArrays.searchedMovies);
-		});
+    const movieId = clickedListItem.dataset.id;
+    const array = helpers.getArray(clickedListItem.parentNode.id);
+    const movieTitle = state[array].find((ele) => ele._id === movieId).title;
+
+    tmdbAPI.getMovies(movieTitle).then((movieResults) => {
+      state.searchedMovies = [...movieResults];
+      view.displayMovieResults(state.searchedMovies);
+    });
   },
-  
-  chooseMovie: function(movieID, clickedListItem) {
-		const array = helpers.getArray(clickedListItem.parentNode.id);
-		const movieToUpdate = movieArrays[array].find(movie => movie._id === clickedListItem.dataset.id);
 
-		tmdbAPI.getMovieDetails(movieID).then(details => {
-			tmdbAPI.getMovieVideos(details.id).then(videos => {
-				const updatedMovie = modifyMovieArray.updateMovie(movieToUpdate, details, videos.results);
+  chooseMovie: function (movieID, clickedListItem) {
+    const array = helpers.getArray(clickedListItem.parentNode.id);
+    const movieToUpdate = state[array].find((movie) => movie._id === clickedListItem.dataset.id);
 
-				clickedListItem.dataset.movie_info = 'true';
-				myAPI.updateMovie(updatedMovie).then(response => {
-					modals.closeModals();
-					view.displayMovies(clickedListItem.parentNode);
-				});
-			});
-		});
-	},
+    tmdbAPI.getMovieDetails(movieID).then((details) => {
+      tmdbAPI.getMovieVideos(details.id).then((videos) => {
+        const updatedMovie = modifyMovieArray.updateMovie(movieToUpdate, details, videos.results);
 
-  openTrailerModal: function(array, movieID) {
-		const trailerModal = document.getElementById('trailer_modal');
-		const youtubePlayer = document.getElementById('player');
+        clickedListItem.dataset.movie_info = 'true';
+        myAPI.updateMovie(updatedMovie).then((response) => {
+          modals.closeModals();
+          view.displayMovies(clickedListItem.parentNode);
+        });
+      });
+    });
+  },
+
+  openTrailerModal: function (array, movieID) {
+    prevButton.style.display = 'block';
+    nextButton.style.display = 'block';
 
     trailerModal.classList.add('modal-visible-flex');
+    state.currentMovie = state[array].find((movie) => movie._id === movieID);
+    console.log(state.currentMovie);
+    view.refreshTrailerCounter();
 
-		const movie = movieArrays[array].find(movie => movie._id === movieID);
-		if(movie.videoPaths.length === 0) {
-			youtubePlayer.style.display = 'none';
-
-      helpers.createNoTrailerEle(trailerModal);
-		}else {
-			youtubePlayer.src = `${movie.videoPaths[0]}?origin=${location.origin}`;
-		}
+    if (state.currentMovie.videoPaths.length === 0) {
+      helpers.createH2Ele(trailerModal, trailerContainer, 'trailer');
+      youtubePlayer.style.display = 'none';
+      prevButton.style.display = 'none';
+      nextButton.style.display = 'none';
+    } else {
+      this.loadTrailer();
+    }
   },
 
-  closeModals: function() {
-    const movieModal = document.getElementById('movie_modal');
-    const movieResultsModal = document.getElementById('results_modal');
-		const trailerModal = document.getElementById('trailer_modal');
-		const h2 = trailerModal.querySelector('h2');
-		const youtubePlayer = document.getElementById('player');
+  loadTrailer: function () {
+    youtubePlayer.src = `${state.currentMovie.videoPaths[state.currentTrailer]}?origin=${
+      location.origin
+    }`;
+  },
+
+  nextTrailer: function () {
+    state.currentTrailer === state.currentMovie.videoPaths.length - 1
+      ? (state.currentTrailer = 0)
+      : state.currentTrailer++;
+
+    if (state.currentMovie.videoPaths.length > 1) {
+      view.refreshTrailerCounter();
+      this.loadTrailer();
+    }
+  },
+
+  prevTrailer: function () {
+    state.currentTrailer === 0
+      ? (state.currentTrailer = state.currentMovie.videoPaths.length - 1)
+      : state.currentTrailer--;
+
+    if (state.currentMovie.videoPaths.length > 1) {
+      view.refreshTrailerCounter();
+      this.loadTrailer();
+    }
+  },
+
+  closeModals: function () {
+    const h2 = trailerModal.querySelector('h2') || movieResultsModal.querySelector('h2');
 
     movieModal.removeEventListener('click', handlers.closeModalsHandler);
     movieResultsModal.removeEventListener('click', handlers.boundResultsHandler);
 
-		if(h2) {trailerModal.removeChild(h2)};
-		movieArrays.searchedMovies = [];
-		youtubePlayer.style.display = 'inline-block';
-    youtubePlayer.src = "";
+    if (h2 && h2.parentElement.id === 'trailer_modal') {
+      trailerModal.removeChild(h2);
+    } else if (h2 && h2.parentElement.id === 'results_modal') {
+      movieResultsModal.removeChild(h2);
+    }
+
+    state.searchedMovies = [];
+    state.currentMovie = {};
+    state.currentTrailer = 0;
+    modalMovieList.innerHTML = '';
+    youtubePlayer.style.display = 'inline-block';
+    youtubePlayer.src = '';
 
     trailerModal.classList.remove('modal-visible-flex');
     movieResultsModal.classList.remove('modal-visible-block');
     movieModal.classList.remove('modal-visible-block');
-	}
-}
+  },
+};
 
 ////////////
 /// VIEW ///
 ////////////
 const view = {
-	displayMovies: function(userUL) {
-		const array = helpers.getArray(userUL.id);
+  displayMovies: function (userUL) {
+    const array = helpers.getArray(userUL.id);
 
-		userUL.innerHTML = movieArrays[array].map(movie => {
-			let hasInfo;
-			movie.hasInfo ? hasInfo = 'true' : hasInfo = 'false';
+    userUL.innerHTML = state[array]
+      .map((movie) => {
+        let hasInfo;
+        movie.hasInfo ? (hasInfo = 'true') : (hasInfo = 'false');
 
-			return `
+        return `
 				<li class='itemClass' data-movie_info=${hasInfo} data-id=${movie._id}>
 					${movie.title}
 					<button class='btnApprove'>\u2713</button>
 					<button class='btnDelete'>\u2717</button>
 				</li>
 			`;
-		}).join('');
+      })
+      .join('');
 
-		view.displayApproved(userUL);
-	},
+    view.displayApproved(userUL);
+  },
 
-	displayApproved: function(userUL) {
-		const array = helpers.getArray(userUL.id);
+  displayApproved: function (userUL) {
+    const array = helpers.getArray(userUL.id);
 
-		movieArrays[array].forEach((movie, index) => {
-			if(movie.approved) {
-				const movieLiToApprove = userUL.querySelector(`li[data-id='${movie._id}']`);
-				const movieButtonToApprove = movieLiToApprove.children[0];
+    state[array].forEach((movie, index) => {
+      if (movie.approved) {
+        const movieLiToApprove = userUL.querySelector(`li[data-id='${movie._id}']`);
+        const movieButtonToApprove = movieLiToApprove.children[0];
 
-				movieLiToApprove.classList.toggle('js-approve');
-				movieButtonToApprove.classList.toggle('js-approve');
-			}	
-		});
-	},
+        movieLiToApprove.classList.toggle('js-approve');
+        movieButtonToApprove.classList.toggle('js-approve');
+      }
+    });
+  },
 
-	displayMovieResults: function(movieArray) {
-		const modifyMovieArray = document.getElementById('movie_modal-list');
+  displayMovieResults: function (movieArray) {
+    if (movieArray.length === 0) {
+      return helpers.createH2Ele(movieResultsModal, modifyMovieArray, 'results');
+    }
 
-		if(movieArray.length === 0) {
-			return modifyMovieArray.innerHTML = `<li>No results for that search</li>`;
-		}
+    modalMovieList.innerHTML = movieArray
+      .map((movie) => {
+        let posterPath, year;
+        movie.poster_path ? (posterPath = BASE_IMAGE_PATH + movie.poster_path) : (posterPath = '');
+        movie.release_date ? (year = movie.release_date.split('-')[0]) : (year = '');
 
-		modifyMovieArray.innerHTML = movieArray.map(movie => {
-			let posterPath, year;
-			movie.poster_path ? posterPath = BASE_IMAGE_PATH + movie.poster_path : posterPath = '';
-			movie.release_date ? year = movie.release_date.split('-')[0] : year = '';
-
-			return `
+        return `
 				<li class='movie_modal-movie'>
 					<img src='${posterPath}' alt='missing movie poster'/>
 					<div>
@@ -614,46 +486,50 @@ const view = {
 					</div>
 					<button data-movie_id=${movie.id}>Choose</button>
 				</li>
-			`
-		}).join('');
-	}
-}
+			`;
+      })
+      .join('');
+  },
 
+  refreshTrailerCounter: function () {
+    trailerCounter.innerHTML = `${state.currentTrailer + 1}/${
+      state.currentMovie.videoPaths.length
+    }`;
+  },
+};
 
 ///////////////////////
 /// EVENT LISTENERS ///
 ///////////////////////
 const events = {
-	listeners: function() {
-		const inputButtons = document.querySelectorAll('.btnContainer button');
-		const inputs = Array.from(document.getElementsByClassName('input'));
+  listeners: function () {
+    const inputButtons = document.querySelectorAll('.btnContainer button');
+    const inputs = Array.from(document.getElementsByClassName('input'));
     const usersUL = document.querySelectorAll('ul');
-    const welcomeModal = document.getElementById('welcome_modal');
+    const welcomeModalBtn = document.querySelector('#welcome_modal button');
 
-    welcomeModal.addEventListener('click', handlers.closeWelcomeModal);
-		inputButtons.forEach(btn => btn.addEventListener('click', handlers.inputButtonClick));
-		inputs.forEach(input => input.addEventListener('keypress', handlers.inputPressEnter));
-		usersUL.forEach(ul => ul.addEventListener('click', handlers.listButtonsHandler));
-	}	
-}
-
+    welcomeModalBtn.addEventListener('click', handlers.closeWelcomeModal);
+    inputButtons.forEach((btn) => btn.addEventListener('click', handlers.inputButtonClick));
+    inputs.forEach((input) => input.addEventListener('keypress', handlers.inputPressEnter));
+    usersUL.forEach((ul) => ul.addEventListener('click', handlers.listButtonsHandler));
+  },
+};
 
 ///////////////
 /// ON LOAD ///
 ///////////////
-window.onload = function() {
-	myAPI.getMovies()
-		.then(response => {
-			movieArrays.allMovies = [...response];
-			movieArrays.dannyArr = movieArrays.allMovies.filter(movie => movie.array === 'dannyArr');
-			movieArrays.lolaArr = movieArrays.allMovies.filter(movie => movie.array === 'lolaArr');
-			view.displayMovies(document.getElementById('listDanny'));
-			view.displayMovies(document.getElementById('listLola'));
-			events.listeners();
-		});
-}
-	
-},{"./myAPI":4,"./tmdbAPI":6}],6:[function(require,module,exports){
+window.onload = function () {
+  myAPI.getMovies().then((response) => {
+    state.allMovies = [...response];
+    state.dannyArr = state.allMovies.filter((movie) => movie.array === 'dannyArr');
+    state.lolaArr = state.allMovies.filter((movie) => movie.array === 'lolaArr');
+    view.displayMovies(listDanny);
+    view.displayMovies(listLola);
+    events.listeners();
+  });
+};
+
+},{"./myAPI":3,"./tmdbAPI":5}],5:[function(require,module,exports){
 const axios = require('axios');
 const { APIKEY } = require('../apiConfig');
 const TMDBURL = 'https://api.themoviedb.org/3';
@@ -710,9 +586,9 @@ const tmdbRequests = {
 
 module.exports = tmdbRequests;
 
-},{"../apiConfig":2,"axios":7}],7:[function(require,module,exports){
+},{"../apiConfig":1,"axios":6}],6:[function(require,module,exports){
 module.exports = require('./lib/axios');
-},{"./lib/axios":9}],8:[function(require,module,exports){
+},{"./lib/axios":8}],7:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -894,7 +770,7 @@ module.exports = function xhrAdapter(config) {
   });
 };
 
-},{"../core/buildFullPath":15,"../core/createError":16,"./../core/settle":20,"./../helpers/buildURL":24,"./../helpers/cookies":26,"./../helpers/isURLSameOrigin":28,"./../helpers/parseHeaders":30,"./../utils":32}],9:[function(require,module,exports){
+},{"../core/buildFullPath":14,"../core/createError":15,"./../core/settle":19,"./../helpers/buildURL":23,"./../helpers/cookies":25,"./../helpers/isURLSameOrigin":27,"./../helpers/parseHeaders":29,"./../utils":31}],8:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -949,7 +825,7 @@ module.exports = axios;
 // Allow use of default import syntax in TypeScript
 module.exports.default = axios;
 
-},{"./cancel/Cancel":10,"./cancel/CancelToken":11,"./cancel/isCancel":12,"./core/Axios":13,"./core/mergeConfig":19,"./defaults":22,"./helpers/bind":23,"./helpers/spread":31,"./utils":32}],10:[function(require,module,exports){
+},{"./cancel/Cancel":9,"./cancel/CancelToken":10,"./cancel/isCancel":11,"./core/Axios":12,"./core/mergeConfig":18,"./defaults":21,"./helpers/bind":22,"./helpers/spread":30,"./utils":31}],9:[function(require,module,exports){
 'use strict';
 
 /**
@@ -970,7 +846,7 @@ Cancel.prototype.__CANCEL__ = true;
 
 module.exports = Cancel;
 
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 var Cancel = require('./Cancel');
@@ -1029,14 +905,14 @@ CancelToken.source = function source() {
 
 module.exports = CancelToken;
 
-},{"./Cancel":10}],12:[function(require,module,exports){
+},{"./Cancel":9}],11:[function(require,module,exports){
 'use strict';
 
 module.exports = function isCancel(value) {
   return !!(value && value.__CANCEL__);
 };
 
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1132,7 +1008,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = Axios;
 
-},{"../helpers/buildURL":24,"./../utils":32,"./InterceptorManager":14,"./dispatchRequest":17,"./mergeConfig":19}],14:[function(require,module,exports){
+},{"../helpers/buildURL":23,"./../utils":31,"./InterceptorManager":13,"./dispatchRequest":16,"./mergeConfig":18}],13:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1186,7 +1062,7 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 
 module.exports = InterceptorManager;
 
-},{"./../utils":32}],15:[function(require,module,exports){
+},{"./../utils":31}],14:[function(require,module,exports){
 'use strict';
 
 var isAbsoluteURL = require('../helpers/isAbsoluteURL');
@@ -1208,7 +1084,7 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
   return requestedURL;
 };
 
-},{"../helpers/combineURLs":25,"../helpers/isAbsoluteURL":27}],16:[function(require,module,exports){
+},{"../helpers/combineURLs":24,"../helpers/isAbsoluteURL":26}],15:[function(require,module,exports){
 'use strict';
 
 var enhanceError = require('./enhanceError');
@@ -1228,7 +1104,7 @@ module.exports = function createError(message, config, code, request, response) 
   return enhanceError(error, config, code, request, response);
 };
 
-},{"./enhanceError":18}],17:[function(require,module,exports){
+},{"./enhanceError":17}],16:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1309,7 +1185,7 @@ module.exports = function dispatchRequest(config) {
   });
 };
 
-},{"../cancel/isCancel":12,"../defaults":22,"./../utils":32,"./transformData":21}],18:[function(require,module,exports){
+},{"../cancel/isCancel":11,"../defaults":21,"./../utils":31,"./transformData":20}],17:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1353,7 +1229,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
   return error;
 };
 
-},{}],19:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -1428,7 +1304,7 @@ module.exports = function mergeConfig(config1, config2) {
   return config;
 };
 
-},{"../utils":32}],20:[function(require,module,exports){
+},{"../utils":31}],19:[function(require,module,exports){
 'use strict';
 
 var createError = require('./createError');
@@ -1455,7 +1331,7 @@ module.exports = function settle(resolve, reject, response) {
   }
 };
 
-},{"./createError":16}],21:[function(require,module,exports){
+},{"./createError":15}],20:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1477,7 +1353,7 @@ module.exports = function transformData(data, headers, fns) {
   return data;
 };
 
-},{"./../utils":32}],22:[function(require,module,exports){
+},{"./../utils":31}],21:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -1578,7 +1454,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 module.exports = defaults;
 
 }).call(this,require('_process'))
-},{"./adapters/http":8,"./adapters/xhr":8,"./helpers/normalizeHeaderName":29,"./utils":32,"_process":1}],23:[function(require,module,exports){
+},{"./adapters/http":7,"./adapters/xhr":7,"./helpers/normalizeHeaderName":28,"./utils":31,"_process":32}],22:[function(require,module,exports){
 'use strict';
 
 module.exports = function bind(fn, thisArg) {
@@ -1591,7 +1467,7 @@ module.exports = function bind(fn, thisArg) {
   };
 };
 
-},{}],24:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1664,7 +1540,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
   return url;
 };
 
-},{"./../utils":32}],25:[function(require,module,exports){
+},{"./../utils":31}],24:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1680,7 +1556,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
     : baseURL;
 };
 
-},{}],26:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1735,7 +1611,7 @@ module.exports = (
     })()
 );
 
-},{"./../utils":32}],27:[function(require,module,exports){
+},{"./../utils":31}],26:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1751,7 +1627,7 @@ module.exports = function isAbsoluteURL(url) {
   return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
 };
 
-},{}],28:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1821,7 +1697,7 @@ module.exports = (
     })()
 );
 
-},{"./../utils":32}],29:[function(require,module,exports){
+},{"./../utils":31}],28:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -1835,7 +1711,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
   });
 };
 
-},{"../utils":32}],30:[function(require,module,exports){
+},{"../utils":31}],29:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1890,7 +1766,7 @@ module.exports = function parseHeaders(headers) {
   return parsed;
 };
 
-},{"./../utils":32}],31:[function(require,module,exports){
+},{"./../utils":31}],30:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1919,7 +1795,7 @@ module.exports = function spread(callback) {
   };
 };
 
-},{}],32:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 var bind = require('./helpers/bind');
@@ -2265,4 +2141,190 @@ module.exports = {
   trim: trim
 };
 
-},{"./helpers/bind":23}]},{},[5]);
+},{"./helpers/bind":22}],32:[function(require,module,exports){
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}]},{},[4]);
