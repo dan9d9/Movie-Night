@@ -12,102 +12,146 @@ module.exports = {
 }
 },{}],3:[function(require,module,exports){
 const axios = require('axios');
+
+const booksAPI = {
+  searchBook: async function (titleArr) {
+    const query = titleArr.join('+');
+
+    try {
+      const response = await axios.get(`http://openlibrary.org/search.json?title=${query}`);
+
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      if (err.response) {
+        console.log('error response: ', err.response);
+      } else {
+        console.log('error: ', err);
+      }
+    }
+  },
+
+  searchAuthor: async function (titleArr) {
+    const query = titleArr.join('+');
+
+    try {
+      const response = await axios.get(`http://openlibrary.org/search.json?author=${query}`);
+
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      if (err.response) {
+        console.log('error response: ', err.response);
+      } else {
+        console.log('error: ', err);
+      }
+    }
+  },
+};
+
+module.exports = booksAPI;
+
+},{"axios":7}],4:[function(require,module,exports){
+const axios = require('axios');
 const { URL } = require('../config');
 
 // /////////////////////
 // /// HTTP REQUESTS ///
 // /////////////////////
 const httpRequests = {
-	addMovie: async function(movieTitle, array) {
-		try {
-			const response = await axios.post(`${URL}/movies/new`, {
-				title: movieTitle,
-				array,
-				approved: false
-			});
-			if(response.statusText === 'OK') {
-				return response.data;	
-			}
-		}
-		catch(err) {
-			if(err.response) {
-				console.log('error response: ', err.response);
-			}else {
-				console.log('error: ', err);	
-			}
-		}	
-	}, 
+  addMovie: async function (movieTitle, array) {
+    try {
+      const response = await axios.post(`${URL}/movies/new`, {
+        title: movieTitle,
+        array,
+        approved: false,
+      });
+      if (response.statusText === 'OK') {
+        return response.data;
+      }
+    } catch (err) {
+      if (err.response) {
+        console.log('error response: ', err.response);
+      } else {
+        console.log('error: ', err);
+      }
+    }
+  },
 
-	deleteMovie: async function(array, id) {
-		try {
-			const response = await axios.delete(`${URL}/movies/delete/${id}`);
-			if(response.statusText === 'OK') {
-				return response.data;	
-			}
-		}catch(err) {
-			if(err.response) {
-				console.log('error response: ', err.response);
-			}else {
-				console.log('error: ', err);	
-			}
-		}
-	},
+  deleteMovie: async function (id) {
+    try {
+      const response = await axios.delete(`${URL}/movies/delete/${id}`);
+      if (response.statusText === 'OK') {
+        return response.data;
+      }
+    } catch (err) {
+      if (err.response) {
+        console.log('error response: ', err.response);
+      } else {
+        console.log('error: ', err);
+      }
+    }
+  },
 
-	getMovies: async function() {
-		try {
-			const response = await axios.get(`${URL}/movies`);
-			if(response.statusText === 'OK') {
-				return response.data;
-			}
-		}catch(err) {
-			if(err.response) {
-				console.log(err.response);
-			}else {
-				console.log(err);	
-			}
-		}
-	},
+  getMovies: async function () {
+    try {
+      const response = await axios.get(`${URL}/movies`);
+      if (response.statusText === 'OK') {
+        return response.data;
+      }
+    } catch (err) {
+      if (err.response) {
+        console.log(err.response);
+      } else {
+        console.log(err);
+      }
+    }
+  },
 
-	approveMovie: async function(movie) {
-		try {
-			await axios.patch(`/movies/approve/${movie._id}`);
-		}catch(err) {
-			if(err.response) {
-				console.log('error response: ', err.response);
-			}else {
-				console.log('error: ', err);	
-			}
-		}
-	},
+  approveMovie: async function (movie) {
+    try {
+      await axios.patch(`/movies/approve/${movie._id}`);
+    } catch (err) {
+      if (err.response) {
+        console.log('error response: ', err.response);
+      } else {
+        console.log('error: ', err);
+      }
+    }
+  },
 
-	updateMovie: async function(movie) {
-		try {
-			const response = await axios.put(`${URL}/movies/update`, {
-				_id: movie._id,
-				title: movie.title, 
-				hasInfo: movie.hasInfo,
-				summary: movie.summary,
-				posterPath: movie.posterPath,
-				videoPaths: movie.videoPaths
-			});
+  updateMovie: async function (movie) {
+    try {
+      const response = await axios.put(`${URL}/movies/update`, {
+        _id: movie._id,
+        title: movie.title,
+        hasInfo: movie.hasInfo,
+        summary: movie.summary,
+        posterPath: movie.posterPath,
+        videoPaths: movie.videoPaths,
+      });
 
-			if(response.statusText === 'OK') {
-				return response.data;	
-			}
-		}catch(err) {
-			if(err.response) {
-				console.log('error response: ', err.response);
-			}else {
-				console.log('error: ', err);	
-			}
-		}
-	}
-}
+      if (response.statusText === 'OK') {
+        return response.data;
+      }
+    } catch (err) {
+      if (err.response) {
+        console.log('error response: ', err.response);
+      } else {
+        console.log('error: ', err);
+      }
+    }
+  },
+};
 
 module.exports = httpRequests;
-},{"../config":2,"axios":6}],4:[function(require,module,exports){
+
+},{"../config":2,"axios":7}],5:[function(require,module,exports){
 const myAPI = require('./myAPI');
 const tmdbAPI = require('./tmdbAPI');
+const booksAPI = require('./booksAPI');
 const BASE_IMAGE_PATH = 'https://image.tmdb.org/t/p/w185';
 const BASE_VIDEO_PATH = 'https://www.youtube.com/embed';
 
@@ -207,25 +251,33 @@ const handlers = {
     let movieTitle, array, userUL, input;
 
     if (this.id === 'btnDanny') {
-      movieTitle = inputDanny.value.trim();
+      input = inputDanny;
       userUL = listDanny;
       array = 'dannyArr';
     } else if (this.id === 'btnLola') {
-      movieTitle = inputLola.value.trim();
+      input = inputLola;
       userUL = listLola;
       array = 'lolaArr';
     }
 
+    titleArr = input.value.trim().split(' ');
+
     input.value = '';
-    if (!movieTitle) {
+    if (!titleArr[0]) {
       return (input.placeholder = 'Please enter a valid movie title');
     }
     input.placeholder = 'Enter a movie';
 
-    myAPI.addMovie(movieTitle, array).then((response) => {
-      modifyMovieArray.addMovie(response);
-      view.displayMovies(userUL);
-    });
+    if (titleArr[0] === 'author' || titleArr[0] === 'book') {
+      let search = titleArr.shift().replace(/^./, (match) => match.toUpperCase());
+
+      booksAPI[`search${search}`](titleArr).then((response) => console.log(response));
+    } else {
+      myAPI.addMovie(titleArr.join(' '), array).then((response) => {
+        modifyMovieArray.addMovie(response);
+        view.displayMovies(userUL);
+      });
+    }
   },
 
   inputPressEnter: function (e) {
@@ -233,10 +285,10 @@ const handlers = {
       return;
     }
 
-    const movieTitle = this.value.trim();
+    const titleArr = this.value.trim().split(' ');
 
     this.value = '';
-    if (!movieTitle) {
+    if (!titleArr[0]) {
       return (this.placeholder = 'Please enter a valid movie title');
     }
     this.placeholder = 'Enter a movie';
@@ -252,10 +304,19 @@ const handlers = {
       array = 'lolaArr';
     }
 
-    myAPI.addMovie(movieTitle, array).then((response) => {
-      modifyMovieArray.addMovie(response);
-      view.displayMovies(userUL);
-    });
+    if (titleArr[0].toLowerCase() === 'author' || titleArr[0].toLowerCase() === 'book') {
+      let search = titleArr
+        .shift()
+        .toLowerCase()
+        .replace(/^./, (match) => match.toUpperCase());
+
+      booksAPI[`search${search}`](titleArr).then((response) => console.log(response));
+    } else {
+      myAPI.addMovie(titleArr.join(' '), array).then((response) => {
+        modifyMovieArray.addMovie(response);
+        view.displayMovies(userUL);
+      });
+    }
   },
 
   listButtonsHandler: function (e) {
@@ -275,7 +336,7 @@ const handlers = {
         modals.openTrailerModal(array, e.target.dataset.id);
       }
     } else if (e.target.className === 'btnDelete') {
-      myAPI.deleteMovie(array, id).then(() => {
+      myAPI.deleteMovie(id).then(() => {
         modifyMovieArray.deleteMovie(array, id);
         view.displayMovies(userUL);
       });
@@ -469,7 +530,7 @@ const view = {
 
   displayMovieResults: function (movieArray) {
     if (movieArray.length === 0) {
-      return helpers.createH2Ele(movieResultsModal, modifyMovieArray, 'results');
+      return helpers.createH2Ele(movieResultsModal, modalMovieList, 'results');
     }
 
     modalMovieList.innerHTML = movieArray
@@ -532,7 +593,7 @@ window.onload = function () {
   });
 };
 
-},{"./myAPI":3,"./tmdbAPI":5}],5:[function(require,module,exports){
+},{"./booksAPI":3,"./myAPI":4,"./tmdbAPI":6}],6:[function(require,module,exports){
 const axios = require('axios');
 const { APIKEY } = require('../apiConfig');
 const TMDBURL = 'https://api.themoviedb.org/3';
@@ -589,9 +650,9 @@ const tmdbRequests = {
 
 module.exports = tmdbRequests;
 
-},{"../apiConfig":1,"axios":6}],6:[function(require,module,exports){
+},{"../apiConfig":1,"axios":7}],7:[function(require,module,exports){
 module.exports = require('./lib/axios');
-},{"./lib/axios":8}],7:[function(require,module,exports){
+},{"./lib/axios":9}],8:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -772,7 +833,7 @@ module.exports = function xhrAdapter(config) {
   });
 };
 
-},{"../core/buildFullPath":14,"../core/createError":15,"./../core/settle":19,"./../helpers/buildURL":23,"./../helpers/cookies":25,"./../helpers/isURLSameOrigin":28,"./../helpers/parseHeaders":30,"./../utils":32}],8:[function(require,module,exports){
+},{"../core/buildFullPath":15,"../core/createError":16,"./../core/settle":20,"./../helpers/buildURL":24,"./../helpers/cookies":26,"./../helpers/isURLSameOrigin":29,"./../helpers/parseHeaders":31,"./../utils":33}],9:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -830,7 +891,7 @@ module.exports = axios;
 // Allow use of default import syntax in TypeScript
 module.exports.default = axios;
 
-},{"./cancel/Cancel":9,"./cancel/CancelToken":10,"./cancel/isCancel":11,"./core/Axios":12,"./core/mergeConfig":18,"./defaults":21,"./helpers/bind":22,"./helpers/isAxiosError":27,"./helpers/spread":31,"./utils":32}],9:[function(require,module,exports){
+},{"./cancel/Cancel":10,"./cancel/CancelToken":11,"./cancel/isCancel":12,"./core/Axios":13,"./core/mergeConfig":19,"./defaults":22,"./helpers/bind":23,"./helpers/isAxiosError":28,"./helpers/spread":32,"./utils":33}],10:[function(require,module,exports){
 'use strict';
 
 /**
@@ -851,7 +912,7 @@ Cancel.prototype.__CANCEL__ = true;
 
 module.exports = Cancel;
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 var Cancel = require('./Cancel');
@@ -910,14 +971,14 @@ CancelToken.source = function source() {
 
 module.exports = CancelToken;
 
-},{"./Cancel":9}],11:[function(require,module,exports){
+},{"./Cancel":10}],12:[function(require,module,exports){
 'use strict';
 
 module.exports = function isCancel(value) {
   return !!(value && value.__CANCEL__);
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1014,7 +1075,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = Axios;
 
-},{"../helpers/buildURL":23,"./../utils":32,"./InterceptorManager":13,"./dispatchRequest":16,"./mergeConfig":18}],13:[function(require,module,exports){
+},{"../helpers/buildURL":24,"./../utils":33,"./InterceptorManager":14,"./dispatchRequest":17,"./mergeConfig":19}],14:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1068,7 +1129,7 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 
 module.exports = InterceptorManager;
 
-},{"./../utils":32}],14:[function(require,module,exports){
+},{"./../utils":33}],15:[function(require,module,exports){
 'use strict';
 
 var isAbsoluteURL = require('../helpers/isAbsoluteURL');
@@ -1090,7 +1151,7 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
   return requestedURL;
 };
 
-},{"../helpers/combineURLs":24,"../helpers/isAbsoluteURL":26}],15:[function(require,module,exports){
+},{"../helpers/combineURLs":25,"../helpers/isAbsoluteURL":27}],16:[function(require,module,exports){
 'use strict';
 
 var enhanceError = require('./enhanceError');
@@ -1110,7 +1171,7 @@ module.exports = function createError(message, config, code, request, response) 
   return enhanceError(error, config, code, request, response);
 };
 
-},{"./enhanceError":17}],16:[function(require,module,exports){
+},{"./enhanceError":18}],17:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1191,7 +1252,7 @@ module.exports = function dispatchRequest(config) {
   });
 };
 
-},{"../cancel/isCancel":11,"../defaults":21,"./../utils":32,"./transformData":20}],17:[function(require,module,exports){
+},{"../cancel/isCancel":12,"../defaults":22,"./../utils":33,"./transformData":21}],18:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1235,7 +1296,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
   return error;
 };
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -1324,7 +1385,7 @@ module.exports = function mergeConfig(config1, config2) {
   return config;
 };
 
-},{"../utils":32}],19:[function(require,module,exports){
+},{"../utils":33}],20:[function(require,module,exports){
 'use strict';
 
 var createError = require('./createError');
@@ -1351,7 +1412,7 @@ module.exports = function settle(resolve, reject, response) {
   }
 };
 
-},{"./createError":15}],20:[function(require,module,exports){
+},{"./createError":16}],21:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1373,7 +1434,7 @@ module.exports = function transformData(data, headers, fns) {
   return data;
 };
 
-},{"./../utils":32}],21:[function(require,module,exports){
+},{"./../utils":33}],22:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -1475,7 +1536,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 module.exports = defaults;
 
 }).call(this)}).call(this,require('_process'))
-},{"./adapters/http":7,"./adapters/xhr":7,"./helpers/normalizeHeaderName":29,"./utils":32,"_process":33}],22:[function(require,module,exports){
+},{"./adapters/http":8,"./adapters/xhr":8,"./helpers/normalizeHeaderName":30,"./utils":33,"_process":34}],23:[function(require,module,exports){
 'use strict';
 
 module.exports = function bind(fn, thisArg) {
@@ -1488,7 +1549,7 @@ module.exports = function bind(fn, thisArg) {
   };
 };
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1560,7 +1621,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
   return url;
 };
 
-},{"./../utils":32}],24:[function(require,module,exports){
+},{"./../utils":33}],25:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1576,7 +1637,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
     : baseURL;
 };
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1631,7 +1692,7 @@ module.exports = (
     })()
 );
 
-},{"./../utils":32}],26:[function(require,module,exports){
+},{"./../utils":33}],27:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1647,7 +1708,7 @@ module.exports = function isAbsoluteURL(url) {
   return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
 };
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1660,7 +1721,7 @@ module.exports = function isAxiosError(payload) {
   return (typeof payload === 'object') && (payload.isAxiosError === true);
 };
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1730,7 +1791,7 @@ module.exports = (
     })()
 );
 
-},{"./../utils":32}],29:[function(require,module,exports){
+},{"./../utils":33}],30:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -1744,7 +1805,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
   });
 };
 
-},{"../utils":32}],30:[function(require,module,exports){
+},{"../utils":33}],31:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1799,7 +1860,7 @@ module.exports = function parseHeaders(headers) {
   return parsed;
 };
 
-},{"./../utils":32}],31:[function(require,module,exports){
+},{"./../utils":33}],32:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1828,7 +1889,7 @@ module.exports = function spread(callback) {
   };
 };
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 'use strict';
 
 var bind = require('./helpers/bind');
@@ -2181,7 +2242,7 @@ module.exports = {
   stripBOM: stripBOM
 };
 
-},{"./helpers/bind":22}],33:[function(require,module,exports){
+},{"./helpers/bind":23}],34:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -2367,4 +2428,4 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}]},{},[4]);
+},{}]},{},[5]);

@@ -1,5 +1,6 @@
 const myAPI = require('./myAPI');
 const tmdbAPI = require('./tmdbAPI');
+const booksAPI = require('./booksAPI');
 const BASE_IMAGE_PATH = 'https://image.tmdb.org/t/p/w185';
 const BASE_VIDEO_PATH = 'https://www.youtube.com/embed';
 
@@ -99,25 +100,33 @@ const handlers = {
     let movieTitle, array, userUL, input;
 
     if (this.id === 'btnDanny') {
-      movieTitle = inputDanny.value.trim();
+      input = inputDanny;
       userUL = listDanny;
       array = 'dannyArr';
     } else if (this.id === 'btnLola') {
-      movieTitle = inputLola.value.trim();
+      input = inputLola;
       userUL = listLola;
       array = 'lolaArr';
     }
 
+    titleArr = input.value.trim().split(' ');
+
     input.value = '';
-    if (!movieTitle) {
+    if (!titleArr[0]) {
       return (input.placeholder = 'Please enter a valid movie title');
     }
     input.placeholder = 'Enter a movie';
 
-    myAPI.addMovie(movieTitle, array).then((response) => {
-      modifyMovieArray.addMovie(response);
-      view.displayMovies(userUL);
-    });
+    if (titleArr[0] === 'author' || titleArr[0] === 'book') {
+      let search = titleArr.shift().replace(/^./, (match) => match.toUpperCase());
+
+      booksAPI[`search${search}`](titleArr).then((response) => console.log(response));
+    } else {
+      myAPI.addMovie(titleArr.join(' '), array).then((response) => {
+        modifyMovieArray.addMovie(response);
+        view.displayMovies(userUL);
+      });
+    }
   },
 
   inputPressEnter: function (e) {
@@ -125,10 +134,10 @@ const handlers = {
       return;
     }
 
-    const movieTitle = this.value.trim();
+    const titleArr = this.value.trim().split(' ');
 
     this.value = '';
-    if (!movieTitle) {
+    if (!titleArr[0]) {
       return (this.placeholder = 'Please enter a valid movie title');
     }
     this.placeholder = 'Enter a movie';
@@ -144,10 +153,19 @@ const handlers = {
       array = 'lolaArr';
     }
 
-    myAPI.addMovie(movieTitle, array).then((response) => {
-      modifyMovieArray.addMovie(response);
-      view.displayMovies(userUL);
-    });
+    if (titleArr[0].toLowerCase() === 'author' || titleArr[0].toLowerCase() === 'book') {
+      let search = titleArr
+        .shift()
+        .toLowerCase()
+        .replace(/^./, (match) => match.toUpperCase());
+
+      booksAPI[`search${search}`](titleArr).then((response) => console.log(response));
+    } else {
+      myAPI.addMovie(titleArr.join(' '), array).then((response) => {
+        modifyMovieArray.addMovie(response);
+        view.displayMovies(userUL);
+      });
+    }
   },
 
   listButtonsHandler: function (e) {
@@ -167,7 +185,7 @@ const handlers = {
         modals.openTrailerModal(array, e.target.dataset.id);
       }
     } else if (e.target.className === 'btnDelete') {
-      myAPI.deleteMovie(array, id).then(() => {
+      myAPI.deleteMovie(id).then(() => {
         modifyMovieArray.deleteMovie(array, id);
         view.displayMovies(userUL);
       });
@@ -361,7 +379,7 @@ const view = {
 
   displayMovieResults: function (movieArray) {
     if (movieArray.length === 0) {
-      return helpers.createH2Ele(movieResultsModal, modifyMovieArray, 'results');
+      return helpers.createH2Ele(movieResultsModal, modalMovieList, 'results');
     }
 
     modalMovieList.innerHTML = movieArray
