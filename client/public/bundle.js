@@ -98,7 +98,6 @@ const httpRequests = {
   getMovies: async function () {
     try {
       const response = await axios.get(`${URL}/movies`);
-      console.log(response);
       if (response.statusText === 'OK') {
         return response.data;
       }
@@ -425,11 +424,10 @@ const handlers = {
 
     if (e.target.tagName === 'LI') {
       modals.openMovieModal();
-      if (e.target.dataset.movie_info === 'false') {
-        modals.openMovieResultsModal(e.target);
-      } else if (e.target.dataset.movie_info === 'true') {
-        modals.openTrailerModal(array, e.target.dataset.id);
-      }
+
+      e.target.dataset.movie_info == true
+        ? modals.openTrailerModal(array, e.target.dataset.id)
+        : modals.openMovieResultsModal(e.target);
     } else if (e.target.className === 'btnDelete') {
       myAPI.deleteMovie(id).then(() => {
         modifyMovieArray.deleteMovie(array, id);
@@ -593,7 +591,7 @@ const view = {
 
     userUL.innerHTML = state[array]
       .map((movie) => {
-        let hasInfo = movie.hasInfo ? 'true' : 'false';
+        let hasInfo = movie.hasInfo ? '1' : '0';
 
         return MovieListItem(movie._id, movie.title, hasInfo);
       })
