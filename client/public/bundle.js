@@ -53,9 +53,9 @@ const booksAPI = {
 
 module.exports = booksAPI;
 
-},{"axios":7}],4:[function(require,module,exports){
+},{"axios":9}],4:[function(require,module,exports){
 const axios = require('axios');
-const { URL } = require('../config');
+const { URL } = require('../../config');
 
 // /////////////////////
 // /// HTTP REQUESTS ///
@@ -98,6 +98,7 @@ const httpRequests = {
   getMovies: async function () {
     try {
       const response = await axios.get(`${URL}/movies`);
+      console.log(response);
       if (response.statusText === 'OK') {
         return response.data;
       }
@@ -148,12 +149,104 @@ const httpRequests = {
 
 module.exports = httpRequests;
 
-},{"../config":2,"axios":7}],5:[function(require,module,exports){
-const myAPI = require('./myAPI');
-const tmdbAPI = require('./tmdbAPI');
-const booksAPI = require('./booksAPI');
+},{"../../config":2,"axios":9}],5:[function(require,module,exports){
+const axios = require('axios');
+const { APIKEY } = require('../../apiConfig');
+const TMDBURL = 'https://api.themoviedb.org/3';
+
+//////////////////////////
+/// TMDB API REQUESTS ///
+//////////////////////////
+const tmdbRequests = {
+  getMovies: async function (query) {
+    try {
+      const response = await axios.get(
+        `${TMDBURL}/search/movie?api_key=${APIKEY}&language=en-US&query=${query}&page=1&include_adult=false`
+      );
+      if (response.statusText === 'OK' || response.status === 200) {
+        return response.data.results;
+      }
+    } catch (err) {
+      if (err.response) {
+        console.log(err.response);
+      } else {
+        console.log(err);
+      }
+    }
+  },
+
+  getMovieDetails: async function (id) {
+    try {
+      const response = await axios.get(`${TMDBURL}/movie/${id}?api_key=${APIKEY}&language=en-US`);
+      if (response.statusText === 'OK' || response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      if (err.response) {
+        console.log(err.response);
+      } else {
+        console.log(err);
+      }
+    }
+  },
+
+  getMovieVideos: async function (id) {
+    try {
+      const response = await axios.get(
+        `${TMDBURL}/movie/${id}/videos?api_key=${APIKEY}&language=en-US`
+      );
+      if (response.statusText === 'OK' || response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      if (err.response) {
+        console.log(err.response);
+      } else {
+        console.log(err);
+      }
+    }
+  },
+};
+
+module.exports = tmdbRequests;
+
+},{"../../apiConfig":1,"axios":9}],6:[function(require,module,exports){
+const MovieListItem = (id, title, hasInfo) => {
+  return `
+				<li class='itemClass' data-movie_info=${hasInfo} data-id=${id}>
+					${title}
+					<button class='btnApprove'>\u2713</button>
+					<button class='btnDelete'>\u2717</button>
+				</li>
+			`;
+};
+
+module.exports = MovieListItem;
+
+},{}],7:[function(require,module,exports){
+const MovieSearchItem = (id, title, overview, posterPath, year) => {
+  return `
+  <li class='movie_modal-movie'>
+    <img src='${posterPath}' alt='missing movie poster'/>
+    <div>
+      <p>${title} - ${year}</p>
+      <p>${overview}</p>
+    </div>
+    <button data-movie_id=${id}>Choose</button>
+  </li>
+`;
+};
+
+module.exports = MovieSearchItem;
+
+},{}],8:[function(require,module,exports){
+const myAPI = require('./apis/myAPI');
+const tmdbAPI = require('./apis/tmdbAPI');
+const booksAPI = require('./apis/booksAPI');
 const BASE_IMAGE_PATH = 'https://image.tmdb.org/t/p/w185';
 const BASE_VIDEO_PATH = 'https://www.youtube.com/embed';
+const MovieListItem = require('./components/MovieListItem');
+const MovieSearchItem = require('./components/MovieSearchItem');
 
 const inputDanny = document.getElementById('inputDanny');
 const inputLola = document.getElementById('inputLola');
@@ -177,10 +270,12 @@ const nextButton = document.getElementById('nextTrailer');
 const state = {
   dannyArr: [],
   lolaArr: [],
-  allMovies: [],
-  searchedMovies: [],
-  currentMovie: {},
-  currentTrailer: 0,
+  movies: {
+    allMovies: [],
+    searchedMovies: [],
+    currentMovie: {},
+    currentTrailer: 0,
+  },
 };
 
 ///////////////
@@ -394,8 +489,8 @@ const modals = {
     const movieTitle = state[array].find((ele) => ele._id === movieId).title;
 
     tmdbAPI.getMovies(movieTitle).then((movieResults) => {
-      state.searchedMovies = [...movieResults];
-      view.displayMovieResults(state.searchedMovies);
+      state.movies.searchedMovies = [...movieResults];
+      view.displayMovieResults(state.movies.searchedMovies);
     });
   },
 
@@ -423,10 +518,10 @@ const modals = {
     nextButton.style.display = 'block';
 
     trailerModal.classList.add('modal-visible-flex');
-    state.currentMovie = state[array].find((movie) => movie._id === movieID);
+    state.movies.currentMovie = state[array].find((movie) => movie._id === movieID);
     view.refreshTrailerCounter();
 
-    if (state.currentMovie.videoPaths.length === 0) {
+    if (state.movies.currentMovie.videoPaths.length === 0) {
       helpers.createH2Ele(trailerModal, trailerContainer, 'trailer');
       trailerCounter.style.display = 'none';
       youtubePlayer.style.display = 'none';
@@ -438,28 +533,28 @@ const modals = {
   },
 
   loadTrailer: function () {
-    youtubePlayer.src = `${state.currentMovie.videoPaths[state.currentTrailer]}?origin=${
-      location.origin
-    }`;
+    youtubePlayer.src = `${
+      state.movies.currentMovie.videoPaths[state.movies.currentTrailer]
+    }?origin=${location.origin}`;
   },
 
   nextTrailer: function () {
-    state.currentTrailer === state.currentMovie.videoPaths.length - 1
-      ? (state.currentTrailer = 0)
-      : state.currentTrailer++;
+    state.movies.currentTrailer === state.movies.currentMovie.videoPaths.length - 1
+      ? (state.movies.currentTrailer = 0)
+      : state.movies.currentTrailer++;
 
-    if (state.currentMovie.videoPaths.length > 1) {
+    if (state.movies.currentMovie.videoPaths.length > 1) {
       view.refreshTrailerCounter();
       this.loadTrailer();
     }
   },
 
   prevTrailer: function () {
-    state.currentTrailer === 0
-      ? (state.currentTrailer = state.currentMovie.videoPaths.length - 1)
-      : state.currentTrailer--;
+    state.movies.currentTrailer === 0
+      ? (state.movies.currentTrailer = state.movies.currentMovie.videoPaths.length - 1)
+      : state.movies.currentTrailer--;
 
-    if (state.currentMovie.videoPaths.length > 1) {
+    if (state.movies.currentMovie.videoPaths.length > 1) {
       view.refreshTrailerCounter();
       this.loadTrailer();
     }
@@ -477,9 +572,9 @@ const modals = {
       movieResultsModal.removeChild(h2);
     }
 
-    state.searchedMovies = [];
-    state.currentMovie = {};
-    state.currentTrailer = 0;
+    state.movies.searchedMovies = [];
+    state.movies.currentMovie = {};
+    state.movies.currentTrailer = 0;
     modalMovieList.innerHTML = '';
     youtubePlayer.src = '';
 
@@ -498,16 +593,9 @@ const view = {
 
     userUL.innerHTML = state[array]
       .map((movie) => {
-        let hasInfo;
-        movie.hasInfo ? (hasInfo = 'true') : (hasInfo = 'false');
+        let hasInfo = movie.hasInfo ? 'true' : 'false';
 
-        return `
-				<li class='itemClass' data-movie_info=${hasInfo} data-id=${movie._id}>
-					${movie.title}
-					<button class='btnApprove'>\u2713</button>
-					<button class='btnDelete'>\u2717</button>
-				</li>
-			`;
+        return MovieListItem(movie._id, movie.title, hasInfo);
       })
       .join('');
 
@@ -539,26 +627,17 @@ const view = {
         movie.poster_path ? (posterPath = BASE_IMAGE_PATH + movie.poster_path) : (posterPath = '');
         movie.release_date ? (year = movie.release_date.split('-')[0]) : (year = '');
 
-        return `
-				<li class='movie_modal-movie'>
-					<img src='${posterPath}' alt='missing movie poster'/>
-					<div>
-						<p>${movie.title} - ${year}</p>
-						<p>${movie.overview}</p>
-					</div>
-					<button data-movie_id=${movie.id}>Choose</button>
-				</li>
-			`;
+        return MovieSearchItem(movie.id, movie.title, movie.overview, posterPath, year);
       })
       .join('');
   },
 
   refreshTrailerCounter: function () {
-    let trailerCount = state.currentTrailer;
+    let trailerCount = state.movies.currentTrailer;
 
-    state.currentMovie.videoPaths.length === 0 ? (trailerCount = 0) : (trailerCount += 1);
+    state.movies.currentMovie.videoPaths.length === 0 ? (trailerCount = 0) : (trailerCount += 1);
 
-    trailerCounter.innerHTML = `${trailerCount}/${state.currentMovie.videoPaths.length}`;
+    trailerCounter.innerHTML = `${trailerCount}/${state.movies.currentMovie.videoPaths.length}`;
   },
 };
 
@@ -584,75 +663,18 @@ const events = {
 ///////////////
 window.onload = function () {
   myAPI.getMovies().then((response) => {
-    state.allMovies = [...response];
-    state.dannyArr = state.allMovies.filter((movie) => movie.array === 'dannyArr');
-    state.lolaArr = state.allMovies.filter((movie) => movie.array === 'lolaArr');
+    state.movies.allMovies = [...response];
+    state.dannyArr = state.movies.allMovies.filter((movie) => movie.array === 'dannyArr');
+    state.lolaArr = state.movies.allMovies.filter((movie) => movie.array === 'lolaArr');
     view.displayMovies(listDanny);
     view.displayMovies(listLola);
     events.listeners();
   });
 };
 
-},{"./booksAPI":3,"./myAPI":4,"./tmdbAPI":6}],6:[function(require,module,exports){
-const axios = require('axios');
-const { APIKEY } = require('../apiConfig');
-const TMDBURL = 'https://api.themoviedb.org/3';
-
-//////////////////////////
-/// TMDB API REQUESTS ///
-//////////////////////////
-const tmdbRequests = {
-	getMovies: async function(query) {
-		try {
-      const response = await axios.get(`${TMDBURL}/search/movie?api_key=${APIKEY}&language=en-US&query=${query}&page=1&include_adult=false`);
-			if(response.statusText === 'OK' || response.status === 200) {
-				return response.data.results;
-			}
-		}catch(err) {
-			if(err.response) {
-				console.log(err.response);
-			}else {
-				console.log(err);	
-			}
-		}
-	},
-
-	getMovieDetails: async function(id) {
-		try {
-			const response = await axios.get(`${TMDBURL}/movie/${id}?api_key=${APIKEY}&language=en-US`);
-			if(response.statusText === 'OK' || response.status === 200) {
-				return response.data;
-			}
-		}catch(err) {
-			if(err.response) {
-				console.log(err.response);
-			}else {
-				console.log(err);	
-			}
-		}
-	},
-
-	getMovieVideos: async function(id) {
-		try {
-			const response = await axios.get(`${TMDBURL}/movie/${id}/videos?api_key=${APIKEY}&language=en-US`);
-			if(response.statusText === 'OK' || response.status === 200) {
-				return response.data;
-			}
-		}catch(err) {
-			if(err.response) {
-				console.log(err.response);
-			}else {
-				console.log(err);	
-			}
-		}
-	}
-}
-
-module.exports = tmdbRequests;
-
-},{"../apiConfig":1,"axios":7}],7:[function(require,module,exports){
+},{"./apis/booksAPI":3,"./apis/myAPI":4,"./apis/tmdbAPI":5,"./components/MovieListItem":6,"./components/MovieSearchItem":7}],9:[function(require,module,exports){
 module.exports = require('./lib/axios');
-},{"./lib/axios":9}],8:[function(require,module,exports){
+},{"./lib/axios":11}],10:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -833,7 +855,7 @@ module.exports = function xhrAdapter(config) {
   });
 };
 
-},{"../core/buildFullPath":15,"../core/createError":16,"./../core/settle":20,"./../helpers/buildURL":24,"./../helpers/cookies":26,"./../helpers/isURLSameOrigin":29,"./../helpers/parseHeaders":31,"./../utils":33}],9:[function(require,module,exports){
+},{"../core/buildFullPath":17,"../core/createError":18,"./../core/settle":22,"./../helpers/buildURL":26,"./../helpers/cookies":28,"./../helpers/isURLSameOrigin":31,"./../helpers/parseHeaders":33,"./../utils":35}],11:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -891,7 +913,7 @@ module.exports = axios;
 // Allow use of default import syntax in TypeScript
 module.exports.default = axios;
 
-},{"./cancel/Cancel":10,"./cancel/CancelToken":11,"./cancel/isCancel":12,"./core/Axios":13,"./core/mergeConfig":19,"./defaults":22,"./helpers/bind":23,"./helpers/isAxiosError":28,"./helpers/spread":32,"./utils":33}],10:[function(require,module,exports){
+},{"./cancel/Cancel":12,"./cancel/CancelToken":13,"./cancel/isCancel":14,"./core/Axios":15,"./core/mergeConfig":21,"./defaults":24,"./helpers/bind":25,"./helpers/isAxiosError":30,"./helpers/spread":34,"./utils":35}],12:[function(require,module,exports){
 'use strict';
 
 /**
@@ -912,7 +934,7 @@ Cancel.prototype.__CANCEL__ = true;
 
 module.exports = Cancel;
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 var Cancel = require('./Cancel');
@@ -971,14 +993,14 @@ CancelToken.source = function source() {
 
 module.exports = CancelToken;
 
-},{"./Cancel":10}],12:[function(require,module,exports){
+},{"./Cancel":12}],14:[function(require,module,exports){
 'use strict';
 
 module.exports = function isCancel(value) {
   return !!(value && value.__CANCEL__);
 };
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1075,7 +1097,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = Axios;
 
-},{"../helpers/buildURL":24,"./../utils":33,"./InterceptorManager":14,"./dispatchRequest":17,"./mergeConfig":19}],14:[function(require,module,exports){
+},{"../helpers/buildURL":26,"./../utils":35,"./InterceptorManager":16,"./dispatchRequest":19,"./mergeConfig":21}],16:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1129,7 +1151,7 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 
 module.exports = InterceptorManager;
 
-},{"./../utils":33}],15:[function(require,module,exports){
+},{"./../utils":35}],17:[function(require,module,exports){
 'use strict';
 
 var isAbsoluteURL = require('../helpers/isAbsoluteURL');
@@ -1151,7 +1173,7 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
   return requestedURL;
 };
 
-},{"../helpers/combineURLs":25,"../helpers/isAbsoluteURL":27}],16:[function(require,module,exports){
+},{"../helpers/combineURLs":27,"../helpers/isAbsoluteURL":29}],18:[function(require,module,exports){
 'use strict';
 
 var enhanceError = require('./enhanceError');
@@ -1171,7 +1193,7 @@ module.exports = function createError(message, config, code, request, response) 
   return enhanceError(error, config, code, request, response);
 };
 
-},{"./enhanceError":18}],17:[function(require,module,exports){
+},{"./enhanceError":20}],19:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1252,7 +1274,7 @@ module.exports = function dispatchRequest(config) {
   });
 };
 
-},{"../cancel/isCancel":12,"../defaults":22,"./../utils":33,"./transformData":21}],18:[function(require,module,exports){
+},{"../cancel/isCancel":14,"../defaults":24,"./../utils":35,"./transformData":23}],20:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1296,7 +1318,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
   return error;
 };
 
-},{}],19:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -1385,7 +1407,7 @@ module.exports = function mergeConfig(config1, config2) {
   return config;
 };
 
-},{"../utils":33}],20:[function(require,module,exports){
+},{"../utils":35}],22:[function(require,module,exports){
 'use strict';
 
 var createError = require('./createError');
@@ -1412,7 +1434,7 @@ module.exports = function settle(resolve, reject, response) {
   }
 };
 
-},{"./createError":16}],21:[function(require,module,exports){
+},{"./createError":18}],23:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1434,7 +1456,7 @@ module.exports = function transformData(data, headers, fns) {
   return data;
 };
 
-},{"./../utils":33}],22:[function(require,module,exports){
+},{"./../utils":35}],24:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -1536,7 +1558,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 module.exports = defaults;
 
 }).call(this)}).call(this,require('_process'))
-},{"./adapters/http":8,"./adapters/xhr":8,"./helpers/normalizeHeaderName":30,"./utils":33,"_process":34}],23:[function(require,module,exports){
+},{"./adapters/http":10,"./adapters/xhr":10,"./helpers/normalizeHeaderName":32,"./utils":35,"_process":36}],25:[function(require,module,exports){
 'use strict';
 
 module.exports = function bind(fn, thisArg) {
@@ -1549,7 +1571,7 @@ module.exports = function bind(fn, thisArg) {
   };
 };
 
-},{}],24:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1621,7 +1643,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
   return url;
 };
 
-},{"./../utils":33}],25:[function(require,module,exports){
+},{"./../utils":35}],27:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1637,7 +1659,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
     : baseURL;
 };
 
-},{}],26:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1692,7 +1714,7 @@ module.exports = (
     })()
 );
 
-},{"./../utils":33}],27:[function(require,module,exports){
+},{"./../utils":35}],29:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1708,7 +1730,7 @@ module.exports = function isAbsoluteURL(url) {
   return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
 };
 
-},{}],28:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1721,7 +1743,7 @@ module.exports = function isAxiosError(payload) {
   return (typeof payload === 'object') && (payload.isAxiosError === true);
 };
 
-},{}],29:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1791,7 +1813,7 @@ module.exports = (
     })()
 );
 
-},{"./../utils":33}],30:[function(require,module,exports){
+},{"./../utils":35}],32:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -1805,7 +1827,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
   });
 };
 
-},{"../utils":33}],31:[function(require,module,exports){
+},{"../utils":35}],33:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1860,7 +1882,7 @@ module.exports = function parseHeaders(headers) {
   return parsed;
 };
 
-},{"./../utils":33}],32:[function(require,module,exports){
+},{"./../utils":35}],34:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1889,7 +1911,7 @@ module.exports = function spread(callback) {
   };
 };
 
-},{}],33:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 'use strict';
 
 var bind = require('./helpers/bind');
@@ -2242,7 +2264,7 @@ module.exports = {
   stripBOM: stripBOM
 };
 
-},{"./helpers/bind":23}],34:[function(require,module,exports){
+},{"./helpers/bind":25}],36:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -2428,4 +2450,4 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}]},{},[5]);
+},{}]},{},[8]);

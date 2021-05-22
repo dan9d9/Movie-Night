@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { URL } = require('../config');
+const { URL } = require('../../config');
 
 // /////////////////////
 // /// HTTP REQUESTS ///

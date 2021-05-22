@@ -1,8 +1,10 @@
-const myAPI = require('./myAPI');
-const tmdbAPI = require('./tmdbAPI');
-const booksAPI = require('./booksAPI');
+const myAPI = require('./apis/myAPI');
+const tmdbAPI = require('./apis/tmdbAPI');
+const booksAPI = require('./apis/booksAPI');
 const BASE_IMAGE_PATH = 'https://image.tmdb.org/t/p/w185';
 const BASE_VIDEO_PATH = 'https://www.youtube.com/embed';
+const MovieListItem = require('./components/MovieListItem');
+const MovieSearchItem = require('./components/MovieSearchItem');
 
 const inputDanny = document.getElementById('inputDanny');
 const inputLola = document.getElementById('inputLola');
@@ -26,10 +28,12 @@ const nextButton = document.getElementById('nextTrailer');
 const state = {
   dannyArr: [],
   lolaArr: [],
-  allMovies: [],
-  searchedMovies: [],
-  currentMovie: {},
-  currentTrailer: 0,
+  movies: {
+    allMovies: [],
+    searchedMovies: [],
+    currentMovie: {},
+    currentTrailer: 0,
+  },
 };
 
 ///////////////
@@ -243,8 +247,8 @@ const modals = {
     const movieTitle = state[array].find((ele) => ele._id === movieId).title;
 
     tmdbAPI.getMovies(movieTitle).then((movieResults) => {
-      state.searchedMovies = [...movieResults];
-      view.displayMovieResults(state.searchedMovies);
+      state.movies.searchedMovies = [...movieResults];
+      view.displayMovieResults(state.movies.searchedMovies);
     });
   },
 
@@ -272,10 +276,10 @@ const modals = {
     nextButton.style.display = 'block';
 
     trailerModal.classList.add('modal-visible-flex');
-    state.currentMovie = state[array].find((movie) => movie._id === movieID);
+    state.movies.currentMovie = state[array].find((movie) => movie._id === movieID);
     view.refreshTrailerCounter();
 
-    if (state.currentMovie.videoPaths.length === 0) {
+    if (state.movies.currentMovie.videoPaths.length === 0) {
       helpers.createH2Ele(trailerModal, trailerContainer, 'trailer');
       trailerCounter.style.display = 'none';
       youtubePlayer.style.display = 'none';
@@ -287,28 +291,28 @@ const modals = {
   },
 
   loadTrailer: function () {
-    youtubePlayer.src = `${state.currentMovie.videoPaths[state.currentTrailer]}?origin=${
-      location.origin
-    }`;
+    youtubePlayer.src = `${
+      state.movies.currentMovie.videoPaths[state.movies.currentTrailer]
+    }?origin=${location.origin}`;
   },
 
   nextTrailer: function () {
-    state.currentTrailer === state.currentMovie.videoPaths.length - 1
-      ? (state.currentTrailer = 0)
-      : state.currentTrailer++;
+    state.movies.currentTrailer === state.movies.currentMovie.videoPaths.length - 1
+      ? (state.movies.currentTrailer = 0)
+      : state.movies.currentTrailer++;
 
-    if (state.currentMovie.videoPaths.length > 1) {
+    if (state.movies.currentMovie.videoPaths.length > 1) {
       view.refreshTrailerCounter();
       this.loadTrailer();
     }
   },
 
   prevTrailer: function () {
-    state.currentTrailer === 0
-      ? (state.currentTrailer = state.currentMovie.videoPaths.length - 1)
-      : state.currentTrailer--;
+    state.movies.currentTrailer === 0
+      ? (state.movies.currentTrailer = state.movies.currentMovie.videoPaths.length - 1)
+      : state.movies.currentTrailer--;
 
-    if (state.currentMovie.videoPaths.length > 1) {
+    if (state.movies.currentMovie.videoPaths.length > 1) {
       view.refreshTrailerCounter();
       this.loadTrailer();
     }
@@ -326,9 +330,9 @@ const modals = {
       movieResultsModal.removeChild(h2);
     }
 
-    state.searchedMovies = [];
-    state.currentMovie = {};
-    state.currentTrailer = 0;
+    state.movies.searchedMovies = [];
+    state.movies.currentMovie = {};
+    state.movies.currentTrailer = 0;
     modalMovieList.innerHTML = '';
     youtubePlayer.src = '';
 
@@ -347,16 +351,9 @@ const view = {
 
     userUL.innerHTML = state[array]
       .map((movie) => {
-        let hasInfo;
-        movie.hasInfo ? (hasInfo = 'true') : (hasInfo = 'false');
+        let hasInfo = movie.hasInfo ? 'true' : 'false';
 
-        return `
-				<li class='itemClass' data-movie_info=${hasInfo} data-id=${movie._id}>
-					${movie.title}
-					<button class='btnApprove'>\u2713</button>
-					<button class='btnDelete'>\u2717</button>
-				</li>
-			`;
+        return MovieListItem(movie._id, movie.title, hasInfo);
       })
       .join('');
 
@@ -388,26 +385,17 @@ const view = {
         movie.poster_path ? (posterPath = BASE_IMAGE_PATH + movie.poster_path) : (posterPath = '');
         movie.release_date ? (year = movie.release_date.split('-')[0]) : (year = '');
 
-        return `
-				<li class='movie_modal-movie'>
-					<img src='${posterPath}' alt='missing movie poster'/>
-					<div>
-						<p>${movie.title} - ${year}</p>
-						<p>${movie.overview}</p>
-					</div>
-					<button data-movie_id=${movie.id}>Choose</button>
-				</li>
-			`;
+        return MovieSearchItem(movie.id, movie.title, movie.overview, posterPath, year);
       })
       .join('');
   },
 
   refreshTrailerCounter: function () {
-    let trailerCount = state.currentTrailer;
+    let trailerCount = state.movies.currentTrailer;
 
-    state.currentMovie.videoPaths.length === 0 ? (trailerCount = 0) : (trailerCount += 1);
+    state.movies.currentMovie.videoPaths.length === 0 ? (trailerCount = 0) : (trailerCount += 1);
 
-    trailerCounter.innerHTML = `${trailerCount}/${state.currentMovie.videoPaths.length}`;
+    trailerCounter.innerHTML = `${trailerCount}/${state.movies.currentMovie.videoPaths.length}`;
   },
 };
 
@@ -433,9 +421,9 @@ const events = {
 ///////////////
 window.onload = function () {
   myAPI.getMovies().then((response) => {
-    state.allMovies = [...response];
-    state.dannyArr = state.allMovies.filter((movie) => movie.array === 'dannyArr');
-    state.lolaArr = state.allMovies.filter((movie) => movie.array === 'lolaArr');
+    state.movies.allMovies = [...response];
+    state.dannyArr = state.movies.allMovies.filter((movie) => movie.array === 'dannyArr');
+    state.lolaArr = state.movies.allMovies.filter((movie) => movie.array === 'lolaArr');
     view.displayMovies(listDanny);
     view.displayMovies(listLola);
     events.listeners();
