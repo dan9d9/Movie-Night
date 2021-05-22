@@ -1,7 +1,6 @@
-const URL = window.location.hostname === `localhost`
-            ? `http://localhost:5000`
-            : `http://167.172.102.224`;
+const URL =
+  window.location.hostname === `localhost` ? `http://localhost:5000` : `http://134.209.169.158`;
 
-module.exports = { 
-  URL
-}
+module.exports = {
+  URL,
+};
