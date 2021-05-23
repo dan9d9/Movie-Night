@@ -3,13 +3,13 @@ const APIKEY = "ad4a44a2296a174ca3a693f429400547";
 
 module.exports = { APIKEY }
 },{}],2:[function(require,module,exports){
-const URL = window.location.hostname === `localhost`
-            ? `http://localhost:5000`
-            : `http://167.172.102.224`;
+const URL =
+  window.location.hostname === `localhost` ? `http://localhost:5000` : `http://165.227.178.43`;
 
-module.exports = { 
-  URL
-}
+module.exports = {
+  URL,
+};
+
 },{}],3:[function(require,module,exports){
 const axios = require('axios');
 
